@@ -10,10 +10,10 @@ struct CameraInstance;
 
 struct Controller {
 	CameraInstance* camera;
-	Keybinds keybinds;
 
 	f32 mouseSens;
 
+	void Init();
 	void Update();
 
 };

@@ -58,6 +58,12 @@
     <ClCompile Include="..\src\atmos\controller.cpp">
       <Filter>atmos\game</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\atmos\Admin.cpp">
+      <Filter>atmos\game</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\atmos\attributes\ModelInstance.cpp">
+      <Filter>atmos\game\attributes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="atmos">
@@ -116,6 +122,12 @@
     </Filter>
     <Filter Include="atmos\game">
       <UniqueIdentifier>{71800a72-b690-46fd-b104-c8a779594c50}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="atmos\game\entity">
+      <UniqueIdentifier>{8f3c2a8b-ad4a-43f8-a282-725fdec4dcdd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="atmos\game\attributes">
+      <UniqueIdentifier>{e4e79f47-d8c8-490f-af0c-3b2f82757c70}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -411,6 +423,21 @@
     </ClInclude>
     <ClInclude Include="..\src\atmos\keybinds.h">
       <Filter>atmos\game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\atmos\Admin.h">
+      <Filter>atmos\game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\atmos\Transform.h">
+      <Filter>atmos\game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\atmos\attributes\Attribute.h">
+      <Filter>atmos\game\attributes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\atmos\entities\Entity.h">
+      <Filter>atmos\game\entity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\atmos\attributes\ModelInstance.h">
+      <Filter>atmos\game\attributes</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

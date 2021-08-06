@@ -154,6 +154,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\src\atmos.cpp" />
+    <ClCompile Include="..\src\atmos\Admin.cpp" />
+    <ClCompile Include="..\src\atmos\attributes\ModelInstance.cpp" />
     <ClCompile Include="..\src\atmos\camerainstance.cpp" />
     <ClCompile Include="..\src\atmos\controller.cpp" />
     <ClCompile Include="..\src\deshi\src\core\assets.cpp">
@@ -247,9 +249,14 @@
     <Natvis Include="..\src\deshi\misc\customvis.natvis" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\src\atmos\Admin.h" />
+    <ClInclude Include="..\src\atmos\attributes\Attribute.h" />
+    <ClInclude Include="..\src\atmos\attributes\ModelInstance.h" />
     <ClInclude Include="..\src\atmos\camerainstance.h" />
     <ClInclude Include="..\src\atmos\controller.h" />
+    <ClInclude Include="..\src\atmos\entities\Entity.h" />
     <ClInclude Include="..\src\atmos\keybinds.h" />
+    <ClInclude Include="..\src\atmos\Transform.h" />
     <ClInclude Include="..\src\deshi\deshi.h" />
     <ClInclude Include="..\src\deshi\src\core\assets.h" />
     <ClInclude Include="..\src\deshi\src\core\camera.h" />
