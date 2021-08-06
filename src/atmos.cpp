@@ -67,13 +67,13 @@ int main() {
 
 	TIMER_START(t_d); TIMER_START(t_f);
 	while (!deshi::shouldClose()) {
-		Render::DrawBox(mat4::TransformationMatrix(vec3::ZERO, vec3(0, DeshTotalTime * 10, 0), vec3::ONE));
+		//Render::DrawBox(mat4::TransformationMatrix(vec3::ZERO, vec3(0, DeshTotalTime * 10, 0), vec3::ONE));
 
 		DeshiImGui::NewFrame();                    //place imgui calls after this
-		DeshTime->Update();                       
-		DeshWindow->Update();                     
-	    DeshInput->Update();   
-		AtmoAdmin->Update();
+		DeshTime->   Update();                       
+		DeshWindow-> Update();                     
+	    DeshInput->  Update();   
+		AtmoAdmin->  Update();
 		DeshConsole->Update(); Console2::Update();
 		Render::Update();                          //place imgui calls before this
 		AtmoAdmin->PostRenderUpdate();

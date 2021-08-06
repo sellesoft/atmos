@@ -35,6 +35,9 @@ global_ const char* EntityTypeStrings[] = {
 
 struct Entity {
 	string name;
+	u32 id; //do ents need ids anymore?
+
+	EntityType type;
 
 	Transform transform;
 

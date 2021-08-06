@@ -43,13 +43,14 @@ void CameraInstance::Update() {
 		//update renderer camera properties
 		if (mode == CameraMode_Orthographic) {
 			switch (orthoview) {
-			case OrthoViews::FRONT:    position = vec3(0, 0, -999); rotation = vec3(0, 0, 0);     break;
-			case OrthoViews::BACK:     position = vec3(0, 0, 999);  rotation = vec3(0, 180, 0);   break;
-			case OrthoViews::RIGHT:    position = vec3(999, 0, 0);  rotation = vec3(0, -90, 0);   break;
-			case OrthoViews::LEFT:     position = vec3(-999, 0, 0); rotation = vec3(0, 90, 0);    break;
-			case OrthoViews::TOPDOWN:  position = vec3(0, 999, 0);  rotation = vec3(89.9, 0, 0);  break;
-			case OrthoViews::BOTTOMUP: position = vec3(0, -999, 0); rotation = vec3(-89.9, 0, 0); break;
+			case OrthoView_Front:  position = vec3(0, 0, -999); rotation = vec3(0, 0, 0);     break;
+			case OrthoView_Back:   position = vec3(0, 0, 999);  rotation = vec3(0, 180, 0);   break;
+			case OrthoView_Right:  position = vec3(999, 0, 0);  rotation = vec3(0, -90, 0);   break;
+			case OrthoView_Left:   position = vec3(-999, 0, 0); rotation = vec3(0, 90, 0);    break;
+			case OrthoView_Top:    position = vec3(0, 999, 0);  rotation = vec3(89.9, 0, 0);  break;
+			case OrthoView_Bottom: position = vec3(0, -999, 0); rotation = vec3(-89.9, 0, 0); break;
 			}
+			
 			UpdateProjectionMatrix();
 		}
 

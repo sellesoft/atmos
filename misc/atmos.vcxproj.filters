@@ -64,6 +64,9 @@
     <ClCompile Include="..\src\atmos\attributes\ModelInstance.cpp">
       <Filter>atmos\game\attributes</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\atmos\Editor.cpp">
+      <Filter>atmos\game</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="atmos">
@@ -438,6 +441,9 @@
     </ClInclude>
     <ClInclude Include="..\src\atmos\attributes\ModelInstance.h">
       <Filter>atmos\game\attributes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\atmos\Editor.h">
+      <Filter>atmos\game</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -18,12 +18,12 @@ void Controller::Update() {
 	vec3 inputs = vec3::ZERO;
 
 	if (DeshInput->KeyDownAnyMod(MouseButton::RIGHT)) {
-		if (DeshInput->KeyDownAnyMod(AtmoBinds.movementFlyingUp))      { inputs.y += 1; }
-		if (DeshInput->KeyDownAnyMod(AtmoBinds.movementFlyingDown))    { inputs.y -= 1; }
-		if (DeshInput->KeyDownAnyMod(AtmoBinds.movementFlyingForward)) { inputs += camera->forward; }
-		if (DeshInput->KeyDownAnyMod(AtmoBinds.movementFlyingBack))    { inputs -= camera->forward; }
-		if (DeshInput->KeyDownAnyMod(AtmoBinds.movementFlyingRight))   { inputs += camera->right; }
-		if (DeshInput->KeyDownAnyMod(AtmoBinds.movementFlyingLeft))    { inputs -= camera->right; }
+		if (DeshInput->KeyDownAnyMod(AtmoKeys.movementFlyingUp))      { inputs.y += 1; }
+		if (DeshInput->KeyDownAnyMod(AtmoKeys.movementFlyingDown))    { inputs.y -= 1; }
+		if (DeshInput->KeyDownAnyMod(AtmoKeys.movementFlyingForward)) { inputs += camera->forward; }
+		if (DeshInput->KeyDownAnyMod(AtmoKeys.movementFlyingBack))    { inputs -= camera->forward; }
+		if (DeshInput->KeyDownAnyMod(AtmoKeys.movementFlyingRight))   { inputs += camera->right; }
+		if (DeshInput->KeyDownAnyMod(AtmoKeys.movementFlyingLeft))    { inputs -= camera->right; }
 
 		if      (DeshInput->LShiftDown()){ camera->position += inputs.normalized() * 16 * dTime; }
 		else if (DeshInput->LCtrlDown()) { camera->position += inputs.normalized() * 4 * dTime; }

@@ -4,6 +4,7 @@
 #include "keybinds.h"
 #include "controller.h"
 #include "camerainstance.h"
+#include "Editor.h"
 
 
 #include "utils/array.h"
@@ -14,9 +15,13 @@ struct Attribute;
 
 struct Admin {
 
+	bool paused = 0;
+	bool pause_phys = 0;
+
+	Controller controller;
 	Keybinds     keybinds;
 	CameraInstance camera; //admin controls all cameras in the world, but for now its just one
-	Controller controller;
+	Editor         editor;
 
 	array<Entity*> entities;
 	array<Attribute*> attributes;
@@ -32,6 +37,6 @@ struct Admin {
 extern Admin* g_admin;
 
 #define AtmoAdmin g_admin
-#define AtmoBinds g_admin->keybinds
+#define AtmoKeys g_admin->keybinds
 
 #endif
