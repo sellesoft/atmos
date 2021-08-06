@@ -52,6 +52,9 @@
     <ClCompile Include="..\src\deshi\src\external\imgui\imgui_widgets.cpp">
       <Filter>deshi\src\external\imgui</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\camerainstance.cpp">
+      <Filter>atmos</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="atmos">
@@ -390,6 +393,9 @@
     </ClInclude>
     <ClInclude Include="..\src\deshi\src\external\tinyobjloader\tiny_obj_loader.h">
       <Filter>deshi\src\external\tinyobjloader</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\camerainstance.h">
+      <Filter>atmos</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

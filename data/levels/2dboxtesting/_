@@ -1,0 +1,20 @@
+>level
+name         "2dboxtesting"
+entity_count 4
+last_updated ""
+
+>materials
+"Flat"
+"Phong"
+
+>models
+"box_flat"
+"box_phong"
+
+>entities
+0 "floor"
+1 "player"
+2 "twod_box1"
+3 "twod_box2"
+
+>events

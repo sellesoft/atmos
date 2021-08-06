@@ -1,11 +1,16 @@
 #include "deshi/deshi.h"
+#include "camerainstance.h"
 
 int main() {
 	deshi::init();
 
+	CameraInstance camera(90);
+
 	TIMER_START(t_d); TIMER_START(t_f);
 	while (!deshi::shouldClose()) {
 		
+		camera.Update();
+
 		DeshiImGui::NewFrame();                                                         //place imgui calls after this
 		TIMER_RESET(t_d); DengTime->Update();                        DengTime->timeTime = TIMER_END(t_d);
 		TIMER_RESET(t_d); DengWindow->Update();                      DengTime->windowTime = TIMER_END(t_d);
