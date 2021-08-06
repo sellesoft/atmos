@@ -11,14 +11,25 @@ int main() {
 		
 		camera.Update();
 
-		DeshiImGui::NewFrame();                                                         //place imgui calls after this
-		TIMER_RESET(t_d); DengTime->Update();                        DengTime->timeTime = TIMER_END(t_d);
-		TIMER_RESET(t_d); DengWindow->Update();                      DengTime->windowTime = TIMER_END(t_d);
-		TIMER_RESET(t_d); DengInput->Update();                       DengTime->inputTime = TIMER_END(t_d);
-		TIMER_RESET(t_d); DengConsole->Update(); Console2::Update(); DengTime->consoleTime = TIMER_END(t_d);
-		TIMER_RESET(t_d); Render::Update();                          DengTime->renderTime = TIMER_END(t_d);  //place imgui calls before this
+		Render::DrawBox(mat4::TransformationMatrix(vec3::ZERO, vec3(0, DengTotalTime * 10, 0), vec3::ONE));
+
+		DeshiImGui::NewFrame();                    //place imgui calls after this
+		DengTime->Update();                       
+		DengWindow->Update();                     
+	    DengInput->Update();                       
+		DengConsole->Update(); Console2::Update();
+		Render::Update();                          //place imgui calls before this
+		
+		UI::BeginWindow("test", vec2(300, 300), vec2(300, 300));
+		UI::Text("test");
+		UI::EndWindow();
+
 		UI::Update();
+		
+
 		DengTime->frameTime = TIMER_END(t_f); TIMER_RESET(t_f);
+
+		DengWindow->UpdateTitle(TOSTRING(1 / DengTime->deltaTime).str);
 	}
 
 	deshi::cleanup();
