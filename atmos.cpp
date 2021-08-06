@@ -1,9 +1,7 @@
-#include "deshi.h"
+#include "deshi/deshi.h"
 
 int main() {
 	deshi::init();
-
-	//game init
 
 	TIMER_START(t_d); TIMER_START(t_f);
 	while (!deshi::shouldClose()) {
