@@ -12,8 +12,8 @@ CameraInstance::CameraInstance(float fov, float nearZ, float farZ, bool freeCam)
 	this->fov = fov;
 	this->freeCamera = freeCam;
 
-	position = { 4.f,   3.f,-4.f };
-	rotation = { 28.f, -45.f, 0.f };
+	position = {0,0,0};//{ 4.f,   3.f,-4.f };
+	rotation = {0,0,0};//{ 28.f, -45.f, 0.f };
 
 	this->forward = (vec3::FORWARD * mat4::RotationMatrix(rotation)).normalized();
 	this->right = vec3::UP.cross(forward).normalized();
@@ -26,8 +26,8 @@ void CameraInstance::Update() {
 	if (freeCamera) {
 		//NOTE this can happen whether the camera is free or not so move it out
 		//of this scope once we implement that
-		persist int wwidth = DengWindow->width;
-		persist int wheight = DengWindow->height;
+		persist int wwidth = DeshWindow->width;
+		persist int wheight = DeshWindow->height;
 
 		//clamp camera crotation
 		Math::clamp(rotation.x, -89.9f, 89.9f);
@@ -54,9 +54,9 @@ void CameraInstance::Update() {
 		}
 
 		//redo projection matrix is window size changes
-		if (DengWindow->width != wwidth || DengWindow->height != wheight) {
-			wwidth = DengWindow->width;
-			wheight = DengWindow->height;
+		if (DeshWindow->width != wwidth || DeshWindow->height != wheight) {
+			wwidth = DeshWindow->width;
+			wheight = DeshWindow->height;
 			UpdateProjectionMatrix();
 		}
 
@@ -67,7 +67,7 @@ void CameraInstance::Update() {
 }
 
 mat4 CameraInstance::MakePerspectiveProjection() {
-	return Camera::MakePerspectiveProjectionMatrix(DengWindow->width, DengWindow->height, fov, farZ, nearZ);
+	return Camera::MakePerspectiveProjectionMatrix(DeshWindow->width, DeshWindow->height, fov, farZ, nearZ);
 }
 
 mat4 CameraInstance::MakeOrthographicProjection() {
@@ -81,7 +81,7 @@ mat4 CameraInstance::MakeOrthographicProjection() {
 	//float maxy = std::max(fabs(mincam.y), fabs(maxcam.y));
 	//float max = std::max(maxx, maxy);
 	//
-	//float aspectRatio = (float)DengWindow->width / DengWindow->height;
+	//float aspectRatio = (float)DeshWindow->width / DeshWindow->height;
 	//float r = max * aspectRatio, t = max;
 	//float l = -r, b = -t;
 	//
@@ -94,26 +94,26 @@ mat4 CameraInstance::MakeOrthographicProjection() {
 	//
 	//PRINTLN(zoom);
 	////orthographic view controls
-	//if (DengInput->KeyPressed(DengKeys.orthoZoomIn) && zoom > 0.0000000009) zoom -= zoom / 5;
-	//if (DengInput->KeyPressed(DengKeys.orthoZoomOut)) zoom += zoom / 5;
+	//if (DeshInput->KeyPressed(DengKeys.orthoZoomIn) && zoom > 0.0000000009) zoom -= zoom / 5;
+	//if (DeshInput->KeyPressed(DengKeys.orthoZoomOut)) zoom += zoom / 5;
 	//
-	//if (DengInput->KeyPressed(DengKeys.orthoOffset)) initoffset = true;
+	//if (DeshInput->KeyPressed(DengKeys.orthoOffset)) initoffset = true;
 	//
-	//if (DengInput->KeyDown(DengKeys.orthoOffset)) {
+	//if (DeshInput->KeyDown(DengKeys.orthoOffset)) {
 	//	if (initoffset) {
-	//		initmouse = DengInput->mousePos;
+	//		initmouse = DeshInput->mousePos;
 	//		initoffset = false;
 	//	}
-	//	offsetx = 0.0002 * zoom * (DengInput->mousePos.x - initmouse.x);
-	//	offsety = 0.0002 * zoom * (DengInput->mousePos.y - initmouse.y);
+	//	offsetx = 0.0002 * zoom * (DeshInput->mousePos.x - initmouse.x);
+	//	offsety = 0.0002 * zoom * (DeshInput->mousePos.y - initmouse.y);
 	//}
 	//
-	//if (DengInput->KeyReleased(DengKeys.orthoOffset)) {
+	//if (DeshInput->KeyReleased(DengKeys.orthoOffset)) {
 	//	oloffsetx += offsetx; oloffsety += offsety;
 	//	offsetx = 0; offsety = 0;
 	//}
 	//
-	//if (DengInput->KeyPressed(DengKeys.orthoResetOffset)) {
+	//if (DeshInput->KeyPressed(DengKeys.orthoResetOffset)) {
 	//	oloffsetx = 0; oloffsety = 0;
 	//}
 	//
@@ -122,7 +122,7 @@ mat4 CameraInstance::MakeOrthographicProjection() {
 	//t += zoom; b -= zoom;
 	//t += offsety + oloffsety; b += offsety + oloffsety;
 	//
-	//return Camera::MakeOrthographicProjection(DengWindow->width, DengWindow->height, r, l, t, b, farZ, nearZ);
+	//return Camera::MakeOrthographicProjection(DeshWindow->width, DeshWindow->height, r, l, t, b, farZ, nearZ);
 	return mat4::IDENTITY;
 }
 

@@ -154,7 +154,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\src\atmos.cpp" />
-    <ClCompile Include="..\src\camerainstance.cpp" />
+    <ClCompile Include="..\src\atmos\camerainstance.cpp" />
+    <ClCompile Include="..\src\atmos\controller.cpp" />
     <ClCompile Include="..\src\deshi\src\core\assets.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
@@ -246,7 +247,10 @@
     <Natvis Include="..\src\deshi\misc\customvis.natvis" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\src\camerainstance.h" />
+    <ClInclude Include="..\src\atmos\camerainstance.h" />
+    <ClInclude Include="..\src\atmos\controller.h" />
+    <ClInclude Include="..\src\atmos\keybinds.h" />
+    <ClInclude Include="..\src\deshi\deshi.h" />
     <ClInclude Include="..\src\deshi\src\core\assets.h" />
     <ClInclude Include="..\src\deshi\src\core\camera.h" />
     <ClInclude Include="..\src\deshi\src\core\console.h" />

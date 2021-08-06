@@ -52,8 +52,11 @@
     <ClCompile Include="..\src\deshi\src\external\imgui\imgui_widgets.cpp">
       <Filter>deshi\src\external\imgui</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\camerainstance.cpp">
-      <Filter>atmos</Filter>
+    <ClCompile Include="..\src\atmos\camerainstance.cpp">
+      <Filter>atmos\game</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\atmos\controller.cpp">
+      <Filter>atmos\game</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -110,6 +113,9 @@
     </Filter>
     <Filter Include="deshi\src\external\tinyobjloader">
       <UniqueIdentifier>{3a761e98-c6ef-490d-a208-d02a7d475aa3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="atmos\game">
+      <UniqueIdentifier>{71800a72-b690-46fd-b104-c8a779594c50}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -394,8 +400,17 @@
     <ClInclude Include="..\src\deshi\src\external\tinyobjloader\tiny_obj_loader.h">
       <Filter>deshi\src\external\tinyobjloader</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\camerainstance.h">
-      <Filter>atmos</Filter>
+    <ClInclude Include="..\src\deshi\deshi.h">
+      <Filter>deshi\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\atmos\camerainstance.h">
+      <Filter>atmos\game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\atmos\controller.h">
+      <Filter>atmos\game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\atmos\keybinds.h">
+      <Filter>atmos\game</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
