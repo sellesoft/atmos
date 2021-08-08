@@ -6,9 +6,8 @@ position (-0.505066,7.794169,-0.866713)
 rotation (0.000000,0.000000,0.000000)
 scale    (100.000000,100.000000,1.000000)
 
->mesh
-id      5
-name    "box.obj"
+>model
+name    "box_testing0"
 visible true
 
 >physics

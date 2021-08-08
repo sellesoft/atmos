@@ -1,4 +1,4 @@
-# deshi ignores
+# atmos ignores
 
 #extensions
 *.pdb
@@ -20,14 +20,12 @@
 #folders
 .vs/
 build/
-deshicheck-cppcheck-build-dir/
 docs/doxygen/
 
 #data ignores (large/binary/user files)
 data/*.*
 data/cfg/
 data/fonts/
-#data/commands
 #data/entities/
 #data/levels
 data/logs/
@@ -41,11 +39,8 @@ data/textures/
 #specific files
 imgui.ini
 TODOs.txt
-deshi_project_suppressions.cfg
-misc/deshi.vcxproj.user
-misc/x64
+misc/atmos.vcxproj.user
+misc/x64/
 
 #delle specifics
-misc/4coder.bat
 misc/shell.bat
-build.bat

@@ -51,12 +51,8 @@ Bug Board
 
 
 
-#include "deshi/deshi.h"
-#include "atmos/camerainstance.h"
-#include "atmos/controller.h"
-#include "atmos/keybinds.h"
-
-#include "atmos/Admin.h"
+#include "deshi.h"
+#include "Admin.h"
 
 static Admin admin; Admin* g_admin = &admin;
 

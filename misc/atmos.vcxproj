@@ -1,22 +1,179 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
-    <ProjectConfiguration Include="Debug|Win32">
-      <Configuration>Debug</Configuration>
-      <Platform>Win32</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="Release|Win32">
-      <Configuration>Release</Configuration>
-      <Platform>Win32</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="Debug|x64">
-      <Configuration>Debug</Configuration>
+    <ProjectConfiguration Include="DebugWindowsVulkan|x64">
+      <Configuration>DebugWindowsVulkan</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
-    <ProjectConfiguration Include="Release|x64">
-      <Configuration>Release</Configuration>
+    <ProjectConfiguration Include="ReleaseWindowsVulkan|x64">
+      <Configuration>ReleaseWindowsVulkan</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\.gitignore" />
+    <None Include="..\.gitmodules" />
+    <None Include="..\data\cfg\aliases.cfg" />
+    <None Include="..\data\cfg\binds.cfg" />
+    <None Include="..\data\cfg\imgui.ini" />
+    <None Include="..\data\cfg\keybinds.cfg" />
+    <None Include="..\data\cfg\render.cfg" />
+    <None Include="..\data\fonts\gohufont-11.bdf" />
+    <None Include="..\data\shaders\base.frag" />
+    <None Include="..\data\shaders\base.vert" />
+    <None Include="..\data\shaders\fixedimguishader.vert" />
+    <None Include="..\data\shaders\flat.frag" />
+    <None Include="..\data\shaders\flat.vert" />
+    <None Include="..\data\shaders\lavalamp.frag" />
+    <None Include="..\data\shaders\lavalamp.vert" />
+    <None Include="..\data\shaders\normaldebug.geom" />
+    <None Include="..\data\shaders\nothing.frag" />
+    <None Include="..\data\shaders\nothing.vert" />
+    <None Include="..\data\shaders\null.frag" />
+    <None Include="..\data\shaders\null.vert" />
+    <None Include="..\data\shaders\offscreen.vert" />
+    <None Include="..\data\shaders\pbr.frag" />
+    <None Include="..\data\shaders\pbr.vert" />
+    <None Include="..\data\shaders\phong.frag" />
+    <None Include="..\data\shaders\phong.vert" />
+    <None Include="..\data\shaders\shadowmapDEBUG.frag" />
+    <None Include="..\data\shaders\shadowmapDEBUG.vert" />
+    <None Include="..\data\shaders\testing0.frag" />
+    <None Include="..\data\shaders\testing0.vert" />
+    <None Include="..\data\shaders\testing1.frag" />
+    <None Include="..\data\shaders\testing1.vert" />
+    <None Include="..\data\shaders\twod.frag" />
+    <None Include="..\data\shaders\twod.vert" />
+    <None Include="..\data\shaders\ui.frag" />
+    <None Include="..\data\shaders\ui.vert" />
+    <None Include="..\data\shaders\utils.glsl" />
+    <None Include="..\data\shaders\wireframe.frag" />
+    <None Include="..\data\shaders\wireframe.vert" />
+    <None Include="..\deshi\src\math\mat3.inl" />
+    <None Include="..\deshi\src\math\mat4.inl" />
+    <None Include="..\deshi\src\math\vec2.inl" />
+    <None Include="..\deshi\src\math\vec3.inl" />
+    <None Include="..\deshi\src\math\vec4.inl" />
+    <None Include="atmos.vcxproj" />
+    <None Include="build_delle.bat" />
+    <None Include="build_shaders.bat" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\vk_layer_settings.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="customvis.natvis" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\deshi\src\core\assets.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseWindowsVulkan|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugWindowsVulkan|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\deshi\src\core\console.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseWindowsVulkan|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugWindowsVulkan|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\deshi\src\core\console2.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseWindowsVulkan|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugWindowsVulkan|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\deshi\src\core\renderers\opengl.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseWindowsVulkan|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugWindowsVulkan|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\deshi\src\core\renderers\vulkan.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseWindowsVulkan|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugWindowsVulkan|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\deshi\src\core\storage.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseWindowsVulkan|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugWindowsVulkan|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\deshi\src\core\ui.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseWindowsVulkan|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugWindowsVulkan|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\deshi\src\core\window.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseWindowsVulkan|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugWindowsVulkan|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\deshi\src\deshi.cpp" />
+    <ClCompile Include="..\deshi\src\external\imgui\imgui.cpp" />
+    <ClCompile Include="..\deshi\src\external\imgui\imgui_demo.cpp" />
+    <ClCompile Include="..\deshi\src\external\imgui\imgui_draw.cpp" />
+    <ClCompile Include="..\deshi\src\external\imgui\imgui_impl_glfw.cpp" />
+    <ClCompile Include="..\deshi\src\external\imgui\imgui_impl_vulkan.cpp" />
+    <ClCompile Include="..\deshi\src\external\imgui\imgui_tables.cpp" />
+    <ClCompile Include="..\deshi\src\external\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="..\src\Admin.cpp" />
+    <ClCompile Include="..\src\atmos.cpp" />
+    <ClCompile Include="..\src\attributes\ModelInstance.cpp" />
+    <ClCompile Include="..\src\camerainstance.cpp" />
+    <ClCompile Include="..\src\controller.cpp" />
+    <ClCompile Include="..\src\Editor.cpp" />
+    <ClCompile Include="..\src\UndoManager.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\deshi\src\core\armature.h" />
+    <ClInclude Include="..\deshi\src\core\assets.h" />
+    <ClInclude Include="..\deshi\src\core\camera.h" />
+    <ClInclude Include="..\deshi\src\core\console.h" />
+    <ClInclude Include="..\deshi\src\core\console2.h" />
+    <ClInclude Include="..\deshi\src\core\imgui.h" />
+    <ClInclude Include="..\deshi\src\core\input.h" />
+    <ClInclude Include="..\deshi\src\core\model.h" />
+    <ClInclude Include="..\deshi\src\core\renderer.h" />
+    <ClInclude Include="..\deshi\src\core\storage.h" />
+    <ClInclude Include="..\deshi\src\core\time.h" />
+    <ClInclude Include="..\deshi\src\core\ui.h" />
+    <ClInclude Include="..\deshi\src\core\window.h" />
+    <ClInclude Include="..\deshi\src\defines.h" />
+    <ClInclude Include="..\deshi\src\deshi.h" />
+    <ClInclude Include="..\deshi\src\external\draudio\dr_flac.h" />
+    <ClInclude Include="..\deshi\src\external\draudio\dr_mp3.h" />
+    <ClInclude Include="..\deshi\src\external\draudio\dr_wav.h" />
+    <ClInclude Include="..\deshi\src\external\imgui\imconfig.h" />
+    <ClInclude Include="..\deshi\src\external\imgui\imgui.h" />
+    <ClInclude Include="..\deshi\src\external\imgui\imgui_impl_glfw.h" />
+    <ClInclude Include="..\deshi\src\external\imgui\imgui_impl_vulkan.h" />
+    <ClInclude Include="..\deshi\src\external\imgui\imgui_internal.h" />
+    <ClInclude Include="..\deshi\src\external\imgui\imstb_rectpack.h" />
+    <ClInclude Include="..\deshi\src\external\imgui\imstb_textedit.h" />
+    <ClInclude Include="..\deshi\src\external\imgui\imstb_truetype.h" />
+    <ClInclude Include="..\deshi\src\external\stb\stb_image.h" />
+    <ClInclude Include="..\deshi\src\geometry\Edge.h" />
+    <ClInclude Include="..\deshi\src\geometry\Geometry.h" />
+    <ClInclude Include="..\deshi\src\math\InertiaTensors.h" />
+    <ClInclude Include="..\deshi\src\math\Math.h" />
+    <ClInclude Include="..\deshi\src\math\matN.h" />
+    <ClInclude Include="..\deshi\src\math\matrix.h" />
+    <ClInclude Include="..\deshi\src\math\Quaternion.h" />
+    <ClInclude Include="..\deshi\src\math\vector.h" />
+    <ClInclude Include="..\deshi\src\math\VectorMatrix.h" />
+    <ClInclude Include="..\deshi\src\utils\array.h" />
+    <ClInclude Include="..\deshi\src\utils\Color.h" />
+    <ClInclude Include="..\deshi\src\utils\Command.h" />
+    <ClInclude Include="..\deshi\src\utils\ContainerManager.h" />
+    <ClInclude Include="..\deshi\src\utils\Debug.h" />
+    <ClInclude Include="..\deshi\src\utils\font.h" />
+    <ClInclude Include="..\deshi\src\utils\hash.h" />
+    <ClInclude Include="..\deshi\src\utils\map.h" />
+    <ClInclude Include="..\deshi\src\utils\optional.h" />
+    <ClInclude Include="..\deshi\src\utils\RingArray.h" />
+    <ClInclude Include="..\deshi\src\utils\string.h" />
+    <ClInclude Include="..\deshi\src\utils\tuple.h" />
+    <ClInclude Include="..\deshi\src\utils\utils.h" />
+    <ClInclude Include="..\deshi\src\utils\view.h" />
+    <ClInclude Include="..\src\Admin.h" />
+    <ClInclude Include="..\src\attributes\Attribute.h" />
+    <ClInclude Include="..\src\attributes\ModelInstance.h" />
+    <ClInclude Include="..\src\camerainstance.h" />
+    <ClInclude Include="..\src\controller.h" />
+    <ClInclude Include="..\src\Editor.h" />
+    <ClInclude Include="..\src\entities\Entity.h" />
+    <ClInclude Include="..\src\keybinds.h" />
+    <ClInclude Include="..\src\Transform.h" />
+    <ClInclude Include="..\src\UndoManager.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
@@ -26,26 +183,13 @@
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugWindowsVulkan|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
-    <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
-    <WholeProgramOptimization>true</WholeProgramOptimization>
-    <CharacterSet>Unicode</CharacterSet>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
-    <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
-    <CharacterSet>Unicode</CharacterSet>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseWindowsVulkan|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
@@ -57,38 +201,37 @@
   </ImportGroup>
   <ImportGroup Label="Shared">
   </ImportGroup>
-  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='DebugWindowsVulkan|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
-  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-  </ImportGroup>
-  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-  </ImportGroup>
-  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseWindowsVulkan|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugWindowsVulkan|x64'">
     <LinkIncremental>true</LinkIncremental>
+    <OutDir>$(SolutionDir)build\debug</OutDir>
+    <IntDir>$(SolutionDir)build\debug</IntDir>
+    <TargetName>$(SolutionName)</TargetName>
+    <SourcePath>$(SolutionDir)src;$(SolutionDir)src\deshi\src;$(VC_SourcePath)</SourcePath>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseWindowsVulkan|x64'">
     <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(SolutionDir)build\release</OutDir>
+    <IntDir>$(SolutionDir)build\release</IntDir>
+    <TargetName>$(SolutionName)</TargetName>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <LinkIncremental>true</LinkIncremental>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <LinkIncremental>false</LinkIncremental>
-  </PropertyGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugWindowsVulkan|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>;C:\src\OpenAL1.1\include;C:\Program Files %28x86%29\OpenAL 1.1 SDK\include;C:\src\stb-master;C:\VulkanSDK\1.2.162.1\Include;C:\src\glfw-3.3.2.bin.WIN64\include</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>$(SolutionDir)src;$(SolutionDir)deshi\src;C:\VulkanSDK\1.2.162.1\Include;C:\src\glfw-3.3.2.bin.WIN64\include;C:\src\OpenAL1.1\include;C:\Program Files %28x86%29\OpenAL 1.1 SDK\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>/D"DESHI_INTERNAL=1" /D"DESHI_SLOW=1" /D"DESHI_WINDOWS=1" /D"DESHI_VULKAN=1" %(AdditionalOptions)</AdditionalOptions>
+      <DebugInformationFormat>OldStyle</DebugInformationFormat>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -97,15 +240,19 @@
       <AdditionalDependencies>OpenAL32.lib;opengl32.lib;gdi32.lib;shell32.lib;vulkan-1.lib;glfw3.lib;shaderc_combinedd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseWindowsVulkan|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>;C:\src\OpenAL1.1\include;C:\Program Files %28x86%29\OpenAL 1.1 SDK\include;C:\src\stb-master;C:\VulkanSDK\1.2.162.1\Include;C:\src\glfw-3.3.2.bin.WIN64\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)src;$(SolutionDir)deshi\src;C:\VulkanSDK\1.2.162.1\Include;C:\src\glfw-3.3.2.bin.WIN64\include;C:\src\OpenAL1.1\include;C:\Program Files %28x86%29\OpenAL 1.1 SDK\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalOptions>/D"DESHI_WINDOWS=1" /D"DESHI_VULKAN=1" %(AdditionalOptions)</AdditionalOptions>
+      <DebugInformationFormat>None</DebugInformationFormat>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -113,207 +260,9 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>C:\src\OpenAL1.1\libs\Win64;C:\Program Files %28x86%29\OpenAL 1.1 SDK\libs\Win64;C:\VulkanSDK\1.2.162.1\Lib;C:\src\glfw-3.3.2.bin.WIN64\lib-vc2019;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>OpenAL32.lib;opengl32.lib;gdi32.lib;shell32.lib;vulkan-1.lib;glfw3.lib;shaderc_combinedd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>OpenAL32.lib;opengl32.lib;gdi32.lib;shell32.lib;vulkan-1.lib;glfw3.lib;shaderc_combined.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
-      <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>DESHI_INTERNAL;DESHI_SLOW;DESHI_WINDOWS;DESHI_VULKAN;_CRT_SECURE_NO_WARNINGS;_DEBUG;_CONSOLE;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
-      <ConformanceMode>true</ConformanceMode>
-      <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>C:\src\OpenAL1.1\include;%(AdditionalIncludeDirectories);C:\Program Files %28x86%29\OpenAL 1.1 SDK\include;C:\src\stb-master;C:\VulkanSDK\1.2.162.1\Include;C:\src\atmos\src\deshi\src;C:\src\glfw-3.3.2.bin.WIN64\include</AdditionalIncludeDirectories>
-    </ClCompile>
-    <Link>
-      <SubSystem>Console</SubSystem>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\src\OpenAL1.1\libs\Win64;C:\Program Files %28x86%29\OpenAL 1.1 SDK\libs\Win64;C:\VulkanSDK\1.2.162.1\Lib;C:\src\glfw-3.3.2.bin.WIN64\lib-vc2019;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>OpenAL32.lib;opengl32.lib;gdi32.lib;shell32.lib;vulkan-1.lib;glfw3.lib;shaderc_combinedd.lib;%(AdditionalDependencies)</AdditionalDependencies>
-    </Link>
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
-      <FunctionLevelLinking>true</FunctionLevelLinking>
-      <IntrinsicFunctions>true</IntrinsicFunctions>
-      <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
-      <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>;C:\src\OpenAL1.1\include;C:\Program Files %28x86%29\OpenAL 1.1 SDK\include;C:\src\stb-master;C:\VulkanSDK\1.2.162.1\Include;C:\src\glfw-3.3.2.bin.WIN64\include</AdditionalIncludeDirectories>
-      <LanguageStandard>stdcpp17</LanguageStandard>
-    </ClCompile>
-    <Link>
-      <SubSystem>Console</SubSystem>
-      <EnableCOMDATFolding>true</EnableCOMDATFolding>
-      <OptimizeReferences>true</OptimizeReferences>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\src\OpenAL1.1\libs\Win64;C:\Program Files %28x86%29\OpenAL 1.1 SDK\libs\Win64;C:\VulkanSDK\1.2.162.1\Lib;C:\src\glfw-3.3.2.bin.WIN64\lib-vc2019;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>OpenAL32.lib;opengl32.lib;gdi32.lib;shell32.lib;vulkan-1.lib;glfw3.lib;shaderc_combinedd.lib;%(AdditionalDependencies)</AdditionalDependencies>
-    </Link>
-  </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClCompile Include="..\src\atmos.cpp" />
-    <ClCompile Include="..\src\atmos\Admin.cpp" />
-    <ClCompile Include="..\src\atmos\attributes\ModelInstance.cpp" />
-    <ClCompile Include="..\src\atmos\camerainstance.cpp" />
-    <ClCompile Include="..\src\atmos\controller.cpp" />
-    <ClCompile Include="..\src\atmos\Editor.cpp" />
-    <ClCompile Include="..\src\atmos\UndoManager.cpp" />
-    <ClCompile Include="..\src\deshi\src\core\assets.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\src\deshi\src\core\console.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\src\deshi\src\core\console2.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\src\deshi\src\core\renderers\opengl.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\src\deshi\src\core\renderers\vulkan.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\src\deshi\src\core\storage.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\src\deshi\src\core\ui.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\src\deshi\src\core\window.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\src\deshi\src\deshi.cpp" />
-    <ClCompile Include="..\src\deshi\src\external\imgui\imgui.cpp" />
-    <ClCompile Include="..\src\deshi\src\external\imgui\imgui_demo.cpp" />
-    <ClCompile Include="..\src\deshi\src\external\imgui\imgui_draw.cpp" />
-    <ClCompile Include="..\src\deshi\src\external\imgui\imgui_impl_glfw.cpp" />
-    <ClCompile Include="..\src\deshi\src\external\imgui\imgui_impl_vulkan.cpp" />
-    <ClCompile Include="..\src\deshi\src\external\imgui\imgui_tables.cpp" />
-    <ClCompile Include="..\src\deshi\src\external\imgui\imgui_widgets.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\data\fonts\gohufont-11.bdf" />
-    <None Include="..\src\deshi\.gitignore" />
-    <None Include="..\src\deshi\cfg\aliases.cfg" />
-    <None Include="..\src\deshi\cfg\binds.cfg" />
-    <None Include="..\src\deshi\cfg\render.cfg" />
-    <None Include="..\src\deshi\data\fonts\gohufont-11.bdf" />
-    <None Include="..\src\deshi\data\fonts\gohufont.otb" />
-    <None Include="..\src\deshi\data\shaders\base.frag" />
-    <None Include="..\src\deshi\data\shaders\base.vert" />
-    <None Include="..\src\deshi\data\shaders\fixedimguishader.vert" />
-    <None Include="..\src\deshi\data\shaders\flat.frag" />
-    <None Include="..\src\deshi\data\shaders\flat.vert" />
-    <None Include="..\src\deshi\data\shaders\lavalamp.frag" />
-    <None Include="..\src\deshi\data\shaders\lavalamp.vert" />
-    <None Include="..\src\deshi\data\shaders\normaldebug.geom" />
-    <None Include="..\src\deshi\data\shaders\offscreen.vert" />
-    <None Include="..\src\deshi\data\shaders\pbr.frag" />
-    <None Include="..\src\deshi\data\shaders\pbr.vert" />
-    <None Include="..\src\deshi\data\shaders\phong.frag" />
-    <None Include="..\src\deshi\data\shaders\phong.vert" />
-    <None Include="..\src\deshi\data\shaders\shadowmapDEBUG.frag" />
-    <None Include="..\src\deshi\data\shaders\shadowmapDEBUG.vert" />
-    <None Include="..\src\deshi\data\shaders\testing0.frag" />
-    <None Include="..\src\deshi\data\shaders\testing0.vert" />
-    <None Include="..\src\deshi\data\shaders\testing1.frag" />
-    <None Include="..\src\deshi\data\shaders\testing1.vert" />
-    <None Include="..\src\deshi\data\shaders\twod.frag" />
-    <None Include="..\src\deshi\data\shaders\ui.frag" />
-    <None Include="..\src\deshi\data\shaders\ui.vert" />
-    <None Include="..\src\deshi\data\shaders\wireframe.frag" />
-    <None Include="..\src\deshi\data\shaders\wireframe.vert" />
-    <None Include="..\src\deshi\misc\build.bat" />
-    <None Include="..\src\deshi\misc\TODOP.py" />
-    <None Include="..\src\deshi\README.md" />
-    <None Include="..\src\deshi\src\math\mat3.inl" />
-    <None Include="..\src\deshi\src\math\mat4.inl" />
-    <None Include="..\src\deshi\src\math\vec2.inl" />
-    <None Include="..\src\deshi\src\math\vec3.inl" />
-    <None Include="..\src\deshi\src\math\vec4.inl" />
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="..\src\deshi\cfg\keybinds.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <Font Include="..\src\deshi\data\fonts\Paskowy.ttf" />
-  </ItemGroup>
-  <ItemGroup>
-    <Natvis Include="..\src\deshi\misc\customvis.natvis" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\src\atmos\Admin.h" />
-    <ClInclude Include="..\src\atmos\attributes\Attribute.h" />
-    <ClInclude Include="..\src\atmos\attributes\ModelInstance.h" />
-    <ClInclude Include="..\src\atmos\camerainstance.h" />
-    <ClInclude Include="..\src\atmos\controller.h" />
-    <ClInclude Include="..\src\atmos\Editor.h" />
-    <ClInclude Include="..\src\atmos\entities\Entity.h" />
-    <ClInclude Include="..\src\atmos\keybinds.h" />
-    <ClInclude Include="..\src\atmos\Transform.h" />
-    <ClInclude Include="..\src\atmos\UndoManager.h" />
-    <ClInclude Include="..\src\deshi\deshi.h" />
-    <ClInclude Include="..\src\deshi\src\core\assets.h" />
-    <ClInclude Include="..\src\deshi\src\core\camera.h" />
-    <ClInclude Include="..\src\deshi\src\core\console.h" />
-    <ClInclude Include="..\src\deshi\src\core\console2.h" />
-    <ClInclude Include="..\src\deshi\src\core\imgui.h" />
-    <ClInclude Include="..\src\deshi\src\core\input.h" />
-    <ClInclude Include="..\src\deshi\src\core\model.h" />
-    <ClInclude Include="..\src\deshi\src\core\renderer.h" />
-    <ClInclude Include="..\src\deshi\src\core\storage.h" />
-    <ClInclude Include="..\src\deshi\src\core\time.h" />
-    <ClInclude Include="..\src\deshi\src\core\ui.h" />
-    <ClInclude Include="..\src\deshi\src\core\window.h" />
-    <ClInclude Include="..\src\deshi\src\defines.h" />
-    <ClInclude Include="..\src\deshi\src\deshi.h" />
-    <ClInclude Include="..\src\deshi\src\external\draudio\dr_flac.h" />
-    <ClInclude Include="..\src\deshi\src\external\draudio\dr_mp3.h" />
-    <ClInclude Include="..\src\deshi\src\external\draudio\dr_wav.h" />
-    <ClInclude Include="..\src\deshi\src\external\imgui\imconfig.h" />
-    <ClInclude Include="..\src\deshi\src\external\imgui\imgui.h" />
-    <ClInclude Include="..\src\deshi\src\external\imgui\imgui_impl_glfw.h" />
-    <ClInclude Include="..\src\deshi\src\external\imgui\imgui_impl_vulkan.h" />
-    <ClInclude Include="..\src\deshi\src\external\imgui\imgui_internal.h" />
-    <ClInclude Include="..\src\deshi\src\external\imgui\imstb_rectpack.h" />
-    <ClInclude Include="..\src\deshi\src\external\imgui\imstb_textedit.h" />
-    <ClInclude Include="..\src\deshi\src\external\imgui\imstb_truetype.h" />
-    <ClInclude Include="..\src\deshi\src\external\saschawillems\VulkanInitializers.hpp" />
-    <ClInclude Include="..\src\deshi\src\external\tinyobjloader\tiny_obj_loader.h" />
-    <ClInclude Include="..\src\deshi\src\geometry\Edge.h" />
-    <ClInclude Include="..\src\deshi\src\geometry\Geometry.h" />
-    <ClInclude Include="..\src\deshi\src\math\InertiaTensors.h" />
-    <ClInclude Include="..\src\deshi\src\math\mat.h" />
-    <ClInclude Include="..\src\deshi\src\math\Math.h" />
-    <ClInclude Include="..\src\deshi\src\math\matN.h" />
-    <ClInclude Include="..\src\deshi\src\math\Quaternion.h" />
-    <ClInclude Include="..\src\deshi\src\math\vec.h" />
-    <ClInclude Include="..\src\deshi\src\math\VectorMatrix.h" />
-    <ClInclude Include="..\src\deshi\src\utils\array.h" />
-    <ClInclude Include="..\src\deshi\src\utils\Color.h" />
-    <ClInclude Include="..\src\deshi\src\utils\Command.h" />
-    <ClInclude Include="..\src\deshi\src\utils\ContainerManager.h" />
-    <ClInclude Include="..\src\deshi\src\utils\Debug.h" />
-    <ClInclude Include="..\src\deshi\src\utils\font.h" />
-    <ClInclude Include="..\src\deshi\src\utils\hash.h" />
-    <ClInclude Include="..\src\deshi\src\utils\map.h" />
-    <ClInclude Include="..\src\deshi\src\utils\optional.h" />
-    <ClInclude Include="..\src\deshi\src\utils\RingArray.h" />
-    <ClInclude Include="..\src\deshi\src\utils\string.h" />
-    <ClInclude Include="..\src\deshi\src\utils\tuple.h" />
-    <ClInclude Include="..\src\deshi\src\utils\utils.h" />
-    <ClInclude Include="..\src\deshi\src\utils\view.h" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
