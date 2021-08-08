@@ -21,6 +21,7 @@ void Admin::Init() {
 	test->attributes.add(mi);
 	test->transform = Transform(vec3::ZERO, vec3::ZERO, vec3::ONE);
 	attributes.add(test->attributes);
+	entities.add(test);
 }
 
 void Admin::Update() {

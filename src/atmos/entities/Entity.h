@@ -47,6 +47,14 @@ struct Entity {
 	
 	virtual void SendEvent(Event event) {};
 	virtual void ReceiveEvent(Event event) {};
+
+	template<typename T>
+	T* GetAttribute() {
+		for (Attribute* attr : attributes) 
+			if (T* t = dyncast(T, attr)) 
+				return t;
+		return nullptr;
+	}
 };
 
 //this maybe should be more explicit, we'll see

@@ -260,10 +260,10 @@ inline void EntitiesTab(Admin* admin, float fontsize) {
 	ImGui::SetCursorPosX(ImGui::GetWindowWidth() * 0.025);
 	if (ImGui::BeginChild("##entity_list", ImVec2(ImGui::GetWindowWidth() * 0.95f, 100))) {
 		//if no entities, draw empty list
-		if (admin->entities.size() == 0) {
+		if (admin->entities.count == 0) {
 			float time = DeshTime->totalTime;
 			std::string str1 = "Nothing yet...";
-			float strlen1 = (fontsize - (fontsize / 2)) * str1.size();
+			float strlen1 = fontw * str1.size();
 			for (int i = 0; i < str1.size(); i++) {
 				ImGui::SetCursorPos(ImVec2((ImGui::GetWindowSize().x - strlen1) / 2 + i * (fontsize / 2), (ImGui::GetWindowSize().y - fontsize) / 2 + sin(10 * time + cos(10 * time + (i * M_PI / 2)) + (i * M_PI / 2))));
 				ImGui::TextEx(str1.substr(i, 1).c_str());
@@ -271,10 +271,10 @@ inline void EntitiesTab(Admin* admin, float fontsize) {
 		}
 		else {
 			if (ImGui::BeginTable("##entity_list_table", 5, ImGuiTableFlags_BordersInner)) {
-				ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed, fontw * 2.f);  //visible ImGui::Button
-				ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed, fontw * 3.f);  //id
-				ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthStretch);                  //name
-				ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed, fontw * 3.5f); //events button
+				ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed, fontw * 3.5f);  //visible ImGui::Button
+				ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed, fontw * 5.f);  //id
+				ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthStretch);             //name
+				//ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed, fontw * 3.5f); //evenbutton
 				ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed, fontw);        //delete button
 
 				forX(ent_idx, admin->entities.size()) {
@@ -284,21 +284,20 @@ inline void EntitiesTab(Admin* admin, float fontsize) {
 					ImGui::TableNextRow();
 
 					//// visible button ////
-					//TODO(sushi,UiEnt) implement visibility for things other than meshes like lights, etc.
-					/*ImGui::TableSetColumnIndex(0);
+					ImGui::TableSetColumnIndex(0);
 					if (ModelInstance* m = ent->GetAttribute<ModelInstance>()) {
 						if (ImGui::Button((m->visible) ? "(M)" : "( )", ImVec2(-FLT_MIN, 0.0f))) {
 							m->ToggleVisibility();
 						}
 					}
-					else if (Light* l = ent->GetAttribute<Light>()) {
-						if (ImGui::Button((l->active) ? "(L)" : "( )", ImVec2(-FLT_MIN, 0.0f))) {
-							l->active = !l->active;
-						}
-					}
+					//else if (Light* l = ent->GetAttribute<Light>()) {
+					//	if (ImGui::Button((l->active) ? "(L)" : "( )", ImVec2(-FLT_MIN, 0.0f))) {
+					//		l->active = !l->active;
+					//	}
+					//}
 					else {
 						if (ImGui::Button("(?)", ImVec2(-FLT_MIN, 0.0f))) {}
-					}*/
+					}
 
 					//// id + label (selectable row) ////
 					ImGui::TableSetColumnIndex(1);
@@ -409,44 +408,44 @@ inline void EntitiesTab(Admin* admin, float fontsize) {
 		//// transform ////
 		int tree_flags = ImGuiTreeNodeFlags_DefaultOpen;
 		if (ImGui::CollapsingHeader("Transform", 0, tree_flags)) {
-		/*	ImGui::Indent();
+		    ImGui::Indent();
 			vec3 oldVec = sel->transform.position;
 
 			ImGui::TextEx("Position    "); ImGui::SameLine();
 			if (ImGui::Inputvec3("##ent_pos", &sel->transform.position)) {
-				if (Physics* p = sel->GetAttribute<Physics>()) {
-					p->position = sel->transform.position;
-					admin->editor.undo_manager.AddUndoTranslate(&sel->transform, &oldVec, &p->position);
-				}
-				else {
-					admin->editor.undo_manager.AddUndoTranslate(&sel->transform, &oldVec, &sel->transform.position);
-				}
+				//if (Physics* p = sel->GetAttribute<Physics>()) {
+				//	p->position = sel->transform.position;
+				//	admin->editor.undo_manager.AddUndoTranslate(&sel->transform, &oldVec, &p->position);
+				//}
+				//else {
+				//	admin->editor.undo_manager.AddUndoTranslate(&sel->transform, &oldVec, &sel->transform.position);
+				//}
 			}ImGui::Separator();
 
 			oldVec = sel->transform.rotation;
 			ImGui::TextEx("Rotation    "); ImGui::SameLine();
 			if (ImGui::Inputvec3("##ent_rot", &sel->transform.rotation)) {
-				if (Physics* p = sel->GetAttribute<Physics>()) {
-					p->rotation = sel->transform.rotation;
-					admin->editor.undo_manager.AddUndoRotate(&sel->transform, &oldVec, &p->rotation);
-				}
-				else {
-					admin->editor.undo_manager.AddUndoRotate(&sel->transform, &oldVec, &sel->transform.rotation);
-				}
+				//if (Physics* p = sel->GetAttribute<Physics>()) {
+				//	p->rotation = sel->transform.rotation;
+				//	admin->editor.undo_manager.AddUndoRotate(&sel->transform, &oldVec, &p->rotation);
+				//}
+				//else {
+				//	admin->editor.undo_manager.AddUndoRotate(&sel->transform, &oldVec, &sel->transform.rotation);
+				//}
 			}ImGui::Separator();
 
 			oldVec = sel->transform.scale;
 			ImGui::TextEx("Scale       "); ImGui::SameLine();
 			if (ImGui::Inputvec3("##ent_scale", &sel->transform.scale)) {
-				if (Physics* p = sel->GetAttribute<Physics>()) {
-					p->scale = sel->transform.scale;
-					admin->editor.undo_manager.AddUndoScale(&sel->transform, &oldVec, &p->scale);
-				}
-				else {
-					admin->editor.undo_manager.AddUndoScale(&sel->transform, &oldVec, &sel->transform.scale);
-				}
+				//if (Physics* p = sel->GetAttribute<Physics>()) {
+				//	p->scale = sel->transform.scale;
+				//	admin->editor.undo_manager.AddUndoScale(&sel->transform, &oldVec, &p->scale);
+				//}
+				//else {
+				//	admin->editor.undo_manager.AddUndoScale(&sel->transform, &oldVec, &sel->transform.scale);
+				//}
 			}ImGui::Separator();
-			ImGui::Unindent();*/
+			ImGui::Unindent();
 		}
 
 		//// components ////
@@ -456,32 +455,32 @@ inline void EntitiesTab(Admin* admin, float fontsize) {
 			bool delete_button = true;
 			ImGui::PushID(c);
 
-			//switch (c->type) {
-			//		//mesh
-			//	case AttributeType_ModelInstance: {
-			//		if (ImGui::CollapsingHeader("Model", &delete_button, tree_flags)) {
-			//			ImGui::Indent();
-			//			ModelInstance* mc = dyncast(ModelInstance, c);
+			switch (c->type) {
+					//mesh
+				case AttributeType_ModelInstance: {
+					if (ImGui::CollapsingHeader("Model", &delete_button, tree_flags)) {
+						ImGui::Indent();
+						ModelInstance* mc = dyncast(ModelInstance, c);
 
-			//			ImGui::TextEx("Visible  "); ImGui::SameLine();
-			//			if (ImGui::Button((mc->visible) ? "True" : "False", ImVec2(-FLT_MIN, 0))) {
-			//				mc->ToggleVisibility();
-			//			}
+						ImGui::TextEx("Visible  "); ImGui::SameLine();
+						if (ImGui::Button((mc->visible) ? "True" : "False", ImVec2(-FLT_MIN, 0))) {
+							mc->ToggleVisibility();
+						}
 
-			//			ImGui::TextEx("Model     "); ImGui::SameLine(); ImGui::SetNextItemWidth(-1);
-			//			if (ImGui::BeginCombo("##model_combo", mc->model->name)) {
-			//				forI(Storage::ModelCount()) {
-			//					if (ImGui::Selectable(Storage::ModelName(i), mc->model == Storage::ModelAt(i))) {
-			//						mc->ChangeModel(Storage::ModelAt(i));
-			//					}
-			//				}
-			//				ImGui::EndCombo();
-			//			}
+						ImGui::TextEx("Model     "); ImGui::SameLine(); ImGui::SetNextItemWidth(-1);
+						if (ImGui::BeginCombo("##model_combo", mc->model->name)) {
+							forI(Storage::ModelCount()) {
+								if (ImGui::Selectable(Storage::ModelName(i), mc->model == Storage::ModelAt(i))) {
+									mc->ChangeModel(Storage::ModelAt(i));
+								}
+							}
+							ImGui::EndCombo();
+						}
 
-			//			ImGui::Unindent();
-			//			ImGui::Separator();
-			//		}
-			//	}break;
+						ImGui::Unindent();
+						ImGui::Separator();
+					}
+				}break;
 
 			//		//physics
 			//	case AttributeType_Physics:
@@ -713,7 +712,7 @@ inline void EntitiesTab(Admin* admin, float fontsize) {
 			//			ImGui::Separator();
 			//		}
 			//	}break;
-			//}
+			}
 
 			if (!delete_button) comp_deleted_queue.push_back(c);
 			ImGui::PopID();
@@ -725,12 +724,12 @@ inline void EntitiesTab(Admin* admin, float fontsize) {
 
 		ImGui::SetCursorPosX(ImGui::GetWindowWidth() * 0.025);
 		if (ImGui::Button("Add Attribute")) {
-			//switch (1 << (add_comp_index - 1)) {
-			//	case AttributeType_ModelInstance: {
-			//		Attribute* comp = new ModelInstance();
-			//		sel->AddAttribute(comp);
-			//		admin->AddAttributeToLayers(comp);
-			//	}break;
+			switch (1 << (add_comp_index - 1)) {
+				case AttributeType_ModelInstance: {
+					Attribute* comp = new ModelInstance();
+					sel->attributes.add(comp);
+					//admin->AddAttributeToLayers(comp);
+				}break;
 			//	case AttributeType_Physics: {
 			//		Attribute* comp = new Physics();
 			//		sel->AddAttribute(comp);
@@ -784,7 +783,7 @@ inline void EntitiesTab(Admin* admin, float fontsize) {
 			//	case(0):default: { //None
 			//		//do nothing
 			//	}break;
-			//}
+			}
 		}
 		ImGui::SameLine(); ImGui::SetNextItemWidth(-1);
 		ImGui::Combo("##add_comp_combo", &add_comp_index, AttributeTypeStrings, ArrayCount(AttributeTypeStrings));
@@ -832,9 +831,9 @@ inline void MeshesTab(Admin* admin) {
 	SetPadding;
 	if (ImGui::BeginChild("##mesh_list", ImVec2(ImGui::GetWindowWidth() * 0.95, ImGui::GetWindowHeight() * .14f), false)) {
 		if (ImGui::BeginTable("##mesh_table", 3, ImGuiTableFlags_BordersInner)) {
-			ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed, fontw * 2.5f);
+			ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed, fonth * 2.5f);
 			ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthStretch);
-			ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed, fontw);
+			ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed, fonth);
 
 			forX(mesh_idx, Storage::MeshCount()) {
 				ImGui::PushID(Storage::MeshAt(mesh_idx));
@@ -1165,9 +1164,9 @@ inline void TexturesTab(Admin* admin) {
 	SetPadding;
 	if (ImGui::BeginChild("##tex_list", ImVec2(ImGui::GetWindowWidth() * 0.95, ImGui::GetWindowHeight() * .14f), false)) {
 		if (ImGui::BeginTable("##tex_table", 3, ImGuiTableFlags_BordersInner)) {
-			ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed, fontw * 2.5f);
+			ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed, fonth * 2.5f);
 			ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthStretch);
-			ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed, fontw);
+			ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed, fonth);
 
 			forX(tex_idx, Storage::TextureCount()) {
 				ImGui::PushID(tex_idx);
@@ -1263,9 +1262,9 @@ inline void MaterialsTab(Admin* admin) {
 	SetPadding;
 	if (ImGui::BeginChild("##mat_list", ImVec2(ImGui::GetWindowWidth() * 0.95, ImGui::GetWindowHeight() * .14f), false)) {
 		if (ImGui::BeginTable("##mat_table", 3, ImGuiTableFlags_BordersInner)) {
-			ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed, fontw * 2.5f);
+			ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed, fonth * 2.5f);
 			ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthStretch);
-			ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed, fontw);
+			ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed, fonth);
 
 			forX(mat_idx, Storage::MaterialCount()) {
 				ImGui::PushID(mat_idx);
@@ -1417,9 +1416,9 @@ inline void ModelsTab(Admin* admin) {
 	SetPadding;
 	if (ImGui::BeginChild("##model_list", ImVec2(ImGui::GetWindowWidth() * 0.95, ImGui::GetWindowHeight() * .14f), false)) {
 		if (ImGui::BeginTable("##model_table", 3, ImGuiTableFlags_BordersInner)) {
-			ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed, fontw * 2.5f);
+			ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed, fonth * 2.5f);
 			ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthStretch);
-			ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed, fontw);
+			ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed, fonth);
 
 			forX(model_idx, Storage::ModelCount()) {
 				ImGui::PushID(Storage::ModelAt(model_idx));
@@ -1506,9 +1505,9 @@ inline void ModelsTab(Admin* admin) {
 		//// batch selection ////
 		ImGui::TextCentered("Batches");
 		if (ImGui::BeginTable("##batch_table", 3, ImGuiTableFlags_None, ImVec2(-FLT_MIN, ImGui::GetWindowHeight() * .10f))) {
-			ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed, fontw * 2.5f);
+			ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed, fonth * 2.5f);
 			ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthStretch);
-			ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed, fontw);
+			ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed, fonth);
 
 			forX(batch_idx, selected->batches.size()) {
 				ImGui::PushID(&selected->batches[batch_idx]);
@@ -1842,15 +1841,15 @@ void Editor::DebugBar() {
 
         //precalc strings and stuff so we can set column widths appropriately
         string str1 = TOSTRING("wents: ", admin->entities.size());
-        float strlen1 = (fontsize - (fontsize / 2)) * str1.size;
+        float strlen1 = fontw * str1.size;
         string str2 = TOSTRING("wtris: ", Render::GetStats()->totalTriangles);
-        float strlen2 = (fontsize - (fontsize / 2)) * str2.size;
+        float strlen2 = fontw * str2.size;
         string str3 = TOSTRING("wverts: ", Render::GetStats()->totalVertices);
-        float strlen3 = (fontsize - (fontsize / 2)) * str3.size;
+        float strlen3 = fontw * str3.size;
         string str4 = TOSTRING("stris: ", "0");
-        float strlen4 = (fontsize - (fontsize / 2)) * str4.size;
+        float strlen4 = fontw * str4.size;
         string str5 = TOSTRING("sverts: ", "0");
-        float strlen5 = (fontsize - (fontsize / 2)) * str5.size;
+        float strlen5 = fontw * str5.size;
 
         ImGui::TableSetupColumn("FPS",            ImGuiTableColumnFlags_WidthFixed, 64);
         ImGui::TableSetupColumn("FPSGraphInline", ImGuiTableColumnFlags_WidthFixed, 64);
@@ -1997,7 +1996,7 @@ void Editor::DebugBar() {
                 else {
                     str6 = string(DeshConsole->alert_message);
                 }
-                float strlen6 = (fontw / 2) * str6.size;
+                float strlen6 = (fontw) * str6.size;
                 ImGui::SameLine((ImGui::GetColumnWidth() - strlen6) / 2); ImGui::PushItemWidth(-1);
                 ImGui::PushStyleColor(ImGuiCol_Text, ImGui::ColorToImVec4(Color(col_text)));
                 ImGui::TextEx(str6.str);
@@ -2012,7 +2011,7 @@ void Editor::DebugBar() {
             //https://stackoverflow.com/questions/24686846/get-current-time-in-milliseconds-or-hhmmssmmm-format
 
             string str7 = DeshTime->FormatDateTime("{h}:{m}:{s}");
-            float strlen7 = (fontsize - (fontsize / 2)) * str7.size;
+            float strlen7 = fontw * str7.size;
             ImGui::SameLine(32 - (strlen7 / 2));
 
             ImGui::TextEx(str7.str);
@@ -2151,12 +2150,14 @@ void Editor::Init() {
 	dir_models   = Assets::iterateDirectory(Assets::dirModels(), ".obj");
 	dir_fonts    = Assets::iterateDirectory(Assets::dirFonts());
 
-	fonth = ImGui::GetFontSize();
-	fontw = fonth / 2.f;
+	
 
 }
 
 void Editor::Update() {
+	fonth = ImGui::GetFontSize();
+	fontw = fonth / 2.f;
+	
 	{//general
 		if (DeshInput->KeyPressed(Key::P | InputMod_Lctrl))
 			admin->paused = !admin->paused;
@@ -2237,7 +2238,9 @@ void Editor::Update() {
 		//if (showDebugLayer) DebugLayer();
 		//if (showTimes)      DrawTimes();
 		if (showInspector)  Inspector();
+		setTrack();
 		if (showDebugBar)   DebugBar();
+		endTrack();
 		//if (showMenuBar)    MenuBar();
 		if (showWorldGrid)  WorldGrid(camera->position);
 		ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0, 0, 0, 1)); {

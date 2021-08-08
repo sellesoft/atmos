@@ -248,6 +248,9 @@
     <None Include="..\src\deshi\src\math\vec4.inl">
       <Filter>deshi\src\math</Filter>
     </None>
+    <None Include="..\data\fonts\gohufont-11.bdf">
+      <Filter>deshi\fonts</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\src\deshi\cfg\keybinds.txt">
