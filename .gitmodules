@@ -1,4 +1,4 @@
 [submodule "deshi"]
 	path = src/deshi
 	url = https://github.com/DelleVelleD/deshi
-	branch = strip-game
+	branch = main

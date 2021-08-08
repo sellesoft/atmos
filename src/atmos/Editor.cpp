@@ -657,7 +657,7 @@ inline void EntitiesTab(Admin* admin, float fontsize) {
 			ImGui::PushID(c);
 
 			switch (c->type) {
-					//mesh
+				//mesh
 				case AttributeType_ModelInstance: {
 					if (ImGui::CollapsingHeader("Model", &delete_button, tree_flags)) {
 						ImGui::Indent();
