@@ -213,7 +213,7 @@
     <OutDir>$(SolutionDir)build\debug</OutDir>
     <IntDir>$(SolutionDir)build\debug</IntDir>
     <TargetName>$(SolutionName)</TargetName>
-    <SourcePath>$(SolutionDir)src;$(SolutionDir)src\deshi\src;$(VC_SourcePath)</SourcePath>
+    <SourcePath>$(VC_SourcePath);</SourcePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseWindowsVulkan|x64'">
     <LinkIncremental>false</LinkIncremental>

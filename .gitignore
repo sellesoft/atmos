@@ -22,11 +22,10 @@
 build/
 docs/doxygen/
 
-#data ignores (large/binary/user files)
+#data ignores
 data/*.*
 data/cfg/
 data/fonts/
-#data/entities/
 #data/levels
 data/logs/
 data/models/
@@ -40,7 +39,6 @@ data/textures/
 imgui.ini
 TODOs.txt
 misc/atmos.vcxproj.user
-misc/x64/
 
 #delle specifics
 misc/shell.bat

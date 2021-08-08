@@ -7,9 +7,6 @@
     <Filter Include="src\deshi">
       <UniqueIdentifier>{b89733a0-d44a-457b-83e0-44c91eab1d82}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\atmos">
-      <UniqueIdentifier>{81ec1624-1ded-4aac-8027-c9371ca50ade}</UniqueIdentifier>
-    </Filter>
     <Filter Include="extra">
       <UniqueIdentifier>{d20a13cd-b5f5-4797-820f-c74d5642387f}</UniqueIdentifier>
     </Filter>
@@ -19,14 +16,8 @@
     <Filter Include="extra\misc">
       <UniqueIdentifier>{8b0fe405-e7c6-4bb3-82b0-2980b1ea6611}</UniqueIdentifier>
     </Filter>
-    <Filter Include="extra\docs">
-      <UniqueIdentifier>{ebb26292-8e96-4d3a-803b-48f090b4e880}</UniqueIdentifier>
-    </Filter>
     <Filter Include="extra\fonts">
       <UniqueIdentifier>{6384599a-bc52-43d1-a973-f509b32572dd}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="extra\levels">
-      <UniqueIdentifier>{bcc1169b-0827-43d6-aebe-3716d71f483d}</UniqueIdentifier>
     </Filter>
     <Filter Include="extra\shaders">
       <UniqueIdentifier>{a7580d45-cec3-4ad3-baf4-226625d6a9ce}</UniqueIdentifier>
@@ -58,6 +49,9 @@
     <Filter Include="src\deshi\external\stb">
       <UniqueIdentifier>{cb37e35b-33e2-4d3b-adfc-980763b53293}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\atmos">
+      <UniqueIdentifier>{81ec1624-1ded-4aac-8027-c9371ca50ade}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\atmos\attributes">
       <UniqueIdentifier>{6e90cd36-bfcc-4e9f-9e48-7cefd582e0e7}</UniqueIdentifier>
     </Filter>
@@ -66,12 +60,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\.gitignore">
-      <Filter>extra</Filter>
-    </None>
-    <None Include="..\.gitmodules">
-      <Filter>extra</Filter>
-    </None>
     <None Include="atmos.vcxproj">
       <Filter>extra\misc</Filter>
     </None>
@@ -204,11 +192,12 @@
     <None Include="..\deshi\src\math\vec4.inl">
       <Filter>src\deshi\math</Filter>
     </None>
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="..\vk_layer_settings.txt">
-      <Filter>extra</Filter>
-    </Text>
+    <None Include="..\.gitignore">
+      <Filter>extra\misc</Filter>
+    </None>
+    <None Include="..\.gitmodules">
+      <Filter>extra\misc</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="customvis.natvis">
@@ -467,5 +456,10 @@
     <ClInclude Include="..\src\UndoManager.h">
       <Filter>src\atmos</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\vk_layer_settings.txt">
+      <Filter>extra\misc</Filter>
+    </Text>
   </ItemGroup>
 </Project>
