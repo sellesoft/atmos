@@ -67,6 +67,9 @@
     <ClCompile Include="..\src\atmos\Editor.cpp">
       <Filter>atmos\game</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\atmos\UndoManager.cpp">
+      <Filter>atmos\game</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="atmos">
@@ -446,6 +449,9 @@
       <Filter>atmos\game\attributes</Filter>
     </ClInclude>
     <ClInclude Include="..\src\atmos\Editor.h">
+      <Filter>atmos\game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\atmos\UndoManager.h">
       <Filter>atmos\game</Filter>
     </ClInclude>
   </ItemGroup>

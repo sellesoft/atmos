@@ -2,6 +2,7 @@
 #define ATMOS_EDITOR_H
 
 #include "defines.h"
+#include "UndoManager.h"
 #include "utils/Color.h"
 #include "utils/array.h"
 #include "utils/string.h"
@@ -19,7 +20,7 @@ struct Editor {
 
 	CameraInstance* camera;
 
-	//UndoManager undoer;
+	UndoManager undoer;
 
 	string level_name;
 	

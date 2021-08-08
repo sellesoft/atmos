@@ -25,6 +25,15 @@ local array<string> dir_textures;
 local array<string> dir_materials;
 local array<string> dir_models;
 local array<string> dir_fonts;
+local array<string> dir_objs;
+
+
+local string copy_path;
+local array<pair<u32, u32>> copy_mesh_diffs;
+local array<bool> saved_meshes({ true });
+local array<bool> saved_materials({ true });
+local array<bool> saved_models({ true });
+
 
 //current palette:
 //https://lospec.com/palette-list/slso8
@@ -222,6 +231,198 @@ namespace ImGui {
 
 } //namespace ImGui
 
+
+void Editor::MenuBar() {
+	ImGui::PushStyleVar(ImGuiStyleVar_PopupBorderSize, 0);
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0);
+	ImGui::PushStyleColor(ImGuiCol_PopupBg, ImGui::ColorToImVec4(Color(20, 20, 20, 255)));
+	ImGui::PushStyleColor(ImGuiCol_MenuBarBg, ImGui::ColorToImVec4(Color(20, 20, 20, 255)));
+
+	if (ImGui::BeginMainMenuBar()) {
+		WinHovCheck;
+		menubarheight = ImGui::GetWindowHeight();
+
+		//// level menu options ////
+		if (ImGui::BeginMenu("Level")) {
+			WinHovCheck;
+			if (ImGui::MenuItem("New")) {
+				admin->Reset();
+			}
+			if (ImGui::MenuItem("Save")) {
+				if (level_name == "") {
+					ERROR("Level not saved before; Use 'Save As'");
+				}
+				else {
+					//admin->SaveTEXT(level_name);
+				}
+			}
+			if (ImGui::BeginMenu("Save As")) {
+				WinHovCheck;
+				persist char buff[255] = {};
+				if (ImGui::InputText("##level_saveas_input", buff, 255, ImGuiInputTextFlags_EnterReturnsTrue)) {
+					//admin->SaveTEXT(buff);
+					level_name = std::string(buff);
+				}
+				ImGui::EndMenu();
+			}
+			if (ImGui::BeginMenu("Load")) {
+				WinHovCheck;
+				dir_levels = Assets::iterateDirectory(Assets::dirLevels());
+				forX(di, dir_levels.count) {
+					if (ImGui::MenuItem(dir_levels[di].str)) {
+						//admin->LoadTEXT(dir_levels[di]);
+						level_name = dir_levels[di];
+					}
+				}
+				ImGui::EndMenu();
+			}
+			ImGui::EndMenu();
+		}
+
+		//// load menu options ////
+		if (ImGui::BeginMenu("Load")) {
+			WinHovCheck;
+			if (ImGui::BeginMenu("Meshes")) {
+				WinHovCheck;
+				dir_meshes = Assets::iterateDirectory(Assets::dirModels(), ".mesh");
+				forX(di, dir_meshes.count) {
+					bool loaded = false;
+					forX(li, Storage::MeshCount()) {
+						if (strncmp(Storage::MeshName(li), dir_meshes[di].str, dir_meshes[di].size - 5) == 0) {
+							loaded = true;  break;
+						}
+					}
+					if (!loaded && ImGui::MenuItem(dir_meshes[di].str)) {
+						WinHovCheck;
+						u32 id = Storage::CreateMeshFromFile(dir_meshes[di].str).first;
+						if (id) saved_meshes.add(true);
+					}
+				}
+				ImGui::EndMenu();
+			}
+
+			if (ImGui::BeginMenu("Textures")) {
+				WinHovCheck;
+				dir_textures = Assets::iterateDirectory(Assets::dirTextures());
+				forX(di, dir_textures.count) {
+					bool loaded = false;
+					forX(li, Storage::TextureCount()) {
+						if (strcmp(Storage::TextureName(li), dir_textures[di].str) == 0) {
+							loaded = true;  break;
+						}
+					}
+					if (!loaded && ImGui::MenuItem(dir_textures[di].str)) {
+						WinHovCheck;
+						Storage::CreateTextureFromFile(dir_textures[di].str);
+					}
+				}
+				ImGui::EndMenu();
+			}
+
+			if (ImGui::BeginMenu("Materials")) {
+				WinHovCheck;
+				dir_materials = Assets::iterateDirectory(Assets::dirModels(), ".mat");
+				forX(di, dir_materials.count) {
+					bool loaded = false;
+					forX(li, Storage::MaterialCount()) {
+						if (strncmp(Storage::MaterialName(li), dir_materials[di].str, dir_materials[di].size - 4) == 0) {
+							loaded = true;  break;
+						}
+					}
+					if (!loaded && ImGui::MenuItem(dir_materials[di].str)) {
+						WinHovCheck;
+						u32 id = Storage::CreateMaterialFromFile(dir_materials[di].str).first;
+						if (id) saved_materials.add(true);
+					}
+				}
+				ImGui::EndMenu();
+			}
+
+			if (ImGui::BeginMenu("Models")) {
+				WinHovCheck;
+				dir_models = Assets::iterateDirectory(Assets::dirModels(), ".model");
+				forX(di, dir_models.count) {
+					bool loaded = false;
+					forX(li, Storage::ModelCount()) {
+						if (strncmp(Storage::ModelName(li), dir_models[di].str, dir_models[di].size - 6) == 0) {
+							loaded = true;  break;
+						}
+					}
+					if (!loaded && ImGui::MenuItem(dir_models[di].str)) {
+						WinHovCheck;
+						u32 mesh_count = Storage::MeshCount();
+						u32 material_count = Storage::MaterialCount();
+						u32 id = Storage::CreateModelFromFile(dir_models[di].str, ModelFlags_NONE, false).first;
+						if (id) saved_models.add(true);
+						forI(Storage::MeshCount() - mesh_count) { saved_meshes.add(true); }
+						forI(Storage::MaterialCount() - material_count) { saved_materials.add(true); }
+					}
+				}
+				ImGui::EndMenu();
+			}
+
+			if (ImGui::BeginMenu("OBJs")) {
+				WinHovCheck;
+				dir_objs = Assets::iterateDirectory(Assets::dirModels(), ".obj");
+				forX(di, dir_objs.count) {
+					u32 loaded_idx = -1;
+					forX(li, Storage::ModelCount()) {
+						if (strcmp(Storage::ModelName(li), dir_objs[di].str) == 0) {
+							loaded_idx = li;  break;
+						}
+					}
+					if (ImGui::MenuItem(dir_objs[di].str)) {
+						WinHovCheck;
+						if (loaded_idx != -1) {
+							Storage::DeleteModel(loaded_idx);
+							saved_models.remove(loaded_idx);
+						}
+						u32 mesh_count = Storage::MeshCount();
+						u32 material_count = Storage::MaterialCount();
+
+						u32 id = Storage::CreateModelFromFile(dir_objs[di].str, ModelFlags_NONE, true).first;
+						if (id) saved_models.add(false);
+
+						forI(Storage::MeshCount() - mesh_count) { saved_meshes.add(false); }
+						forI(Storage::MaterialCount() - material_count) { saved_materials.add(false); }
+					}
+				}
+				ImGui::EndMenu();
+			}
+			ImGui::EndMenu();
+		}
+
+		//// window menu options ////
+		if (ImGui::BeginMenu("Window")) {
+			WinHovCheck;
+			if (ImGui::MenuItem("Inspector"))        showInspector = !showInspector;
+			if (ImGui::MenuItem("Debug Bar"))        showDebugBar = !showDebugBar;
+			if (ImGui::MenuItem("DebugLayer"))       showDebugLayer = !showDebugLayer;
+			if (ImGui::MenuItem("Timers"))           showTimes = !showTimes;
+			if (ImGui::MenuItem("World Grid"))       showWorldGrid = !showWorldGrid;
+			if (ImGui::MenuItem("ImGui Demo"))       showImGuiDemoWindow = !showImGuiDemoWindow;
+			if (ImGui::MenuItem("Popout Inspector")) popoutInspector = !popoutInspector;
+			ImGui::EndMenu();
+		}
+
+		//// state menu options ////
+		if (ImGui::BeginMenu("State")) {
+			WinHovCheck;
+			ImGui::Text("state not reimpl yet");
+			//if (ImGui::MenuItem("Play"))   admin->ChangeState(GameState_Play);
+			//if (ImGui::MenuItem("Debug"))  admin->ChangeState(GameState_Debug);
+			//if (ImGui::MenuItem("Editor")) admin->ChangeState(GameState_Editor);
+			//if (ImGui::MenuItem("Menu"))   admin->ChangeState(GameState_Menu);
+			ImGui::EndMenu();
+		}
+		ImGui::EndMainMenuBar();
+	}
+
+	ImGui::PopStyleColor(2);
+	ImGui::PopStyleVar(2);
+}
+
+
 inline void EntitiesTab(Admin* admin, float fontsize) {
 	persist bool rename_ent = false;
 	persist char rename_buffer[DESHI_NAME_SIZE] = {};
@@ -232,10 +433,10 @@ inline void EntitiesTab(Admin* admin, float fontsize) {
 	//// selected entity keybinds ////
 	//start renaming first selected entity
 	//TODO(delle) repair this to work with array
-	if (selected.size() && DeshInput->KeyPressedAnyMod(Key::F2)) {
+	if (selected.count && DeshInput->KeyPressedAnyMod(Key::F2)) {
 		rename_ent = true;
 		DeshConsole->IMGUI_KEY_CAPTURE = true;
-		//if (selected.size() > 1) selected.remove(selected.end());
+		//if (selected.size > 1) selected.remove(selected.end());
 		selected[0]->name = string(rename_buffer);
 	}
 	//submit renaming entity
@@ -250,7 +451,7 @@ inline void EntitiesTab(Admin* admin, float fontsize) {
 		DeshConsole->IMGUI_KEY_CAPTURE = false;
 	}
 	//delete selected entities
-	if (selected.size() && DeshInput->KeyPressedAnyMod(Key::DELETE)) {
+	if (selected.count && DeshInput->KeyPressedAnyMod(Key::DELETE)) {
 		//TODO(Ui) re-enable this with a popup to delete OR with undoing on delete
 		selected.clear();
 	}
@@ -277,7 +478,7 @@ inline void EntitiesTab(Admin* admin, float fontsize) {
 				//ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed, fontw * 3.5f); //evenbutton
 				ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed, fontw);        //delete button
 
-				forX(ent_idx, admin->entities.size()) {
+				forX(ent_idx, admin->entities.count) {
 					Entity* ent = admin->entities[ent_idx];
 					if (!ent) assert(!"NULL entity when creating entity list table");
 					ImGui::PushID(ent->id);
@@ -304,7 +505,7 @@ inline void EntitiesTab(Admin* admin, float fontsize) {
 					char label[8];
 					sprintf(label, " %04d ", ent->id);
 					u32 selected_idx = -1;
-					forI(selected.size()) { if (ent == selected[i]) { selected_idx = i; break; } }
+					forI(selected.count) { if (ent == selected[i]) { selected_idx = i; break; } }
 					bool is_selected = selected_idx != -1;
 					if (ImGui::Selectable(label, is_selected, ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowItemOverlap)) {
 						if (is_selected) {
@@ -371,10 +572,10 @@ inline void EntitiesTab(Admin* admin, float fontsize) {
 	ImGui::SetCursorPosX(ImGui::GetWindowWidth() * 0.025);
 	if (ImGui::Button("New Entity")) {
 		//Entity* ent = 0;
-		//std::string ent_name = TOSTDSTRING(presets[current_preset], admin->entities.size());
+		//std::string ent_name = TOSTDSTRING(presets[current_preset], admin->entities.size);
 		//switch (current_preset) {
 		//case(0):default: { //Empty
-		//	ent = admin->CreateEntityNow({}, ent_name.c_str());
+		//	ent = admin->CreateEntityNow({}, ent_name.str);
 		//}break;
 		//case(1): { //Static Mesh
 		//	ModelInstance* mc = new ModelInstance();
@@ -382,7 +583,7 @@ inline void EntitiesTab(Admin* admin, float fontsize) {
 		//	phys->staticPosition = true;
 		//	Collider* coll = new AABBCollider(vec3{ .5f, .5f, .5f }, phys->mass);
 
-		//	ent = admin->CreateEntityNow({ mc, phys, coll }, ent_name.c_str());
+		//	ent = admin->CreateEntityNow({ mc, phys, coll }, ent_name.str);
 		//}break;
 		//}
 
@@ -394,7 +595,7 @@ inline void EntitiesTab(Admin* admin, float fontsize) {
 	ImGui::Separator();
 
 	//// selected entity inspector panel ////
-	Entity* sel = admin->editor.selected.size() ? admin->editor.selected[0] : 0;
+	Entity* sel = admin->editor.selected.count ? admin->editor.selected[0] : 0;
 	if (!sel) return;
 	ImGui::PushStyleVar(ImGuiStyleVar_IndentSpacing, 5.0f);
 	ImGui::SetCursorPosX(ImGui::GetWindowWidth() * 0.025);
@@ -450,7 +651,7 @@ inline void EntitiesTab(Admin* admin, float fontsize) {
 
 		//// components ////
 		std::vector<Attribute*> comp_deleted_queue;
-		forX(comp_idx, sel->attributes.size()) {
+		forX(comp_idx, sel->attributes.count) {
 			Attribute* c = sel->attributes[comp_idx];
 			bool delete_button = true;
 			ImGui::PushID(c);
@@ -1354,11 +1555,11 @@ inline void MaterialsTab(Admin* admin) {
 			//// PBR shader ////
 			//TODO(Ui) add texture image previews
 		case Shader_PBR:default: {
-			forX(mti, selected->textures.size()) {
+			forX(mti, selected->textures.count) {
 				ImGui::TextEx(TOSTRING("Texture ", mti).str); ImGui::SameLine(); ImGui::SetNextItemWidth(-1);
 				if (ImGui::BeginCombo(TOSTRING("##mat_texture_combo", mti).str, Storage::TextureName(selected->textures[mti]))) {
 					dir_textures = Assets::iterateDirectory(Assets::dirTextures());
-					forX(ti, dir_textures.size()) {
+					forX(ti, dir_textures.count) {
 						if (ImGui::Selectable(dir_textures[ti].str, strcmp(Storage::TextureName(selected->textures[mti]), dir_textures[ti].str) == 0)) {
 							selected->textures[mti] = Storage::CreateTextureFromFile(dir_textures[ti].str).first;
 							Render::UpdateMaterial(selected);
@@ -1491,7 +1692,7 @@ inline void ModelsTab(Admin* admin) {
 			forI(Storage::MeshCount()) {
 				if (ImGui::Selectable(Storage::MeshName(i), selected->mesh == Storage::MeshAt(i))) {
 					selected->mesh = Storage::MeshAt(i);
-					forX(batch_idx, selected->batches.size()) {
+					forX(batch_idx, selected->batches.count) {
 						selected->batches[batch_idx].indexOffset = 0;
 						selected->batches[batch_idx].indexCount = selected->mesh->indexCount;
 					}
@@ -1509,7 +1710,7 @@ inline void ModelsTab(Admin* admin) {
 			ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthStretch);
 			ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed, fonth);
 
-			forX(batch_idx, selected->batches.size()) {
+			forX(batch_idx, selected->batches.count) {
 				ImGui::PushID(&selected->batches[batch_idx]);
 				ImGui::TableNextRow();
 
@@ -1529,7 +1730,7 @@ inline void ModelsTab(Admin* admin) {
 
 				//// delete button ////
 				ImGui::TableSetColumnIndex(2); //NOTE there must be at least 1 batch on a model
-				if (ImGui::Button("X", ImVec2(-FLT_MIN, 0.0f)) && selected->batches.size() > 1) {
+				if (ImGui::Button("X", ImVec2(-FLT_MIN, 0.0f)) && selected->batches.count > 1) {
 					if (batch_idx == sel_batch_idx) {
 						sel_batch_idx = -1;
 					}
@@ -1840,7 +2041,7 @@ void Editor::DebugBar() {
     if (ImGui::BeginTable("DebugBarTable", activecols, ImGuiTableFlags_BordersV | ImGuiTableFlags_NoPadInnerX | ImGuiTableFlags_NoPadOuterX | ImGuiTableFlags_ContextMenuInBody | ImGuiTableFlags_SizingFixedFit)) {
 
         //precalc strings and stuff so we can set column widths appropriately
-        string str1 = TOSTRING("wents: ", admin->entities.size());
+        string str1 = TOSTRING("wents: ", admin->entities.count);
         float strlen1 = fontw * str1.size;
         string str2 = TOSTRING("wtris: ", Render::GetStats()->totalTriangles);
         float strlen2 = fontw * str2.size;
@@ -2241,7 +2442,7 @@ void Editor::Update() {
 		setTrack();
 		if (showDebugBar)   DebugBar();
 		endTrack();
-		//if (showMenuBar)    MenuBar();
+		if (showMenuBar)    MenuBar();
 		if (showWorldGrid)  WorldGrid(camera->position);
 		ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0, 0, 0, 1)); {
 			if (showImGuiDemoWindow) ImGui::ShowDemoWindow();
