@@ -1,15 +1,16 @@
 @echo off
+REM i run this from atmos\
 
-ctime -begin misc\deshi.ctm
+ctime -begin misc\atmos.ctm
 
-pushd ..\src
+pushd src
 
 REM _____________________________________________________________________________________________________
 REM                                       Includes/Sources/Libs
 REM _____________________________________________________________________________________________________
 
-@set INCLUDES=/I..\src /IC:\src\glfw-3.3.2.bin.WIN64\include /IC:\src\OpenAL1.1\include /I%VULKAN_SDK%\include /IC:\src\glm /IC:\src\glad\include
-@set SOURCES=*.cpp external\imgui\*.cpp game\*.cpp game\components\*.cpp game\systems\*.cpp game\entities\*.cpp
+@set INCLUDES=/I"..\src" /I"..\deshi\src" /I"C:\src\glfw-3.3.2.bin.WIN64\include" /I"C:\src\OpenAL1.1\include" /I"%VULKAN_SDK%\include" /I"C:\src\glad\include"
+@set SOURCES=..\deshi\src\external\imgui\*.cpp ..\deshi\src\deshi.cpp *.cpp attributes\*.cpp
 @set LIBS=/LIBPATH:C:\src\glfw-3.3.2.bin.WIN64\lib-vc2019 /LIBPATH:C:\src\OpenAL1.1\libs\Win64 /libpath:%VULKAN_SDK%\lib glfw3.lib OpenAL32.lib opengl32.lib gdi32.lib shell32.lib vulkan-1.lib shaderc_combined.lib
 
 REM _____________________________________________________________________________________________________
@@ -19,7 +20,7 @@ REM ____________________________________________________________________________
 @set WARNINGS=/W1 /wd4201 /wd4100 /wd4189 /wd4706 /wd4311
 @set COMPILE_FLAGS=/diagnostics:column /EHsc /nologo /MD /MP /Oi /Gm- /Fm /std:c++17 %WARNINGS%
 @set LINK_FLAGS=/nologo /opt:ref
-@set OUT_EXE=deshi.exe
+@set OUT_EXE=atmos.exe
 
 REM _____________________________________________________________________________________________________
 REM                                            Defines
@@ -104,4 +105,4 @@ GOTO DONE
 ECHO ---------------------------------
 popd
 
-ctime -end misc\deshi.ctm
+ctime -end misc\atmos.ctm
