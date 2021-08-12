@@ -387,9 +387,6 @@
     <ClInclude Include="..\deshi\src\utils\Command.h">
       <Filter>src\deshi\utils</Filter>
     </ClInclude>
-    <ClInclude Include="..\deshi\src\utils\ContainerManager.h">
-      <Filter>src\deshi\utils</Filter>
-    </ClInclude>
     <ClInclude Include="..\deshi\src\utils\Debug.h">
       <Filter>src\deshi\utils</Filter>
     </ClInclude>
@@ -403,9 +400,6 @@
       <Filter>src\deshi\utils</Filter>
     </ClInclude>
     <ClInclude Include="..\deshi\src\utils\optional.h">
-      <Filter>src\deshi\utils</Filter>
-    </ClInclude>
-    <ClInclude Include="..\deshi\src\utils\RingArray.h">
       <Filter>src\deshi\utils</Filter>
     </ClInclude>
     <ClInclude Include="..\deshi\src\utils\string.h">
@@ -455,6 +449,12 @@
     </ClInclude>
     <ClInclude Include="..\src\UndoManager.h">
       <Filter>src\atmos</Filter>
+    </ClInclude>
+    <ClInclude Include="..\deshi\src\utils\container_manager.h">
+      <Filter>src\deshi\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\deshi\src\utils\ring_array.h">
+      <Filter>src\deshi\utils</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

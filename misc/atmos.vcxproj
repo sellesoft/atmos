@@ -153,13 +153,13 @@
     <ClInclude Include="..\deshi\src\utils\array.h" />
     <ClInclude Include="..\deshi\src\utils\Color.h" />
     <ClInclude Include="..\deshi\src\utils\Command.h" />
-    <ClInclude Include="..\deshi\src\utils\ContainerManager.h" />
+    <ClInclude Include="..\deshi\src\utils\container_manager.h" />
     <ClInclude Include="..\deshi\src\utils\Debug.h" />
     <ClInclude Include="..\deshi\src\utils\font.h" />
     <ClInclude Include="..\deshi\src\utils\hash.h" />
     <ClInclude Include="..\deshi\src\utils\map.h" />
     <ClInclude Include="..\deshi\src\utils\optional.h" />
-    <ClInclude Include="..\deshi\src\utils\RingArray.h" />
+    <ClInclude Include="..\deshi\src\utils\ring_array.h" />
     <ClInclude Include="..\deshi\src\utils\string.h" />
     <ClInclude Include="..\deshi\src\utils\tuple.h" />
     <ClInclude Include="..\deshi\src\utils\utils.h" />

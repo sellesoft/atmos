@@ -12,6 +12,7 @@ Global
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{26AFA182-40A5-42B2-A21C-2783CDB33C3F}.DebugWindowsVulkan|x64.ActiveCfg = DebugWindowsVulkan|x64
+		{26AFA182-40A5-42B2-A21C-2783CDB33C3F}.DebugWindowsVulkan|x64.Build.0 = DebugWindowsVulkan|x64
 		{26AFA182-40A5-42B2-A21C-2783CDB33C3F}.ReleaseWindowsVulkan|x64.ActiveCfg = ReleaseWindowsVulkan|x64
 		{26AFA182-40A5-42B2-A21C-2783CDB33C3F}.ReleaseWindowsVulkan|x64.Build.0 = ReleaseWindowsVulkan|x64
 	EndGlobalSection
