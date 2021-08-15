@@ -261,7 +261,7 @@ void Editor::MenuBar() {
 				persist char buff[255] = {};
 				if (ImGui::InputText("##level_saveas_input", buff, 255, ImGuiInputTextFlags_EnterReturnsTrue)) {
 					//admin->SaveTEXT(buff);
-					level_name = std::string(buff);
+					level_name = buff;
 				}
 				ImGui::EndMenu();
 			}
@@ -2191,10 +2191,10 @@ void Editor::DebugBar() {
                 
                 string str6;
                 if (DeshConsole->alert_count > 1) {
-                    str6 = TOSTRING("(", DeshConsole->alert_count, ") ", string(DeshConsole->alert_message));
+                    str6 = TOSTRING("(", DeshConsole->alert_count, ") ", string(DeshConsole->alert_message.c_str()));
                 }
                 else {
-                    str6 = string(DeshConsole->alert_message);
+                    str6 = string(DeshConsole->alert_message.c_str());
                 }
                 float strlen6 = (fontw) * str6.size;
                 ImGui::SameLine((ImGui::GetColumnWidth() - strlen6) / 2); ImGui::PushItemWidth(-1);
@@ -2210,7 +2210,7 @@ void Editor::DebugBar() {
         if (ImGui::TableNextColumn()) {
             //https://stackoverflow.com/questions/24686846/get-current-time-in-milliseconds-or-hhmmssmmm-format
             
-            string str7 = DeshTime->FormatDateTime("{h}:{m}:{s}");
+            string str7 = DeshTime->FormatDateTime("{h}:{m}:{s}").c_str();
             float strlen7 = fontw * str7.size;
             ImGui::SameLine(32 - (strlen7 / 2));
             
@@ -2438,9 +2438,7 @@ void Editor::Update() {
 		//if (showDebugLayer) DebugLayer();
 		//if (showTimes)      DrawTimes();
 		if (showInspector)  Inspector();
-		setTrack();
 		if (showDebugBar)   DebugBar();
-		endTrack();
 		if (showMenuBar)    MenuBar();
 		if (showWorldGrid)  WorldGrid(camera->position);
 		ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0, 0, 0, 1)); {

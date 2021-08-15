@@ -4,6 +4,8 @@
 #include "core/input.h"
 #include "core/window.h"
 
+#include <cstring>
+
 local f32 MOUSE_SENS_FRACTION = .03f;
 
 void Controller::Init() {
