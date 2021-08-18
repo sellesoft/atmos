@@ -274,6 +274,9 @@
     <ClCompile Include="..\src\UndoManager.cpp">
       <Filter>src\atmos</Filter>
     </ClCompile>
+    <ClCompile Include="..\deshi\src\core\commands.cpp">
+      <Filter>src\deshi\core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\deshi\src\core\console2.h">
@@ -455,6 +458,9 @@
     </ClInclude>
     <ClInclude Include="..\deshi\src\utils\ring_array.h">
       <Filter>src\deshi\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\deshi\src\core\commands.h">
+      <Filter>src\deshi\core</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

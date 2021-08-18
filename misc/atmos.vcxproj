@@ -69,6 +69,10 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseWindowsVulkan|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugWindowsVulkan|x64'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\deshi\src\core\commands.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseWindowsVulkan|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugWindowsVulkan|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\deshi\src\core\console.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseWindowsVulkan|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugWindowsVulkan|x64'">true</ExcludedFromBuild>
@@ -138,6 +142,7 @@
     <ClInclude Include="..\deshi\src\core\armature.h" />
     <ClInclude Include="..\deshi\src\core\assets.h" />
     <ClInclude Include="..\deshi\src\core\camera.h" />
+    <ClInclude Include="..\deshi\src\core\commands.h" />
     <ClInclude Include="..\deshi\src\core\console.h" />
     <ClInclude Include="..\deshi\src\core\console2.h" />
     <ClInclude Include="..\deshi\src\core\imgui.h" />
