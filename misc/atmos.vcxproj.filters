@@ -462,6 +462,9 @@
     <ClInclude Include="..\deshi\src\core\font.h">
       <Filter>src\deshi\core</Filter>
     </ClInclude>
+    <ClInclude Include="..\deshi\src\core\memory.h">
+      <Filter>src\deshi\core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\vk_layer_settings.txt">

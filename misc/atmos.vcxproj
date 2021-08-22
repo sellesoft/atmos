@@ -148,6 +148,7 @@
     <ClInclude Include="..\deshi\src\core\font.h" />
     <ClInclude Include="..\deshi\src\core\imgui.h" />
     <ClInclude Include="..\deshi\src\core\input.h" />
+    <ClInclude Include="..\deshi\src\core\memory.h" />
     <ClInclude Include="..\deshi\src\core\model.h" />
     <ClInclude Include="..\deshi\src\core\renderer.h" />
     <ClInclude Include="..\deshi\src\core\storage.h" />

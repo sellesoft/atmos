@@ -44,7 +44,7 @@ Fun TODOs
 
 Bug Board
 ---------
-
+(08/22/21) debug bar's FPS is 10x less than it should be
 
 */
 
