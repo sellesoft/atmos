@@ -393,9 +393,6 @@
     <ClInclude Include="..\deshi\src\utils\Debug.h">
       <Filter>src\deshi\utils</Filter>
     </ClInclude>
-    <ClInclude Include="..\deshi\src\utils\font.h">
-      <Filter>src\deshi\utils</Filter>
-    </ClInclude>
     <ClInclude Include="..\deshi\src\utils\hash.h">
       <Filter>src\deshi\utils</Filter>
     </ClInclude>
@@ -460,6 +457,9 @@
       <Filter>src\deshi\utils</Filter>
     </ClInclude>
     <ClInclude Include="..\deshi\src\core\commands.h">
+      <Filter>src\deshi\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\deshi\src\core\font.h">
       <Filter>src\deshi\core</Filter>
     </ClInclude>
   </ItemGroup>

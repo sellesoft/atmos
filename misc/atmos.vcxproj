@@ -145,6 +145,7 @@
     <ClInclude Include="..\deshi\src\core\commands.h" />
     <ClInclude Include="..\deshi\src\core\console.h" />
     <ClInclude Include="..\deshi\src\core\console2.h" />
+    <ClInclude Include="..\deshi\src\core\font.h" />
     <ClInclude Include="..\deshi\src\core\imgui.h" />
     <ClInclude Include="..\deshi\src\core\input.h" />
     <ClInclude Include="..\deshi\src\core\model.h" />
@@ -181,7 +182,6 @@
     <ClInclude Include="..\deshi\src\utils\Command.h" />
     <ClInclude Include="..\deshi\src\utils\container_manager.h" />
     <ClInclude Include="..\deshi\src\utils\Debug.h" />
-    <ClInclude Include="..\deshi\src\utils\font.h" />
     <ClInclude Include="..\deshi\src\utils\hash.h" />
     <ClInclude Include="..\deshi\src\utils\map.h" />
     <ClInclude Include="..\deshi\src\utils\optional.h" />
