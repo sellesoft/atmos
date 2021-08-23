@@ -271,9 +271,6 @@
     <ClCompile Include="..\src\Editor.cpp">
       <Filter>src\atmos</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\UndoManager.cpp">
-      <Filter>src\atmos</Filter>
-    </ClCompile>
     <ClCompile Include="..\deshi\src\core\commands.cpp">
       <Filter>src\deshi\core</Filter>
     </ClCompile>
@@ -439,12 +436,6 @@
       <Filter>src\atmos</Filter>
     </ClInclude>
     <ClInclude Include="..\src\Editor.h">
-      <Filter>src\atmos</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\Transform.h">
-      <Filter>src\atmos</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\UndoManager.h">
       <Filter>src\atmos</Filter>
     </ClInclude>
     <ClInclude Include="..\deshi\src\utils\container_manager.h">

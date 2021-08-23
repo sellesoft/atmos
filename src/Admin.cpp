@@ -1,11 +1,8 @@
 #include "Admin.h"
-
 #include "attributes/Attribute.h"
 #include "attributes/ModelInstance.h"
-
-#include "core/storage.h"
-
 #include "entities/Entity.h"
+#include "core/storage.h"
 
 void Admin::Init() {
 	camera = CameraInstance(90);
@@ -18,7 +15,7 @@ void Admin::Init() {
         ModelInstance* mi = new ModelInstance(Storage::CreateModelFromFile("box.obj").second);
         mi->entity = test;
         test->attributes.add(mi);
-        test->transform = Transform(vec3::ZERO, vec3::ZERO, vec3::ONE);
+        test->transform = Transform{vec3::ZERO, vec3::ZERO, vec3::ONE};
         attributes.add(test->attributes);
         entities.add(test);
     }

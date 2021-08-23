@@ -1,5 +1,4 @@
 #pragma once
-
 #ifndef ATMOS_ENTITY_H
 #define ATMOS_ENTITY_H
 
@@ -7,7 +6,7 @@
 #include "utils/array.h"
 #include "utils/map.h"
 #include "utils/utils.h"
-#include "../Transform.h"
+#include "math/VectorMatrix.h"
 #include "../attributes/Attribute.h"
 
 enum Event_ {
@@ -16,7 +15,6 @@ enum Event_ {
 	Event_LightToggle,
 	Event_ModelVisibleToggle,
 }; typedef u32 Event;
-
 global_ const char* EventStrings[] = {
 	"NONE", "DoorToggle", "LightToggle", "ModelVisibleToggle",
 };
@@ -28,31 +26,40 @@ enum EntityType_ {
 	EntityType_Trigger,
 	EntityType_COUNT,
 }; typedef u32 EntityType;
-
 global_ const char* EntityTypeStrings[] = {
 	"Anonymous", "Player", "StaticMesh", "Trigger"
 };
 
-struct Entity {
+struct Transform{
+	vec3 position;
+	vec3 rotation;
+	vec3 scale;
+	vec3 prevPosition;
+	vec3 prevRotation;
+    
+	inline vec3 Up()     { return vec3::UP * mat4::RotationMatrix(rotation); }
+	inline vec3 Right()  { return vec3::RIGHT * mat4::RotationMatrix(rotation); }
+	inline vec3 Forward(){ return vec3::FORWARD * mat4::RotationMatrix(rotation); }
+	inline mat4 Matrix() { return mat4::TransformationMatrix(position, rotation, scale); }
+};
+
+struct Entity{
 	string name;
 	u32 id; //do ents need ids anymore?
-
 	EntityType type;
-
 	Transform transform;
-
+    
 	set<Entity*> connections;
-
 	array<Attribute*> attributes;
 	
 	virtual void SendEvent(Event event) {};
 	virtual void ReceiveEvent(Event event) {};
-
+    
 	template<typename T>
-	T* GetAttribute() {
+        T* GetAttribute() {
 		for (Attribute* attr : attributes) 
 			if (T* t = dyncast(T, attr)) 
-				return t;
+            return t;
 		return nullptr;
 	}
 };
@@ -60,9 +67,9 @@ struct Entity {
 //this maybe should be more explicit, we'll see
 template<>
 struct hash<Entity> {
-	inline u32 operator()(Entity s) {
+	inline u32 operator()(Entity& s) {
 		return Utils::dataHash32(&s, sizeof(Entity));
 	}
 };
 
-#endif
+#endif //ATMOS_ENTITY_H

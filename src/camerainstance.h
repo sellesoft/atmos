@@ -1,22 +1,21 @@
 #pragma once
-#ifndef COMPONENT_CAMERA_H
-#define COMPONENT_CAMERA_H
+#ifndef ATMOS_CAMERAINSTANCE_H
+#define ATMOS_CAMERAINSTANCE_H
 
 #include "core/camera.h"
+#include "math/vectormatrix.h"
 
-#include "math/vector.h"
-#include "math/matrix.h"
-
-struct CameraInstance : public Camera {
+//TODO(delle) make this an attribute
+struct CameraInstance : public Camera{
 	CameraInstance() {};
 	CameraInstance(float fov, float nearZ = .01f, float farZ = 1000.01f, bool freeCam = true);
-
+    
 	void Update();
-
+    
 	mat4 MakePerspectiveProjection();
 	mat4 MakeOrthographicProjection();
-
+    
 	void UpdateProjectionMatrix();
 };
 
-#endif //COMPONENT_CAMERA_H
+#endif //ATMOS_CAMERAINSTANCE_H

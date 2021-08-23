@@ -1,3 +1,4 @@
+#pragma once
 #ifndef ATMOS_ATTRIBUTE_H
 #define ATMOS_ATTRIBUTE_H
 
@@ -21,16 +22,12 @@ global_ const char* AttributeTypeStrings[] = {
 	"None", "ModelInstance", "Physics", "Collider", "AudioListener", "AudioSource", "CameraInstance", "Light", "OrbManager", "Door", "Player", "Movement"
 };
 
-
 struct Entity;
-
-struct Attribute {
-	Entity* entity;
-
+struct Attribute{
 	AttributeType type = AttributeType_NONE;
-
-	virtual void Update() {};
+	Entity* entity;
+    
+	virtual void Update(){};
 };
 
-
-#endif
+#endif //ATMOS_ATTRIBUTE_H
