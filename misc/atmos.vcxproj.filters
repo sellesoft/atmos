@@ -441,9 +441,6 @@
     <ClInclude Include="..\src\Editor.h">
       <Filter>src\atmos</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\keybinds.h">
-      <Filter>src\atmos</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\Transform.h">
       <Filter>src\atmos</Filter>
     </ClInclude>

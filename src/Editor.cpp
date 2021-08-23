@@ -2383,7 +2383,7 @@ void Editor::Update() {
 		//uncomment once ortho has been implemented again
 		//persist vec3 ogpos;
 		//persist vec3 ogrot;
-		//if (DeshInput->KeyPressed(AtmoKeys.perspectiveToggle)) {
+		//if (DeshInput->KeyPressed(AtmoAdmin->controller.perspectiveToggle)) {
 		//	switch (camera->mode) {
 		//	case(CameraMode_Perspective): {
 		//		ogpos = camera->position;
@@ -2402,14 +2402,14 @@ void Editor::Update() {
 		//}
 		//
 		////ortho views
-		//if      (DeshInput->KeyPressed(AtmoKeys.orthoFrontView))    camera->orthoview = OrthoView_Front;
-		//else if (DeshInput->KeyPressed(AtmoKeys.orthoBackView))     camera->orthoview = OrthoView_Back;
-		//else if (DeshInput->KeyPressed(AtmoKeys.orthoRightView))    camera->orthoview = OrthoView_Right;
-		//else if (DeshInput->KeyPressed(AtmoKeys.orthoLeftView))     camera->orthoview = OrthoView_Left;
-		//else if (DeshInput->KeyPressed(AtmoKeys.orthoTopDownView))  camera->orthoview = OrthoView_Top;
-		//else if (DeshInput->KeyPressed(AtmoKeys.orthoBottomUpView)) camera->orthoview = OrthoView_Bottom;
+		//if      (DeshInput->KeyPressed(AtmoAdmin->controller.orthoFrontView))    camera->orthoview = OrthoView_Front;
+		//else if (DeshInput->KeyPressed(AtmoAdmin->controller.orthoBackView))     camera->orthoview = OrthoView_Back;
+		//else if (DeshInput->KeyPressed(AtmoAdmin->controller.orthoRightView))    camera->orthoview = OrthoView_Right;
+		//else if (DeshInput->KeyPressed(AtmoAdmin->controller.orthoLeftView))     camera->orthoview = OrthoView_Left;
+		//else if (DeshInput->KeyPressed(AtmoAdmin->controller.orthoTopDownView))  camera->orthoview = OrthoView_Top;
+		//else if (DeshInput->KeyPressed(AtmoAdmin->controller.orthoBottomUpView)) camera->orthoview = OrthoView_Bottom;
         
-		if (DeshInput->KeyPressed(AtmoKeys.gotoSelected)) {
+		if(DeshInput->KeyPressed(AtmoAdmin->controller.gotoSelected)) {
 			camera->position = selected[0]->transform.position + vec3(4.f, 3.f, -4.f);
 			camera->rotation = { 28.f, -45.f, 0.f };
 		}
@@ -2417,9 +2417,10 @@ void Editor::Update() {
     
     
 	{//interface 
-		if (DeshInput->KeyPressed(AtmoKeys.toggleDebugMenu)) showInspector = !showInspector;
-		if (DeshInput->KeyPressed(AtmoKeys.toggleDebugBar))  showDebugBar = !showDebugBar;
-		if (DeshInput->KeyPressed(AtmoKeys.toggleMenuBar))   showMenuBar = !showMenuBar;
+		if (DeshInput->KeyPressed(AtmoAdmin->controller.toggleConsole))   DeshConsole->dispcon = !DeshConsole->dispcon;
+		if (DeshInput->KeyPressed(AtmoAdmin->controller.toggleDebugMenu)) showInspector = !showInspector;
+		if (DeshInput->KeyPressed(AtmoAdmin->controller.toggleDebugBar))  showDebugBar = !showDebugBar;
+		if (DeshInput->KeyPressed(AtmoAdmin->controller.toggleMenuBar))   showMenuBar = !showMenuBar;
 	}
     
 	{//cut/copy/paste

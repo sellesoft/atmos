@@ -53,30 +53,31 @@ Bug Board
 
 #include "deshi.h"
 #include "Admin.h"
+#include "core/console.h"
 
-static Admin admin; Admin* g_admin = &admin;
+local Admin admin; Admin* g_admin = &admin;
 
 int main() {
+    //init deshi
 	deshi::init();
-
+    
+    //init atmos
 	AtmoAdmin->Init();
-
+    
 	TIMER_START(t_d); TIMER_START(t_f);
 	while (!deshi::shouldClose()) {
-		//Render::DrawBox(mat4::TransformationMatrix(vec3::ZERO, vec3(0, DeshTotalTime * 10, 0), vec3::ONE));
-
 		DeshiImGui::NewFrame();                    //place imgui calls after this
-		DeshTime->   Update();                       
-		DeshWindow-> Update();                     
-	    DeshInput->  Update();   
+		DeshTime->   Update();
+		DeshWindow-> Update();
+	    DeshInput->  Update();
 		AtmoAdmin->  Update();
 		DeshConsole->Update(); Console2::Update();
 		Render::Update();                          //place imgui calls before this
 		AtmoAdmin->PostRenderUpdate();
-
+        
 		DeshTime->frameTime = TIMER_END(t_f); TIMER_RESET(t_f);
 	}
-
+    
 	deshi::cleanup();
 	AtmoAdmin->Cleanup();
 }

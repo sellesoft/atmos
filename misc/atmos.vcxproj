@@ -198,7 +198,6 @@
     <ClInclude Include="..\src\controller.h" />
     <ClInclude Include="..\src\Editor.h" />
     <ClInclude Include="..\src\entities\Entity.h" />
-    <ClInclude Include="..\src\keybinds.h" />
     <ClInclude Include="..\src\Transform.h" />
     <ClInclude Include="..\src\UndoManager.h" />
   </ItemGroup>
