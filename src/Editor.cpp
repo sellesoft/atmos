@@ -265,30 +265,30 @@ namespace ImGui {
 		ImGui::End();
 	}
     
-	void DebugDrawCircle(vec2 pos, float radius, color color = color::WHITE){
+	void DebugDrawCircle(vec2 pos, float radius, color color = Color_White){
 		ImGui::GetBackgroundDrawList()->AddCircle(ImVec2(pos.x, pos.y), radius, ImGui::GetColorU32(ImGui::ColorToImVec4(color)));
 	}
     
-	void DebugDrawCircle3(vec3 pos, float radius, color color = color::WHITE){
+	void DebugDrawCircle3(vec3 pos, float radius, color color = Color_White){
 		CameraInstance* c = &AtmoAdmin->camera;
 		vec2 windimen = DeshWindow->dimensions;
 		vec2 pos2 = Math::WorldToScreen2(pos, c->projMat, c->viewMat, windimen);
 		ImGui::GetBackgroundDrawList()->AddCircle(ImGui::vec2ToImVec2(pos2), radius, ImGui::GetColorU32(ImGui::ColorToImVec4(color)));
 	}
     
-	void DebugDrawCircleFilled3(vec3 pos, float radius, color color = color::WHITE){
+	void DebugDrawCircleFilled3(vec3 pos, float radius, color color = Color_White){
 		CameraInstance* c = &AtmoAdmin->camera;
 		vec2 windimen = DeshWindow->dimensions;
 		vec2 pos2 = Math::WorldToScreen2(pos, c->projMat, c->viewMat, windimen);
 		ImGui::GetBackgroundDrawList()->AddCircleFilled(ImGui::vec2ToImVec2(pos2), radius, ImGui::GetColorU32(ImGui::ColorToImVec4(color)));
 	}
     
-	void DebugDrawLine(vec2 pos1, vec2 pos2, color color = color::WHITE){
+	void DebugDrawLine(vec2 pos1, vec2 pos2, color color = Color_White){
 		Math::ClipLineToBorderPlanes(pos1, pos2, DeshWindow->dimensions);
 		ImGui::GetBackgroundDrawList()->AddLine(ImGui::vec2ToImVec2(pos1), ImGui::vec2ToImVec2(pos2), ImGui::GetColorU32(ImGui::ColorToImVec4(color)));
 	}
     
-	void DebugDrawLine3(vec3 pos1, vec3 pos2, color color = color::WHITE){
+	void DebugDrawLine3(vec3 pos1, vec3 pos2, color color = Color_White){
 		CameraInstance* c = &AtmoAdmin->camera;
 		vec2 windimen = DeshWindow->dimensions;
         
@@ -302,7 +302,7 @@ namespace ImGui {
 		}
 	}
     
-	void DebugDrawText(const char* text, vec2 pos, color color = color::WHITE){
+	void DebugDrawText(const char* text, vec2 pos, color color = Color_White){
 		ImGui::SetCursorPos(ImGui::vec2ToImVec2(pos));
         
 		ImGui::PushStyleColor(ImGuiCol_Text, ImGui::ColorToImVec4(color));
@@ -310,7 +310,7 @@ namespace ImGui {
 		ImGui::PopStyleColor();
 	}
     
-	void DebugDrawText3(const char* text, vec3 pos, color color = color::WHITE, vec2 twoDoffset = vec2::ZERO){
+	void DebugDrawText3(const char* text, vec3 pos, color color = Color_White, vec2 twoDoffset = vec2::ZERO){
 		CameraInstance* c = &AtmoAdmin->camera;
 		vec2 windimen = DeshWindow->dimensions;
         
@@ -323,25 +323,25 @@ namespace ImGui {
 		}
 	}
     
-	void DebugDrawTriangle(vec2 p1, vec2 p2, vec2 p3, color color = color::WHITE){
+	void DebugDrawTriangle(vec2 p1, vec2 p2, vec2 p3, color color = Color_White){
 		DebugDrawLine(p1, p2);
 		DebugDrawLine(p2, p3);
 		DebugDrawLine(p3, p1);
 	}
     
-	void DebugFillTriangle(vec2 p1, vec2 p2, vec2 p3, color color = color::WHITE){
+	void DebugFillTriangle(vec2 p1, vec2 p2, vec2 p3, color color = Color_White){
 		ImGui::GetBackgroundDrawList()->AddTriangleFilled(ImGui::vec2ToImVec2(p1), ImGui::vec2ToImVec2(p2), ImGui::vec2ToImVec2(p3),
                                                           ImGui::GetColorU32(ImGui::ColorToImVec4(color)));
 	}
     
-	void DebugDrawTriangle3(vec3 p1, vec3 p2, vec3 p3, color color = color::WHITE){
+	void DebugDrawTriangle3(vec3 p1, vec3 p2, vec3 p3, color color = Color_White){
 		DebugDrawLine3(p1, p2, color);
 		DebugDrawLine3(p2, p3, color);
 		DebugDrawLine3(p3, p1, color);
 	}
     
 	//TODO(sushi, Ui) add triangle clipping to this function
-	void DebugFillTriangle3(vec3 p1, vec3 p2, vec3 p3, color color = color::WHITE){
+	void DebugFillTriangle3(vec3 p1, vec3 p2, vec3 p3, color color = Color_White){
 		vec2 p1n = Math::WorldToScreen(p1, AtmoAdmin->camera.projMat, AtmoAdmin->camera.viewMat, DeshWindow->dimensions).toVec2();
 		vec2 p2n = Math::WorldToScreen(p2, AtmoAdmin->camera.projMat, AtmoAdmin->camera.viewMat, DeshWindow->dimensions).toVec2();
 		vec2 p3n = Math::WorldToScreen(p3, AtmoAdmin->camera.projMat, AtmoAdmin->camera.viewMat, DeshWindow->dimensions).toVec2();
@@ -1306,13 +1306,13 @@ void MeshesTab(){
 	persist bool face_trinei_indexes = false;
 	persist bool face_face_neighbors = false;
 	persist bool face_tri_neighbors = false;
-	persist color text_color = color::WHITE;
-	color vertex_color = color::GREEN; //non-static so they can be changed
-	color triangle_color = color::RED;
-	color face_color = color::BLUE;
-	persist color selected_color = color(255, 255, 0, 128); //yellow  half-alphs
+	persist color text_color = Color_White;
+	color vertex_color = Color_Green; //non-static so they can be changed
+	color triangle_color = Color_Red;
+	color face_color = Color_Blue;
+	persist color selected_color = color(255, 255, 0, 128); //yellow  half-alpha
 	persist color neighbor_color = color(255, 0, 255, 128); //megenta half-alpha
-	persist color edge_color = color(0, 255, 255, 128); //cyan    half-alpha
+	persist color edge_color     = color(0, 255, 255, 128); //cyan    half-alpha
 	persist vec3 off{ .005f,.005f,.005f }; //slight offset for possibly overlapping things //TODO(delle) add wide lines to vulkan
 	persist f32 scale = 1.f;
 	persist f32 normal_scale = .3f; //scale for making normal lines smaller
@@ -2105,30 +2105,30 @@ void Inspector(){
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowTitleAlign, ImVec2(1, 0));
 	ImGui::PushStyleVar(ImGuiStyleVar_TabRounding, 0);
     
-	ImGui::PushStyleColor(ImGuiCol_Border, ImGui::ColorToImVec4(color(0, 0, 0)));
-	ImGui::PushStyleColor(ImGuiCol_Button, ImGui::ColorToImVec4(color(40, 40, 40)));
-	ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImGui::ColorToImVec4(color(48, 48, 48)));
-	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImGui::ColorToImVec4(color(60, 60, 60)));
-	ImGui::PushStyleColor(ImGuiCol_WindowBg, ImColor(0xff141414).Value);
-	ImGui::PushStyleColor(ImGuiCol_PopupBg, ImGui::ColorToImVec4(color(20, 20, 20)));
-	ImGui::PushStyleColor(ImGuiCol_FrameBg, ImGui::ColorToImVec4(color(35, 45, 50)));
-	ImGui::PushStyleColor(ImGuiCol_FrameBgActive, ImGui::ColorToImVec4(color(42, 54, 60)));
-	ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, ImGui::ColorToImVec4(color(54, 68, 75)));
-	ImGui::PushStyleColor(ImGuiCol_TitleBg, ImGui::ColorToImVec4(color(0, 0, 0)));
-	ImGui::PushStyleColor(ImGuiCol_TitleBgActive, ImGui::ColorToImVec4(color(0, 0, 0)));
-	ImGui::PushStyleColor(ImGuiCol_Header, ImGui::ColorToImVec4(color(35, 45, 50)));
-	ImGui::PushStyleColor(ImGuiCol_HeaderActive, ImGui::ColorToImVec4(color(0, 74, 74)));
-	ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImGui::ColorToImVec4(color(0, 93, 93)));
-	ImGui::PushStyleColor(ImGuiCol_TableBorderLight, ImGui::ColorToImVec4(color(45, 45, 45)));
-	ImGui::PushStyleColor(ImGuiCol_TableHeaderBg, ImGui::ColorToImVec4(color(10, 10, 10)));
-	ImGui::PushStyleColor(ImGuiCol_ScrollbarBg, ImGui::ColorToImVec4(color(10, 10, 10)));
-	ImGui::PushStyleColor(ImGuiCol_ScrollbarGrab, ImGui::ColorToImVec4(color(55, 55, 55)));
-	ImGui::PushStyleColor(ImGuiCol_ScrollbarGrabActive, ImGui::ColorToImVec4(color(75, 75, 75)));
-	ImGui::PushStyleColor(ImGuiCol_ScrollbarGrabHovered, ImGui::ColorToImVec4(color(65, 65, 65)));
-	ImGui::PushStyleColor(ImGuiCol_TabActive, ImGui::ColorToImVec4(color::VERY_DARK_CYAN));
-	ImGui::PushStyleColor(ImGuiCol_TabHovered, ImGui::ColorToImVec4(color::DARK_CYAN));
-	ImGui::PushStyleColor(ImGuiCol_Tab, ImColor(0xff0d2b45).Value);
-	ImGui::PushStyleColor(ImGuiCol_Separator, ImGui::ColorToImVec4(color::VERY_DARK_CYAN));
+	ImGui::PushStyleColor(ImGuiCol_Border, Color_Black);
+	ImGui::PushStyleColor(ImGuiCol_Button, PackColorU32(40,40,40,255));
+	ImGui::PushStyleColor(ImGuiCol_ButtonActive, PackColorU32(48,48,48,255));
+	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, PackColorU32(60,60,60,255));
+	ImGui::PushStyleColor(ImGuiCol_WindowBg, 0xff141414);
+	ImGui::PushStyleColor(ImGuiCol_PopupBg, PackColorU32(20,20,20,255));
+	ImGui::PushStyleColor(ImGuiCol_FrameBg, PackColorU32(35,45,50,255));
+	ImGui::PushStyleColor(ImGuiCol_FrameBgActive, PackColorU32(42,54,60,255));
+	ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, PackColorU32(54,68,75,255));
+	ImGui::PushStyleColor(ImGuiCol_TitleBg, Color_Black);
+	ImGui::PushStyleColor(ImGuiCol_TitleBgActive, Color_Black);
+	ImGui::PushStyleColor(ImGuiCol_Header, PackColorU32(35,45,50,255));
+	ImGui::PushStyleColor(ImGuiCol_HeaderActive, PackColorU32(0,74,74,255));
+	ImGui::PushStyleColor(ImGuiCol_HeaderHovered, PackColorU32(0,93,93,255));
+	ImGui::PushStyleColor(ImGuiCol_TableBorderLight, PackColorU32(45,45,45,255));
+	ImGui::PushStyleColor(ImGuiCol_TableHeaderBg, PackColorU32(10,10,10,255));
+	ImGui::PushStyleColor(ImGuiCol_ScrollbarBg, PackColorU32(10,10,10,255));
+	ImGui::PushStyleColor(ImGuiCol_ScrollbarGrab, PackColorU32(55,55,55,255));
+	ImGui::PushStyleColor(ImGuiCol_ScrollbarGrabActive, PackColorU32(75,75,75,255));
+	ImGui::PushStyleColor(ImGuiCol_ScrollbarGrabHovered, PackColorU32(65,65,65,255));
+	ImGui::PushStyleColor(ImGuiCol_TabActive, Color_VeryDarkCyan);
+	ImGui::PushStyleColor(ImGuiCol_TabHovered, Color_DarkCyan);
+	ImGui::PushStyleColor(ImGuiCol_Tab, 0xff0d2b45);
+	ImGui::PushStyleColor(ImGuiCol_Separator, Color_VeryDarkCyan);
     
 	ImGuiWindowFlags window_flags;
 	if(popoutInspector){
@@ -2390,9 +2390,9 @@ void WorldGrid(){
 		if(zn + i != 0) Render::DrawLine(v3, v4, color);
 	}
     
-	Render::DrawLine(vec3{ -1000,0,0 }, vec3{ 1000,0,0 }, color::RED);
-	Render::DrawLine(vec3{ 0,-1000,0 }, vec3{ 0,1000,0 }, color::GREEN);
-	Render::DrawLine(vec3{ 0,0,-1000 }, vec3{ 0,0,1000 }, color::BLUE);
+	Render::DrawLine(vec3{ -1000,0,0 }, vec3{ 1000,0,0 }, Color_Red);
+	Render::DrawLine(vec3{ 0,-1000,0 }, vec3{ 0,1000,0 }, Color_Green);
+	Render::DrawLine(vec3{ 0,0,-1000 }, vec3{ 0,0,1000 }, Color_Blue);
 }
 
 void ShowWorldAxis(){
@@ -2408,9 +2408,9 @@ void ShowWorldAxis(){
     
 	vec2 offset = vec2(DeshWindow->width - 50, DeshWindow->height - debugbarheight - 50);
     
-	Render::DrawLineUI(offset, spx + offset, 1, color::RED);
-	Render::DrawLineUI(offset, spy + offset, 1, color::GREEN);
-	Render::DrawLineUI(offset, spz + offset, 1, color::BLUE);
+	Render::DrawLineUI(offset, spx + offset, 1, Color_Red);
+	Render::DrawLineUI(offset, spy + offset, 1, Color_Green);
+	Render::DrawLineUI(offset, spz + offset, 1, Color_Blue);
 }
 
 void Editor::Init(){
