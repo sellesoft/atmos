@@ -274,6 +274,9 @@
     <ClCompile Include="..\deshi\src\core\commands.cpp">
       <Filter>src\deshi\core</Filter>
     </ClCompile>
+    <ClCompile Include="..\deshi\src\core\renderers\directx.cpp">
+      <Filter>src\deshi\core\renderers</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\deshi\src\core\console2.h">
