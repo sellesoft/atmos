@@ -274,6 +274,15 @@
     <ClCompile Include="..\deshi\src\core\commands.cpp">
       <Filter>src\deshi\core</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\attributes\Player.cpp">
+      <Filter>src\atmos\attributes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\attributes\Movement.cpp">
+      <Filter>src\atmos\attributes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\attributes\Physics.cpp">
+      <Filter>src\atmos\attributes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\deshi\src\core\console2.h">
@@ -452,6 +461,18 @@
     </ClInclude>
     <ClInclude Include="..\deshi\src\core\memory.h">
       <Filter>src\deshi\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\attributes\Player.h">
+      <Filter>src\atmos\attributes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\attributes\Movement.h">
+      <Filter>src\atmos\attributes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\attributes\Physics.h">
+      <Filter>src\atmos\attributes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\entities\PlayerEntity.h">
+      <Filter>src\atmos\entities</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
