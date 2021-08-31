@@ -26,18 +26,19 @@ REM ____________________________________________________________________________
 REM                                            Defines
 REM _____________________________________________________________________________________________________
 
-REM  DESHI_WINDOWS:  build for 64-bit windows
-REM  DESHI_MAC:      build for Mac OS X
-REM  DESHI_LINUX:    build for Linux
-REM  DESHI_SLOW:     slow code allowed (Assert, etc)
-REM  DESHI_INTERNAL: build for developer only (Renderer debug, etc)
-REM  DESHI_VULKAN:   build for Vulkan
-REM  DESHI_OPENGL:   build for OpenGL
+REM  DESHI_WINDOWS:   build for 64-bit windows
+REM  DESHI_MAC:       build for Mac OS X
+REM  DESHI_LINUX:     build for Linux
+REM  DESHI_SLOW:      slow code allowed (Assert, etc)
+REM  DESHI_INTERNAL:  build for developer only (Renderer debug, etc)
+REM  DESHI_VULKAN:    build for Vulkan
+REM  DESHI_OPENGL:    build for OpenGL
+REM  DESHI_DIRECTX12: build for DirectX12
 
 @set DEFINES_DEBUG=/D"DESHI_INTERNAL=1" /D"DESHI_SLOW=1" 
 @set DEFINES_RELEASE=
 @set DEFINES_OS=/D"DESHI_WINDOWS=1" /D"DESHI_MAC=0" /D"DESHI_LINUX=0"
-@set DEFINES_RENDERER=/D"DESHI_VULKAN=1" /D"DESHI_OPENGL=0"
+@set DEFINES_RENDERER=/D"DESHI_VULKAN=0" /D"DESHI_OPENGL=0" /D"DESHI_DIRECTX12=1"
 
 REM _____________________________________________________________________________________________________
 REM                                    Command Line Arguments
