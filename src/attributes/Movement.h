@@ -46,7 +46,6 @@ struct Movement : public Attribute {
 
 	void Update() override;
 
-	void DecideContactState();
 	void DecideMovementState();
 
 	void GrabObject();

@@ -5,19 +5,11 @@
 #include "attribute.h"
 #include "math/Vector.h"
 
-struct Movement;
-
-
-//NOTE sushi: probably rename this to something more general, like an actor or something, but I don't like the name actor, so think of a better one :)
 struct Player : public Attribute {
 	int health;
 
-	Movement* movement;
-
 	Player();
-	Player(Movement* movement);
-	Player(Movement* movement, int health);
-
+	Player(int health);
 
 	void Update() override;
 

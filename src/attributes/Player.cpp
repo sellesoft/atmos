@@ -7,14 +7,8 @@ Player::Player() {
 	type = AttributeType_Player;
 }
 
-Player::Player(Movement* movement) {
+Player::Player(int health) {
 	type = AttributeType_Player;
-	this->movement = movement;
-}
-
-Player::Player(Movement* movement, int health) {
-	type = AttributeType_Player;
-	this->movement = movement;
 	this->health = health;
 
 }
