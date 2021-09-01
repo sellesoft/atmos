@@ -23,11 +23,9 @@ global_ const char* AttributeTypeStrings[] = {
 };
 
 struct Entity;
-struct Attribute{
+struct Attribute {
 	AttributeType type = AttributeType_NONE;
-	Entity* entity;
-    
-	virtual void Update(){};
+	Entity* entity = 0;
 };
 
 #endif //ATMOS_ATTRIBUTE_H

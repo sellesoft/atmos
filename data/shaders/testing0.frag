@@ -326,5 +326,5 @@ vec4 edge(){
 
 
 void main() {
-	outColor = monitor();
+	outColor = dither();
 }

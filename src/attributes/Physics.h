@@ -31,7 +31,9 @@ enum ContactState {
 	ContactMoving
 };
 
-struct Physics : public Attribute {
+struct Physics {
+	Attribute attribute{ AttributeType_Physics };
+	
 	vec3 position;
 	vec3 rotation;
 	vec3 scale;

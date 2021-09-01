@@ -14,7 +14,6 @@
 
 
 AABBCollider::AABBCollider(Mesh* mesh, mat3 tensor_, u32 collisionLayer, bool nocollide) {
-	type      = AttributeType_Collider;
 	shape     = ColliderShape_AABB;
 	collLayer = collisionLayer;
 	noCollide = nocollide;
@@ -34,7 +33,6 @@ AABBCollider::AABBCollider(Mesh* mesh, mat3 tensor_, u32 collisionLayer, bool no
 }
 
 AABBCollider::AABBCollider(vec3 halfDims_, mat3 tensor_, u32 collisionLayer, bool nocollide){
-	type      = AttributeType_Collider;
 	shape     = ColliderShape_AABB;
 	collLayer = collisionLayer;
 	noCollide = nocollide;
@@ -43,7 +41,6 @@ AABBCollider::AABBCollider(vec3 halfDims_, mat3 tensor_, u32 collisionLayer, boo
 }
 
 AABBCollider::AABBCollider(Mesh* mesh, f32 mass, u32 collisionLayer, bool nocollide){
-	type      = AttributeType_Collider;
 	shape     = ColliderShape_AABB;
 	collLayer = collisionLayer;
 	noCollide = nocollide;
@@ -64,7 +61,6 @@ AABBCollider::AABBCollider(Mesh* mesh, f32 mass, u32 collisionLayer, bool nocoll
 }
 
 AABBCollider::AABBCollider(vec3 halfDims_, f32 mass, u32 collisionLayer, bool nocollide){
-	type      = AttributeType_Collider;
 	shape     = ColliderShape_AABB;
 	collLayer = collisionLayer;
 	noCollide = nocollide;
@@ -88,13 +84,11 @@ void AABBCollider::RecalculateTensor(f32 mass){
 
 
 SphereCollider::SphereCollider(float radius, mat3& tensor, u32 collisionLayer, bool noCollide){
-	type = AttributeType_Collider;
 	//!!Incomplete
 
 }
 
 SphereCollider::SphereCollider(float radius, f32 mass, mat3& tensor, u32 collisionLayer, bool noCollide){
-	type = AttributeType_Collider;
 	//!!Incomplete
 
 
@@ -116,7 +110,6 @@ void SphereCollider::RecalculateTensor(f32 mass){
 
 
 ComplexCollider::ComplexCollider(Mesh* mesh, u32 collisionLayer, bool noCollide){
-	type = AttributeType_Collider;
 	//!!Incomplete
 
 }

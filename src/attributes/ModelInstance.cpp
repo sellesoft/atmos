@@ -4,7 +4,6 @@
 #include "../entities/Entity.h"
 
 ModelInstance::ModelInstance(){
-	type = AttributeType_ModelInstance;
 	model     = Storage::NullModel();
 	mesh      = model->mesh;
 	armature  = model->armature;
@@ -14,7 +13,6 @@ ModelInstance::ModelInstance(){
 }
 
 ModelInstance::ModelInstance(Model* _model){
-	type = AttributeType_ModelInstance;
 	model     = _model;
 	mesh      = model->mesh;
 	armature  = model->armature;
@@ -24,7 +22,6 @@ ModelInstance::ModelInstance(Model* _model){
 }
 
 ModelInstance::ModelInstance(Mesh* _mesh){
-	type = AttributeType_ModelInstance;
 	model     = Storage::CreateModelFromMesh(_mesh).second;
 	mesh      = model->mesh;
 	armature  = model->armature;
@@ -46,6 +43,6 @@ void ModelInstance::ChangeModel(Mesh* _mesh){
 }
 
 void ModelInstance::Update(){
-	if(!control) transform = entity->transform.Matrix();
+	if(!control) transform = attribute.entity->transform.Matrix();
 	if(visible)  Render::DrawModel(model, transform);
 }

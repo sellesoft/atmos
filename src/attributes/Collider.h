@@ -19,7 +19,9 @@ global_ const char* ColliderShapeStrings[] = {
 };
 
 
-struct Collider : public Attribute {
+struct Collider {
+	Attribute attribute{ AttributeType_Collider };
+	
 	ColliderShape shape;
 	u32           collLayer;
 	mat3          tensor;
@@ -56,7 +58,7 @@ struct ComplexCollider : public Collider {
 	ComplexCollider(Mesh* mesh, u32 collisionLayer = 0, bool nocollide = 0);
 
 	//TODO(sushi) implement tensor generation from an arbitrary mesh
-	void RecalculateTensor(f32 mass) override;
+	void RecalculateTensor(f32 mass) override {};
 };
 
 #endif

@@ -18,7 +18,9 @@ enum MoveState : u32 {
 struct Physics;
 struct Camera;
 
-struct Movement : public Attribute {
+struct Movement {
+	Attribute attribute{ AttributeType_Movement };
+	
 	vec3 inputs;
 	Physics* phys;
 
@@ -44,7 +46,7 @@ struct Movement : public Attribute {
 	Movement(Physics* phys);
 	Movement(Physics* phys, float gndAccel, float airAccel, float maxWalkingSpeed, float maxRunningSpeed, float maxCrouchingSpeed, bool jump, float jumpImpulse);
 
-	void Update() override;
+	void Update();
 
 	void DecideMovementState();
 

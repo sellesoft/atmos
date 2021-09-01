@@ -19,12 +19,13 @@ global_ const char* EventStrings[] = {
 	"NONE", "DoorToggle", "LightToggle", "ModelVisibleToggle",
 };
 
-enum EntityType_ {
-	EntityType_Anonymous,
-	EntityType_Player,
-	EntityType_StaticMesh,
-	EntityType_Trigger,
-	EntityType_COUNT,
+enum EntityTypeBits {
+	EntityType_Anonymous     = 1 << 0,
+	EntityType_Player        = 1 << 1,
+	EntityType_NonStaticMesh = 1 << 2,
+	EntityType_StaticMesh    = 1 << 3,
+	EntityType_SceneryMesh   = 1 << 4,
+	EntityType_Trigger       = 1 << 5,
 }; typedef u32 EntityType;
 global_ const char* EntityTypeStrings[] = {
 	"Anonymous", "Player", "StaticMesh", "Trigger"
@@ -43,25 +44,28 @@ struct Transform{
 	inline mat4 Matrix() { return mat4::TransformationMatrix(position, rotation, scale); }
 };
 
+struct Player;
+struct Movement;
+struct ModelInstance;
+struct Physics;
+struct Collider;
+
 struct Entity{
-	u32 id; //do ents need ids anymore?
 	string name;
 	EntityType type;
 	Transform transform;
+	u32 id; //do ents need ids anymore?
     
+	Player*       playerPtr = nullptr;
+	Physics*     physicsPtr = nullptr;
+	Collider*   colliderPtr = nullptr;
+	Movement*   movementPtr = nullptr;
+	ModelInstance* modelPtr = nullptr;
+
 	set<Entity*> connections;
-	array<Attribute*> attributes;
 	
 	virtual void SendEvent(Event event) {};
 	virtual void ReceiveEvent(Event event) {};
-    
-	template<typename T>
-        T* GetAttribute() {
-		for (Attribute* attr : attributes) 
-			if (T* t = dyncast(T, attr)) 
-            return t;
-		return nullptr;
-	}
 };
 
 //this maybe should be more explicit, we'll see

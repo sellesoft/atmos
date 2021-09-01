@@ -15,8 +15,8 @@ struct PhysicsTuple {
 array<PhysicsTuple> GetPhysicsTuples() {
 	array<PhysicsTuple> out;
 	for (Entity* e : AtmoAdmin->entities) 
-		if (Physics* phys = e->GetAttribute<Physics>()) 
-			out.add({ &e->transform, phys, e->GetAttribute<Collider>() });
+		if (Physics* phys = e->physicsPtr) 
+			out.add({ &e->transform, phys, e->colliderPtr });
 	return out;
 }
 
@@ -61,10 +61,10 @@ inline void PhysicsTick(PhysicsTuple& t, PhysicsSystem* ps) {
 }
 
 inline void AABBAABBCollision(Physics* obj1, AABBCollider* obj1Col, Physics* obj2, AABBCollider* obj2Col) {
-	vec3 min1 = obj1->position - (obj1Col->halfDims * obj1->entity->transform.scale);
-	vec3 max1 = obj1->position + (obj1Col->halfDims * obj1->entity->transform.scale);
-	vec3 min2 = obj2->position - (obj2Col->halfDims * obj2->entity->transform.scale);
-	vec3 max2 = obj2->position + (obj2Col->halfDims * obj2->entity->transform.scale);
+	vec3 min1 = obj1->position - (obj1Col->halfDims * obj1->attribute.entity->transform.scale);
+	vec3 max1 = obj1->position + (obj1Col->halfDims * obj1->attribute.entity->transform.scale);
+	vec3 min2 = obj2->position - (obj2Col->halfDims * obj2->attribute.entity->transform.scale);
+	vec3 max2 = obj2->position + (obj2Col->halfDims * obj2->attribute.entity->transform.scale);
 
 
 	if (//check if overlapping

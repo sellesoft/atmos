@@ -8,7 +8,9 @@
 struct Model;
 struct Mesh;
 struct Armature;
-struct ModelInstance : public Attribute{
+struct ModelInstance {
+	Attribute attribute{ AttributeType_ModelInstance };
+	
 	Model* model;
 	Mesh* mesh;
 	Armature* armature;
@@ -20,7 +22,7 @@ struct ModelInstance : public Attribute{
 	ModelInstance(Model* model);
 	ModelInstance(Mesh* mesh);
     
-	void Update() override;
+	void Update();
 	void ChangeModel(Model* model);
 	void ChangeModel(Mesh* mesh);
     inline void ToggleVisibility(){ visible = !visible; }

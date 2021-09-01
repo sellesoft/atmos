@@ -1,6 +1,7 @@
 #include "Editor.h"
 #include "admin.h"
 #include "attributes/ModelInstance.h"
+#include "entities/PlayerEntity.h"
 #include "camerainstance.h"
 #include "entities/Entity.h"
 #include "core/assets.h"
@@ -667,7 +668,7 @@ void EntitiesTab(){
                     
 					//// visible button ////
 					ImGui::TableSetColumnIndex(0);
-					if(ModelInstance* m = ent->GetAttribute<ModelInstance>()){
+					if(ModelInstance* m = ent->modelPtr){
 						if(ImGui::Button((m->visible) ? "(M)" : "( )", ImVec2(-FLT_MIN, 0.0f))){
 							m->ToggleVisibility();
 						}
@@ -832,38 +833,39 @@ void EntitiesTab(){
         
 		//// components ////
 		std::vector<Attribute*> comp_deleted_queue;
-		forX(comp_idx, sel->attributes.count){
-			Attribute* c = sel->attributes[comp_idx];
-			bool delete_button = true;
-			ImGui::PushID(c);
+		bool delete_button = 1;
+		//ImGui::PushID(c);
             
-			switch (c->type){
-				//mesh
-				case AttributeType_ModelInstance: {
-					if(ImGui::CollapsingHeader("Model", &delete_button, tree_flags)){
-						ImGui::Indent();
-						ModelInstance* mc = dyncast(ModelInstance, c);
+			
+		//mesh
+		if(sel->modelPtr){
+			if(ImGui::CollapsingHeader("Model", &delete_button, tree_flags)){
+				ImGui::Indent();
+				ModelInstance* mc = sel->modelPtr;
                         
-						ImGui::TextEx("Visible  "); ImGui::SameLine();
-						if(ImGui::Button((mc->visible) ? "True" : "False", ImVec2(-FLT_MIN, 0))){
-							mc->ToggleVisibility();
+				ImGui::TextEx("Visible  "); ImGui::SameLine();
+				if(ImGui::Button((mc->visible) ? "True" : "False", ImVec2(-FLT_MIN, 0))){
+					mc->ToggleVisibility();
+				}
+                        
+				ImGui::TextEx("Model     "); ImGui::SameLine(); ImGui::SetNextItemWidth(-1);
+				if(ImGui::BeginCombo("##model_combo", mc->model->name)){
+					forI(Storage::ModelCount()){
+						if(ImGui::Selectable(Storage::ModelName(i), mc->model == Storage::ModelAt(i))){
+							mc->ChangeModel(Storage::ModelAt(i));
 						}
-                        
-						ImGui::TextEx("Model     "); ImGui::SameLine(); ImGui::SetNextItemWidth(-1);
-						if(ImGui::BeginCombo("##model_combo", mc->model->name)){
-							forI(Storage::ModelCount()){
-								if(ImGui::Selectable(Storage::ModelName(i), mc->model == Storage::ModelAt(i))){
-									mc->ChangeModel(Storage::ModelAt(i));
-								}
-							}
-							ImGui::EndCombo();
-						}
-                        
-						ImGui::Unindent();
-						ImGui::Separator();
 					}
-				}break;
+					ImGui::EndCombo();
+				}
+                        
+				ImGui::Unindent();
+				ImGui::Separator();
+			}
+		}
                 
+				//NOTE we no longer switch here since there is no attributes array on entity so
+				//     all these below will need to be converted
+
                 //		//physics
                 //	case AttributeType_Physics:
                 //		if(ImGui::CollapsingHeader("Physics", &delete_button, tree_flags)){
@@ -1094,11 +1096,11 @@ void EntitiesTab(){
                 //			ImGui::Separator();
                 //		}
                 //	}break;
-			}
+			
             
-			if(!delete_button) comp_deleted_queue.push_back(c);
-			ImGui::PopID();
-		} //for(Attribute* c : sel->components)
+		//if(!delete_button) comp_deleted_queue.push_back(c);
+	    //ImGui::PopID();
+		//for(Attribute* c : sel->components)
 		//sel->RemoveAttributes(comp_deleted_queue);
         
 		//// add component ////
@@ -1108,8 +1110,19 @@ void EntitiesTab(){
 		if(ImGui::Button("Add Attribute")){
 			switch (1 << (add_comp_index - 1)){
 				case AttributeType_ModelInstance: {
-					Attribute* comp = new ModelInstance();
-					sel->attributes.add(comp);
+					switch (sel->type) {
+						case EntityType_Player: {
+							PlayerEntity* p = (PlayerEntity*)sel;
+							p->model = ModelInstance();
+							p->modelPtr = &p->model;
+						}break;
+
+						default: {
+							//do something like say the currently selected type cant add that
+							//or even better only show the things that can be added to that type
+
+						}break;
+					}
 					//admin->AddAttributeToLayers(comp);
 				}break;
                 //	case AttributeType_Physics: {

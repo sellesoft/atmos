@@ -294,7 +294,9 @@
     <ClInclude Include="..\src\controller.h" />
     <ClInclude Include="..\src\Editor.h" />
     <ClInclude Include="..\src\entities\Entity.h" />
+    <ClInclude Include="..\src\entities\PhysicsEntity.h" />
     <ClInclude Include="..\src\entities\PlayerEntity.h" />
+    <ClInclude Include="..\src\entities\StaticEntity.h" />
     <ClInclude Include="..\src\PhysicsSystem.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

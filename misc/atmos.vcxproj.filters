@@ -487,6 +487,12 @@
     <ClInclude Include="..\src\attributes\Collider.h">
       <Filter>src\atmos\attributes</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\entities\PhysicsEntity.h">
+      <Filter>src\atmos\entities</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\entities\StaticEntity.h">
+      <Filter>src\atmos\entities</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\vk_layer_settings.txt">

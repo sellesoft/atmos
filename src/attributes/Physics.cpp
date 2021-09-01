@@ -3,8 +3,6 @@
 #include "../admin.h"
 
 Physics::Physics() {
-	type = AttributeType_Physics;
-
 	position = vec3::ZERO;
 	rotation = vec3::ZERO;
 	velocity = vec3::ZERO;
@@ -18,8 +16,6 @@ Physics::Physics() {
 
 Physics::Physics(vec3 position, vec3 rotation, vec3 velocity, vec3 acceleration, vec3 rotVeloctiy,
 	vec3 rotAcceleration, float elasticity, float mass, bool staticPosition) {
-	type = AttributeType_Physics;
-
 	this->position = position;
 	this->rotation = rotation;
 	this->velocity = velocity;
@@ -32,8 +28,6 @@ Physics::Physics(vec3 position, vec3 rotation, vec3 velocity, vec3 acceleration,
 }
 
 Physics::Physics(vec3 position, vec3 rotation, float mass, float elasticity) {
-	type = AttributeType_Physics;
-
 	this->position = position;
 	this->rotation = rotation;
 	this->velocity = vec3::ZERO;

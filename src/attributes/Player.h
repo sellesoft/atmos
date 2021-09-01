@@ -5,13 +5,15 @@
 #include "attribute.h"
 #include "math/Vector.h"
 
-struct Player : public Attribute {
+struct Player {
+	Attribute attribute{ AttributeType_Player };
+
 	int health;
 
 	Player();
 	Player(int health);
 
-	void Update() override;
+	void Update();
 
 	//std::string SaveTEXT() override;
 	//static void LoadDESH(Admin* admin, const char* fileData, u32& cursor, u32 countToLoad);

@@ -19,15 +19,29 @@ struct PlayerEntity : public Entity {
 	Collider      collider;
 	ModelInstance model;
 
-	PlayerEntity(Mesh* mesh, Transform transform, f32 mass) {
-		player   = Player();
-		physics  = Physics(transform.position, transform.rotation, mass, 0);
-		movement = Movement(&physics);
-		model    = ModelInstance((mesh) ? mesh : Storage::NullMesh());
-		collider = AABBCollider(model.mesh, mass);
+	void Init(const char* name, Mesh* mesh, Transform transform, f32 mass) {
+		type = EntityType_Player;
+		this->name = name;
+		this->transform = transform;
 
-		attributes.add({ &player, &physics, &movement, &model, &collider });
+		player   = Player();                                                 playerPtr   = &player;
+		physics  = Physics(transform.position, transform.rotation, mass, 0); physicsPtr  = &physics;
+		movement = Movement(&physics);                                       movementPtr = &movement;
+		model    = ModelInstance((mesh) ? mesh : Storage::NullMesh());       modelPtr    = &model;
+		collider = AABBCollider(model.mesh, mass);                           colliderPtr = &collider;
+		
+		//this sucks do it differently later
+		player.  attribute.entity = this;
+		physics. attribute.entity = this;
+		movement.attribute.entity = this;
+		model.   attribute.entity = this;
+		collider.attribute.entity = this;
+
+
 	}
+
+	void SendEvent(Event event) override {};
+	void ReceiveEvent(Event event) override {};
 
 };
 
