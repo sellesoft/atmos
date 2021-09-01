@@ -1,7 +1,7 @@
 #version 450
 #extension GL_ARB_separate_shader_objects : enable
 
-layout(set = 0, binding = 0) uniform UniformBufferObject{
+layout(std140, set = 0, binding = 0) uniform UniformBufferObject{
 	mat4  view;
 	mat4  proj;
 	vec4  lights[10];
@@ -10,6 +10,8 @@ layout(set = 0, binding = 0) uniform UniformBufferObject{
 	vec2  mousepos;
 	vec3  mouseWorld;
 	float time;
+	mat4  depthMVP;
+	int   enablePCF;
 } ubo;
 
 layout(push_constant) uniform PushConsts{
