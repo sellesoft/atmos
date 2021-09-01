@@ -9,7 +9,9 @@
 #include "utils/string.h"
 
 struct Entity;
+struct PlayerEntity;
 struct Attribute;
+
 struct Admin{
 	bool paused = 0;
 	bool pause_phys = 0;
@@ -20,6 +22,8 @@ struct Admin{
     
 	array<Entity*> entities;
 	array<Attribute*> attributes;
+
+	PlayerEntity* player;
     
 	void Init();
 	void Update();

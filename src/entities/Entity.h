@@ -44,8 +44,8 @@ struct Transform{
 };
 
 struct Entity{
-	string name;
 	u32 id; //do ents need ids anymore?
+	string name;
 	EntityType type;
 	Transform transform;
     

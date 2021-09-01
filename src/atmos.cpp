@@ -6,6 +6,9 @@ reimplement timers
 
 Attribute TODOs
 ---------------
+once we reimplement saving/loading, stop using big ass constructors to load everything into an object and just use
+____{} or something
+
 
 Entity TODOs
 ------------
