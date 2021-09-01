@@ -220,6 +220,7 @@
     </ClCompile>
     <ClCompile Include="..\src\Admin.cpp" />
     <ClCompile Include="..\src\atmos.cpp" />
+    <ClCompile Include="..\src\attributes\Collider.cpp" />
     <ClCompile Include="..\src\attributes\ModelInstance.cpp" />
     <ClCompile Include="..\src\attributes\Movement.cpp" />
     <ClCompile Include="..\src\attributes\Physics.cpp" />
@@ -227,6 +228,7 @@
     <ClCompile Include="..\src\camerainstance.cpp" />
     <ClCompile Include="..\src\controller.cpp" />
     <ClCompile Include="..\src\Editor.cpp" />
+    <ClCompile Include="..\src\PhysicsSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\deshi\src\core\armature.h" />
@@ -283,6 +285,7 @@
     <ClInclude Include="..\deshi\src\utils\view.h" />
     <ClInclude Include="..\src\Admin.h" />
     <ClInclude Include="..\src\attributes\Attribute.h" />
+    <ClInclude Include="..\src\attributes\Collider.h" />
     <ClInclude Include="..\src\attributes\ModelInstance.h" />
     <ClInclude Include="..\src\attributes\Movement.h" />
     <ClInclude Include="..\src\attributes\Physics.h" />
@@ -292,6 +295,7 @@
     <ClInclude Include="..\src\Editor.h" />
     <ClInclude Include="..\src\entities\Entity.h" />
     <ClInclude Include="..\src\entities\PlayerEntity.h" />
+    <ClInclude Include="..\src\PhysicsSystem.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

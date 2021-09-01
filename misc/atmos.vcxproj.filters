@@ -283,6 +283,13 @@
     <ClCompile Include="..\src\attributes\Physics.cpp">
       <Filter>src\atmos\attributes</Filter>
     </ClCompile>
+    <ClCompile Include="..\deshi\src\core\renderers\directx.cpp" />
+    <ClCompile Include="..\src\PhysicsSystem.cpp">
+      <Filter>src\atmos</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\attributes\Collider.cpp">
+      <Filter>src\atmos\attributes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\deshi\src\core\console2.h">
@@ -473,6 +480,12 @@
     </ClInclude>
     <ClInclude Include="..\src\entities\PlayerEntity.h">
       <Filter>src\atmos\entities</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\PhysicsSystem.h">
+      <Filter>src\atmos</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\attributes\Collider.h">
+      <Filter>src\atmos\attributes</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
