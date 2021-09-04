@@ -9,7 +9,6 @@ Attribute TODOs
 once we reimplement saving/loading, stop using big ass constructors to load everything into an object and just use
 ____{} or something
 
-
 Entity TODOs
 ------------
 
@@ -38,13 +37,11 @@ orthographic side views
 (maybe) multiple viewports
 implement orthographic grabbing 
 entity filtering in entity list
+redo debug bar to be more informative and have different modes
 
  Physics TODOs
 -------------
 make collider trigger latching a boolean, so it can continuous trigger an event while an obj is in it
-figure out how to handle multi events being set for a collider. for other components its not really an issue
-___because u just choose what event to send at run time, but i don't want to do this inside of the collider
-___functions themselves, as it would be way too much clutter. maybe a helper function on collider to choose what to do 
 redo main physics loop
 add physics collision sweeping
 add physics based collision resolution for remaining collider primitives
@@ -61,11 +58,6 @@ reimplement physics system
 create a demo level
 rework and simplify entity creation so there is a distinction between development and gameplay creation
 change entity and admin LoadTEXT to be character based rather than std::string based
-think of a way to implement different events being sent between comps as right now it's only one
-____is this necessary though? we can define these events at run time, but the connections must be made through UI
-____so maybe have a UI option that allows the comps update function to handle it and only connects them.
-____actually having an option for anything other than collider is kind of useless soooo maybe 
-____get rid of event on every component or just only let u choose that event on colliders
 pool/arena components and entities for better performance
 binary file saving/loading
 
@@ -97,6 +89,7 @@ int main() {
 	    DeshInput->  Update();
 		AtmoAdmin->  Update();
 		DeshConsole->Update(); Console2::Update();
+		UI::Update();
 		Render::Update();                          //place imgui calls before this
 		AtmoAdmin->PostRenderUpdate();
         
