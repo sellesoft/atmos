@@ -53,13 +53,13 @@ void Controller::Update(){
 	vec3 inputs = vec3::ZERO;
 	
     //camera movement
-	if(DeshInput->KeyDownAnyMod(MouseButton::RIGHT)){
-		if(DeshInput->KeyDownAnyMod(movementFlyingUp))     { inputs.y += 1; }
-		if(DeshInput->KeyDownAnyMod(movementFlyingDown))   { inputs.y -= 1; }
-		if(DeshInput->KeyDownAnyMod(movementFlyingForward)){ inputs += AtmoAdmin->camera.forward; }
-		if(DeshInput->KeyDownAnyMod(movementFlyingBack))   { inputs -= AtmoAdmin->camera.forward; }
-		if(DeshInput->KeyDownAnyMod(movementFlyingRight))  { inputs += AtmoAdmin->camera.right; }
-		if(DeshInput->KeyDownAnyMod(movementFlyingLeft))   { inputs -= AtmoAdmin->camera.right; }
+	if(DeshInput->KeyDown(MouseButton::RIGHT)){
+		if(DeshInput->KeyDown(movementFlyingUp))     { inputs.y += 1; }
+		if(DeshInput->KeyDown(movementFlyingDown))   { inputs.y -= 1; }
+		if(DeshInput->KeyDown(movementFlyingForward)){ inputs += AtmoAdmin->camera.forward; }
+		if(DeshInput->KeyDown(movementFlyingBack))   { inputs -= AtmoAdmin->camera.forward; }
+		if(DeshInput->KeyDown(movementFlyingRight))  { inputs += AtmoAdmin->camera.right; }
+		if(DeshInput->KeyDown(movementFlyingLeft))   { inputs -= AtmoAdmin->camera.right; }
         
 		if     (DeshInput->LShiftDown()){ AtmoAdmin->camera.position += inputs.normalized() * 16.f * DeshTime->deltaTime; }
 		else if(DeshInput->LCtrlDown()) { AtmoAdmin->camera.position += inputs.normalized() * 4.f  * DeshTime->deltaTime; }
@@ -67,9 +67,9 @@ void Controller::Update(){
 	}
     
 	//camera rotation
-	if(DeshInput->KeyPressedAnyMod(MouseButton::RIGHT)){ DeshWindow->UpdateCursorMode(CursorMode_FirstPerson); }
-	if(DeshInput->KeyReleasedAnyMod(MouseButton::RIGHT)){ DeshWindow->UpdateCursorMode(CursorMode_Default); }
-	if(DeshInput->KeyDownAnyMod(MouseButton::RIGHT)){
+	if(DeshInput->KeyPressed(MouseButton::RIGHT)){ DeshWindow->UpdateCursorMode(CursorMode_FirstPerson); }
+	if(DeshInput->KeyReleased(MouseButton::RIGHT)){ DeshWindow->UpdateCursorMode(CursorMode_Default); }
+	if(DeshInput->KeyDown(MouseButton::RIGHT)){
 		AtmoAdmin->camera.rotation.y += (DeshInput->mouseX - DeshWindow->centerX) * cameraSensitivity * MOUSE_SENS_FRACTION;
 		AtmoAdmin->camera.rotation.x += (DeshInput->mouseY - DeshWindow->centerY) * cameraSensitivity * MOUSE_SENS_FRACTION;
 	}

@@ -616,25 +616,25 @@ void EntitiesTab(){
 	//// selected entity keybinds ////
 	//start renaming first selected entity
 	//TODO(delle) repair this to work with array
-	if(selected_entities.count && DeshInput->KeyPressedAnyMod(Key::F2)){
+	if(selected_entities.count && DeshInput->KeyPressed(Key::F2)){
 		rename_ent = true;
 		DeshConsole->IMGUI_KEY_CAPTURE = true;
 		//if(selected_entities.size > 1) selected_entities.remove(selected_entities.end());
 		selected_entities[0]->name = string(rename_buffer);
 	}
 	//submit renaming entity
-	if(rename_ent && DeshInput->KeyPressedAnyMod(Key::ENTER)){
+	if(rename_ent && DeshInput->KeyPressed(Key::ENTER)){
 		rename_ent = false;
 		DeshConsole->IMGUI_KEY_CAPTURE = false;
 		selected_entities[0]->name = string(rename_buffer);
 	}
 	//stop renaming entity
-	if(rename_ent && DeshInput->KeyPressedAnyMod(Key::ESCAPE)){
+	if(rename_ent && DeshInput->KeyPressed(Key::ESCAPE)){
 		rename_ent = false;
 		DeshConsole->IMGUI_KEY_CAPTURE = false;
 	}
 	//delete selected entities
-	if(selected_entities.count && DeshInput->KeyPressedAnyMod(Key::DELETE)){
+	if(selected_entities.count && DeshInput->KeyPressed(Key::DELETE)){
 		//TODO(delle) re-enable this with a popup to delete OR with undoing on delete
 		selected_entities.clear();
 	}
@@ -835,19 +835,19 @@ void EntitiesTab(){
 		std::vector<Attribute*> comp_deleted_queue;
 		bool delete_button = 1;
 		//ImGui::PushID(c);
-            
-			
+        
+        
 		//mesh
 		if(sel->modelPtr){
 			if(ImGui::CollapsingHeader("Model", &delete_button, tree_flags)){
 				ImGui::Indent();
 				ModelInstance* mc = sel->modelPtr;
-                        
+                
 				ImGui::TextEx("Visible  "); ImGui::SameLine();
 				if(ImGui::Button((mc->visible) ? "True" : "False", ImVec2(-FLT_MIN, 0))){
 					mc->ToggleVisibility();
 				}
-                        
+                
 				ImGui::TextEx("Model     "); ImGui::SameLine(); ImGui::SetNextItemWidth(-1);
 				if(ImGui::BeginCombo("##model_combo", mc->model->name)){
 					forI(Storage::ModelCount()){
@@ -857,247 +857,247 @@ void EntitiesTab(){
 					}
 					ImGui::EndCombo();
 				}
-                        
+                
 				ImGui::Unindent();
 				ImGui::Separator();
 			}
 		}
-                
-				//NOTE we no longer switch here since there is no attributes array on entity so
-				//     all these below will need to be converted
-
-                //		//physics
-                //	case AttributeType_Physics:
-                //		if(ImGui::CollapsingHeader("Physics", &delete_button, tree_flags)){
-                //			ImGui::Indent();
-                
-                //			Physics* d = dyncast(Physics, c);
-                //			ImGui::TextEx("Velocity     "); ImGui::SameLine(); ImGui::Inputvec3("##phys_vel", &d->velocity);
-                //			ImGui::TextEx("Accelertaion "); ImGui::SameLine(); ImGui::Inputvec3("##phys_accel", &d->acceleration);
-                //			ImGui::TextEx("Rot Velocity "); ImGui::SameLine(); ImGui::Inputvec3("##phys_rotvel", &d->rotVelocity);
-                //			ImGui::TextEx("Rot Accel    "); ImGui::SameLine(); ImGui::Inputvec3("##phys_rotaccel", &d->rotAcceleration);
-                //			ImGui::TextEx("Elasticity   "); ImGui::SameLine();
-                //			ImGui::SetNextItemWidth(-FLT_MIN); ImGui::InputFloat("##phys_elastic", &d->elasticity);
-                //			ImGui::TextEx("Mass         "); ImGui::SameLine();
-                //			ImGui::SetNextItemWidth(-FLT_MIN); ImGui::InputFloat("##phys_mass", &d->mass);
-                //			ImGui::TextEx("Kinetic Fric "); ImGui::SameLine();
-                //			ImGui::SetNextItemWidth(-FLT_MIN); ImGui::InputFloat("##phys_kinfric", &d->kineticFricCoef);
-                //			ImGui::Checkbox("Static Position", &d->staticPosition);
-                //			ImGui::Checkbox("Static Rotation", &d->staticRotation);
-                //			ImGui::Checkbox("2D Physics", &d->twoDphys);
-                
-                //			ImGui::Unindent();
-                //			ImGui::Separator();
-                //		}
-                //		break;
-                
-                //		//colliders
-                //	case AttributeType_Collider: {
-                //		if(ImGui::CollapsingHeader("Collider", &delete_button, tree_flags)){
-                //			ImGui::Indent();
-                
-                //			Collider* coll = dyncast(Collider, c);
-                //			f32 mass = 1.0f;
-                
-                //			ImGui::TextEx("Shape "); ImGui::SameLine(); ImGui::SetNextItemWidth(-1);
-                //			if(ImGui::BeginCombo("##coll_type_combo", ColliderShapeStrings[coll->shape])){
-                //				forI(ArrayCount(ColliderShapeStrings)){
-                //					if(ImGui::Selectable(ColliderShapeStrings[i], coll->shape == i) && (coll->shape != i)){
-                //						if(Physics* p = sel->GetAttribute<Physics>()) mass = p->mass;
-                
-                //						sel->RemoveAttribute(coll);
-                //						coll = 0;
-                //						switch (i){
-                //						case ColliderShape_AABB: {
-                //							coll = new AABBCollider(vec3{ 0.5f, 0.5f, 0.5f }, mass);
-                //						}break;
-                //						case ColliderShape_Box: {
-                //							coll = new BoxCollider(vec3{ 0.5f, 0.5f, 0.5f }, mass);
-                //						}break;
-                //						case ColliderShape_Sphere: {
-                //							coll = new SphereCollider(1.0f, mass);
-                //						}break;
-                //						case ColliderShape_Landscape: {
-                //							//coll = new LandscapeCollider();
-                //							WARNING_LOC("Landscape collider not setup yet");
-                //						}break;
-                //						case ColliderShape_Complex: {
-                //							//coll = new ComplexCollider();
-                //							WARNING_LOC("Complex collider not setup yet");
-                //						}break;
-                //						}
-                
-                //						if(coll){
-                //							sel->AddAttribute(coll);
-                //							admin->AddAttributeToLayers(coll);
-                //						}
-                //					}
-                //				}
-                //				ImGui::EndCombo();
-                //			}
-                
-                //			switch (coll->shape){
-                //			case ColliderShape_Box: {
-                //				BoxCollider* coll_box = dyncast(BoxCollider, coll);
-                //				ImGui::TextEx("Half Dims "); ImGui::SameLine();
-                //				if(ImGui::Inputvec3("##coll_halfdims", &coll_box->halfDims)){
-                //					if(Physics* p = sel->GetAttribute<Physics>()) mass = p->mass;
-                //					coll_box->RecalculateTensor(mass);
-                //				}
-                //			}break;
-                //			case ColliderShape_AABB: {
-                //				AABBCollider* coll_aabb = dyncast(AABBCollider, coll);
-                //				ImGui::TextEx("Half Dims "); ImGui::SameLine();
-                //				if(ImGui::Inputvec3("##coll_halfdims", &coll_aabb->halfDims)){
-                //					if(Physics* p = sel->GetAttribute<Physics>()) mass = p->mass;
-                //					coll_aabb->RecalculateTensor(mass);
-                //				}
-                //			}break;
-                //			case ColliderShape_Sphere: {
-                //				SphereCollider* coll_sphere = dyncast(SphereCollider, coll);
-                //				ImGui::TextEx("Radius    "); ImGui::SameLine(); ImGui::SetNextItemWidth(-FLT_MIN);
-                //				if(ImGui::InputFloat("##coll_sphere", &coll_sphere->radius)){
-                //					if(Physics* p = sel->GetAttribute<Physics>()) mass = p->mass;
-                //					coll_sphere->RecalculateTensor(mass);
-                //				}
-                //			}break;
-                //			case ColliderShape_Landscape: {
-                //				ImGui::TextEx("Landscape collider has no settings yet");
-                //			}break;
-                //			case ColliderShape_Complex: {
-                //				ImGui::TextEx("Complex collider has no settings yet");
-                //			}break;
-                //			}
-                
-                //			ImGui::Checkbox("Don't Resolve Collisions", (bool*)&coll->noCollide);
-                //			ImGui::TextEx("Collision Layer"); ImGui::SameLine(); ImGui::SetNextItemWidth(-1);
-                //			local u32 min = 0, max = 9;
-                //			ImGui::SliderScalar("##coll_layer", ImGuiDataType_U32, &coll->layer, &min, &max, "%d");
-                
-                //			ImGui::Unindent();
-                //			ImGui::Separator();
-                //		}
-                //	}break;
-                
-                //		//audio listener
-                //	case AttributeType_AudioListener: {
-                //		if(ImGui::CollapsingHeader("Audio Listener", &delete_button, tree_flags)){
-                //			ImGui::Indent();
-                
-                //			ImGui::TextEx("TODO implement audio listener component editing");
-                
-                //			ImGui::Unindent();
-                //			ImGui::Separator();
-                //		}
-                //	}break;
-                
-                //		//audio source
-                //	case AttributeType_AudioSource: {
-                //		if(ImGui::CollapsingHeader("Audio Source", &delete_button, tree_flags)){
-                //			ImGui::Indent();
-                
-                //			ImGui::TextEx("TODO implement audio source component editing");
-                
-                //			ImGui::Unindent();
-                //			ImGui::Separator();
-                //		}
-                //	}break;
-                
-                //		//camera
-                //	case AttributeType_Camera: {
-                //		if(ImGui::CollapsingHeader("CameraInstance", &delete_button, tree_flags)){
-                //			ImGui::Indent();
-                
-                //			ImGui::TextEx("TODO implement camera component editing");
-                
-                //			ImGui::Unindent();
-                //			ImGui::Separator();
-                //		}
-                //	}break;
-                
-                //		//light
-                //	case AttributeType_Light: {
-                //		if(ImGui::CollapsingHeader("Light", &delete_button, tree_flags)){
-                //			ImGui::Indent();
-                
-                //			Light* d = dyncast(Light, c);
-                //			ImGui::TextEx("Brightness   "); ImGui::SameLine(); ImGui::SetNextItemWidth(-FLT_MIN);
-                //			ImGui::InputFloat("##light_brightness", &d->brightness);
-                //			ImGui::TextEx("Position     "); ImGui::SameLine();
-                //			ImGui::Inputvec3("##light_position", &d->position);
-                //			ImGui::TextEx("Direction    "); ImGui::SameLine();
-                //			ImGui::Inputvec3("##light_direction", &d->direction);
-                
-                //			ImGui::Unindent();
-                //			ImGui::Separator();
-                //		}
-                //	}break;
-                
-                //		//orb manager
-                //	case AttributeType_OrbManager: {
-                //		if(ImGui::CollapsingHeader("Orbs", &delete_button, tree_flags)){
-                //			ImGui::Indent();
-                
-                //			OrbManager* d = dyncast(OrbManager, c);
-                //			ImGui::TextEx("Orb Count "); ImGui::SameLine(); ImGui::SetNextItemWidth(-FLT_MIN);
-                //			ImGui::InputInt("##orb_orbcount", &d->orbcount);
-                
-                //			ImGui::Unindent();
-                //			ImGui::Separator();
-                //		}
-                //	}break;
-                
-                //		//door
-                //	case AttributeType_Door: {
-                //		if(ImGui::CollapsingHeader("Door", &delete_button, tree_flags)){
-                //			ImGui::Indent();
-                
-                //			ImGui::TextEx("TODO implement door component editing");
-                
-                //			ImGui::Unindent();
-                //			ImGui::Separator();
-                //		}
-                //	}break;
-                
-                //		//player
-                //	case AttributeType_Player: {
-                //		if(ImGui::CollapsingHeader("Player", &delete_button, tree_flags)){
-                //			ImGui::Indent();
-                
-                //			Player* d = dyncast(Player, c);
-                //			ImGui::TextEx("Health "); ImGui::SameLine(); ImGui::SetNextItemWidth(-FLT_MIN);
-                //			ImGui::InputInt("##player_health", &d->health);
-                
-                //			ImGui::Unindent();
-                //			ImGui::Separator();
-                //		}
-                //	}break;
-                
-                //		//movement
-                //	case AttributeType_Movement: {
-                //		if(ImGui::CollapsingHeader("Movement", &delete_button, tree_flags)){
-                //			ImGui::Indent();
-                
-                //			Movement* d = dyncast(Movement, c);
-                //			ImGui::TextEx("Ground Accel    "); ImGui::SameLine(); ImGui::SetNextItemWidth(-FLT_MIN);
-                //			ImGui::InputFloat("##move_gndaccel", &d->gndAccel);
-                //			ImGui::TextEx("Air Accel       "); ImGui::SameLine(); ImGui::SetNextItemWidth(-FLT_MIN);
-                //			ImGui::InputFloat("##move_airaccel", &d->airAccel);
-                //			ImGui::TextEx("Jump Impulse    "); ImGui::SameLine(); ImGui::SetNextItemWidth(-FLT_MIN);
-                //			ImGui::InputFloat("##move_jimp", &d->jumpImpulse);
-                //			ImGui::TextEx("Max Walk Speed  "); ImGui::SameLine(); ImGui::SetNextItemWidth(-FLT_MIN);
-                //			ImGui::InputFloat("##move_maxwalk", &d->maxWalkingSpeed);
-                //			ImGui::TextEx("Max Run Speed   "); ImGui::SameLine(); ImGui::SetNextItemWidth(-FLT_MIN);
-                //			ImGui::InputFloat("##move_maxrun", &d->maxRunningSpeed);
-                //			ImGui::TextEx("Max Crouch Speed"); ImGui::SameLine(); ImGui::SetNextItemWidth(-FLT_MIN);
-                //			ImGui::InputFloat("##move_maxcrouch", &d->maxCrouchingSpeed);
-                
-                //			ImGui::Unindent();
-                //			ImGui::Separator();
-                //		}
-                //	}break;
-			
-            
+        
+        //NOTE we no longer switch here since there is no attributes array on entity so
+        //     all these below will need to be converted
+        
+        //		//physics
+        //	case AttributeType_Physics:
+        //		if(ImGui::CollapsingHeader("Physics", &delete_button, tree_flags)){
+        //			ImGui::Indent();
+        
+        //			Physics* d = dyncast(Physics, c);
+        //			ImGui::TextEx("Velocity     "); ImGui::SameLine(); ImGui::Inputvec3("##phys_vel", &d->velocity);
+        //			ImGui::TextEx("Accelertaion "); ImGui::SameLine(); ImGui::Inputvec3("##phys_accel", &d->acceleration);
+        //			ImGui::TextEx("Rot Velocity "); ImGui::SameLine(); ImGui::Inputvec3("##phys_rotvel", &d->rotVelocity);
+        //			ImGui::TextEx("Rot Accel    "); ImGui::SameLine(); ImGui::Inputvec3("##phys_rotaccel", &d->rotAcceleration);
+        //			ImGui::TextEx("Elasticity   "); ImGui::SameLine();
+        //			ImGui::SetNextItemWidth(-FLT_MIN); ImGui::InputFloat("##phys_elastic", &d->elasticity);
+        //			ImGui::TextEx("Mass         "); ImGui::SameLine();
+        //			ImGui::SetNextItemWidth(-FLT_MIN); ImGui::InputFloat("##phys_mass", &d->mass);
+        //			ImGui::TextEx("Kinetic Fric "); ImGui::SameLine();
+        //			ImGui::SetNextItemWidth(-FLT_MIN); ImGui::InputFloat("##phys_kinfric", &d->kineticFricCoef);
+        //			ImGui::Checkbox("Static Position", &d->staticPosition);
+        //			ImGui::Checkbox("Static Rotation", &d->staticRotation);
+        //			ImGui::Checkbox("2D Physics", &d->twoDphys);
+        
+        //			ImGui::Unindent();
+        //			ImGui::Separator();
+        //		}
+        //		break;
+        
+        //		//colliders
+        //	case AttributeType_Collider: {
+        //		if(ImGui::CollapsingHeader("Collider", &delete_button, tree_flags)){
+        //			ImGui::Indent();
+        
+        //			Collider* coll = dyncast(Collider, c);
+        //			f32 mass = 1.0f;
+        
+        //			ImGui::TextEx("Shape "); ImGui::SameLine(); ImGui::SetNextItemWidth(-1);
+        //			if(ImGui::BeginCombo("##coll_type_combo", ColliderShapeStrings[coll->shape])){
+        //				forI(ArrayCount(ColliderShapeStrings)){
+        //					if(ImGui::Selectable(ColliderShapeStrings[i], coll->shape == i) && (coll->shape != i)){
+        //						if(Physics* p = sel->GetAttribute<Physics>()) mass = p->mass;
+        
+        //						sel->RemoveAttribute(coll);
+        //						coll = 0;
+        //						switch (i){
+        //						case ColliderShape_AABB: {
+        //							coll = new AABBCollider(vec3{ 0.5f, 0.5f, 0.5f }, mass);
+        //						}break;
+        //						case ColliderShape_Box: {
+        //							coll = new BoxCollider(vec3{ 0.5f, 0.5f, 0.5f }, mass);
+        //						}break;
+        //						case ColliderShape_Sphere: {
+        //							coll = new SphereCollider(1.0f, mass);
+        //						}break;
+        //						case ColliderShape_Landscape: {
+        //							//coll = new LandscapeCollider();
+        //							WARNING_LOC("Landscape collider not setup yet");
+        //						}break;
+        //						case ColliderShape_Complex: {
+        //							//coll = new ComplexCollider();
+        //							WARNING_LOC("Complex collider not setup yet");
+        //						}break;
+        //						}
+        
+        //						if(coll){
+        //							sel->AddAttribute(coll);
+        //							admin->AddAttributeToLayers(coll);
+        //						}
+        //					}
+        //				}
+        //				ImGui::EndCombo();
+        //			}
+        
+        //			switch (coll->shape){
+        //			case ColliderShape_Box: {
+        //				BoxCollider* coll_box = dyncast(BoxCollider, coll);
+        //				ImGui::TextEx("Half Dims "); ImGui::SameLine();
+        //				if(ImGui::Inputvec3("##coll_halfdims", &coll_box->halfDims)){
+        //					if(Physics* p = sel->GetAttribute<Physics>()) mass = p->mass;
+        //					coll_box->RecalculateTensor(mass);
+        //				}
+        //			}break;
+        //			case ColliderShape_AABB: {
+        //				AABBCollider* coll_aabb = dyncast(AABBCollider, coll);
+        //				ImGui::TextEx("Half Dims "); ImGui::SameLine();
+        //				if(ImGui::Inputvec3("##coll_halfdims", &coll_aabb->halfDims)){
+        //					if(Physics* p = sel->GetAttribute<Physics>()) mass = p->mass;
+        //					coll_aabb->RecalculateTensor(mass);
+        //				}
+        //			}break;
+        //			case ColliderShape_Sphere: {
+        //				SphereCollider* coll_sphere = dyncast(SphereCollider, coll);
+        //				ImGui::TextEx("Radius    "); ImGui::SameLine(); ImGui::SetNextItemWidth(-FLT_MIN);
+        //				if(ImGui::InputFloat("##coll_sphere", &coll_sphere->radius)){
+        //					if(Physics* p = sel->GetAttribute<Physics>()) mass = p->mass;
+        //					coll_sphere->RecalculateTensor(mass);
+        //				}
+        //			}break;
+        //			case ColliderShape_Landscape: {
+        //				ImGui::TextEx("Landscape collider has no settings yet");
+        //			}break;
+        //			case ColliderShape_Complex: {
+        //				ImGui::TextEx("Complex collider has no settings yet");
+        //			}break;
+        //			}
+        
+        //			ImGui::Checkbox("Don't Resolve Collisions", (bool*)&coll->noCollide);
+        //			ImGui::TextEx("Collision Layer"); ImGui::SameLine(); ImGui::SetNextItemWidth(-1);
+        //			local u32 min = 0, max = 9;
+        //			ImGui::SliderScalar("##coll_layer", ImGuiDataType_U32, &coll->layer, &min, &max, "%d");
+        
+        //			ImGui::Unindent();
+        //			ImGui::Separator();
+        //		}
+        //	}break;
+        
+        //		//audio listener
+        //	case AttributeType_AudioListener: {
+        //		if(ImGui::CollapsingHeader("Audio Listener", &delete_button, tree_flags)){
+        //			ImGui::Indent();
+        
+        //			ImGui::TextEx("TODO implement audio listener component editing");
+        
+        //			ImGui::Unindent();
+        //			ImGui::Separator();
+        //		}
+        //	}break;
+        
+        //		//audio source
+        //	case AttributeType_AudioSource: {
+        //		if(ImGui::CollapsingHeader("Audio Source", &delete_button, tree_flags)){
+        //			ImGui::Indent();
+        
+        //			ImGui::TextEx("TODO implement audio source component editing");
+        
+        //			ImGui::Unindent();
+        //			ImGui::Separator();
+        //		}
+        //	}break;
+        
+        //		//camera
+        //	case AttributeType_Camera: {
+        //		if(ImGui::CollapsingHeader("CameraInstance", &delete_button, tree_flags)){
+        //			ImGui::Indent();
+        
+        //			ImGui::TextEx("TODO implement camera component editing");
+        
+        //			ImGui::Unindent();
+        //			ImGui::Separator();
+        //		}
+        //	}break;
+        
+        //		//light
+        //	case AttributeType_Light: {
+        //		if(ImGui::CollapsingHeader("Light", &delete_button, tree_flags)){
+        //			ImGui::Indent();
+        
+        //			Light* d = dyncast(Light, c);
+        //			ImGui::TextEx("Brightness   "); ImGui::SameLine(); ImGui::SetNextItemWidth(-FLT_MIN);
+        //			ImGui::InputFloat("##light_brightness", &d->brightness);
+        //			ImGui::TextEx("Position     "); ImGui::SameLine();
+        //			ImGui::Inputvec3("##light_position", &d->position);
+        //			ImGui::TextEx("Direction    "); ImGui::SameLine();
+        //			ImGui::Inputvec3("##light_direction", &d->direction);
+        
+        //			ImGui::Unindent();
+        //			ImGui::Separator();
+        //		}
+        //	}break;
+        
+        //		//orb manager
+        //	case AttributeType_OrbManager: {
+        //		if(ImGui::CollapsingHeader("Orbs", &delete_button, tree_flags)){
+        //			ImGui::Indent();
+        
+        //			OrbManager* d = dyncast(OrbManager, c);
+        //			ImGui::TextEx("Orb Count "); ImGui::SameLine(); ImGui::SetNextItemWidth(-FLT_MIN);
+        //			ImGui::InputInt("##orb_orbcount", &d->orbcount);
+        
+        //			ImGui::Unindent();
+        //			ImGui::Separator();
+        //		}
+        //	}break;
+        
+        //		//door
+        //	case AttributeType_Door: {
+        //		if(ImGui::CollapsingHeader("Door", &delete_button, tree_flags)){
+        //			ImGui::Indent();
+        
+        //			ImGui::TextEx("TODO implement door component editing");
+        
+        //			ImGui::Unindent();
+        //			ImGui::Separator();
+        //		}
+        //	}break;
+        
+        //		//player
+        //	case AttributeType_Player: {
+        //		if(ImGui::CollapsingHeader("Player", &delete_button, tree_flags)){
+        //			ImGui::Indent();
+        
+        //			Player* d = dyncast(Player, c);
+        //			ImGui::TextEx("Health "); ImGui::SameLine(); ImGui::SetNextItemWidth(-FLT_MIN);
+        //			ImGui::InputInt("##player_health", &d->health);
+        
+        //			ImGui::Unindent();
+        //			ImGui::Separator();
+        //		}
+        //	}break;
+        
+        //		//movement
+        //	case AttributeType_Movement: {
+        //		if(ImGui::CollapsingHeader("Movement", &delete_button, tree_flags)){
+        //			ImGui::Indent();
+        
+        //			Movement* d = dyncast(Movement, c);
+        //			ImGui::TextEx("Ground Accel    "); ImGui::SameLine(); ImGui::SetNextItemWidth(-FLT_MIN);
+        //			ImGui::InputFloat("##move_gndaccel", &d->gndAccel);
+        //			ImGui::TextEx("Air Accel       "); ImGui::SameLine(); ImGui::SetNextItemWidth(-FLT_MIN);
+        //			ImGui::InputFloat("##move_airaccel", &d->airAccel);
+        //			ImGui::TextEx("Jump Impulse    "); ImGui::SameLine(); ImGui::SetNextItemWidth(-FLT_MIN);
+        //			ImGui::InputFloat("##move_jimp", &d->jumpImpulse);
+        //			ImGui::TextEx("Max Walk Speed  "); ImGui::SameLine(); ImGui::SetNextItemWidth(-FLT_MIN);
+        //			ImGui::InputFloat("##move_maxwalk", &d->maxWalkingSpeed);
+        //			ImGui::TextEx("Max Run Speed   "); ImGui::SameLine(); ImGui::SetNextItemWidth(-FLT_MIN);
+        //			ImGui::InputFloat("##move_maxrun", &d->maxRunningSpeed);
+        //			ImGui::TextEx("Max Crouch Speed"); ImGui::SameLine(); ImGui::SetNextItemWidth(-FLT_MIN);
+        //			ImGui::InputFloat("##move_maxcrouch", &d->maxCrouchingSpeed);
+        
+        //			ImGui::Unindent();
+        //			ImGui::Separator();
+        //		}
+        //	}break;
+        
+        
 		//if(!delete_button) comp_deleted_queue.push_back(c);
 	    //ImGui::PopID();
 		//for(Attribute* c : sel->components)
@@ -1116,11 +1116,11 @@ void EntitiesTab(){
 							p->model = ModelInstance();
 							p->modelPtr = &p->model;
 						}break;
-
+                        
 						default: {
 							//do something like say the currently selected type cant add that
 							//or even better only show the things that can be added to that type
-
+                            
 						}break;
 					}
 					//admin->AddAttributeToLayers(comp);
@@ -1200,24 +1200,24 @@ void MeshesTab(){
     
 	//// selected mesh keybinds ////
 	//start renaming mesh
-	if(selected && DeshInput->KeyPressedAnyMod(Key::F2)){
+	if(selected && DeshInput->KeyPressed(Key::F2)){
 		rename_mesh = true;
 		DeshConsole->IMGUI_KEY_CAPTURE = true;
 		cpystr(rename_buffer, selected->name, DESHI_NAME_SIZE);
 	}
 	//submit renaming mesh
-	if(selected && rename_mesh && DeshInput->KeyPressedAnyMod(Key::ENTER)){
+	if(selected && rename_mesh && DeshInput->KeyPressed(Key::ENTER)){
 		rename_mesh = false;
 		DeshConsole->IMGUI_KEY_CAPTURE = false;
 		cpystr(selected->name, rename_buffer, DESHI_NAME_SIZE);
 	}
 	//stop renaming mesh
-	if(rename_mesh && DeshInput->KeyPressedAnyMod(Key::ESCAPE)){
+	if(rename_mesh && DeshInput->KeyPressed(Key::ESCAPE)){
 		rename_mesh = false;
 		DeshConsole->IMGUI_KEY_CAPTURE = false;
 	}
 	//delete mesh
-	if(selected && DeshInput->KeyPressedAnyMod(Key::DELETE)){
+	if(selected && DeshInput->KeyPressed(Key::DELETE)){
 		//Storage::DeleteMesh(sel_mesh_idx);
 		//sel_mat_idx = -1;
 	}
@@ -1549,7 +1549,7 @@ void TexturesTab(){
     
 	//// selected material keybinds ////
 	//delete material
-	if(selected && DeshInput->KeyPressedAnyMod(Key::DELETE)){
+	if(selected && DeshInput->KeyPressed(Key::DELETE)){
 		//TODO(Ui) re-enable this with a popup to delete OR with undoing on delete
 		//Storage::DeleteTexture(sel_tex_idx);
 		//sel_tex_idx = -1;
@@ -1630,24 +1630,24 @@ void MaterialsTab(){
     
 	//// selected material keybinds ////
 	//start renaming material
-	if(selected && DeshInput->KeyPressedAnyMod(Key::F2)){
+	if(selected && DeshInput->KeyPressed(Key::F2)){
 		rename_mat = true;
 		DeshConsole->IMGUI_KEY_CAPTURE = true;
 		cpystr(rename_buffer, selected->name, DESHI_NAME_SIZE);
 	}
 	//submit renaming material
-	if(selected && rename_mat && DeshInput->KeyPressedAnyMod(Key::ENTER)){
+	if(selected && rename_mat && DeshInput->KeyPressed(Key::ENTER)){
 		rename_mat = false;
 		DeshConsole->IMGUI_KEY_CAPTURE = false;
 		cpystr(selected->name, rename_buffer, DESHI_NAME_SIZE);
 	}
 	//stop renaming material
-	if(rename_mat && DeshInput->KeyPressedAnyMod(Key::ESCAPE)){
+	if(rename_mat && DeshInput->KeyPressed(Key::ESCAPE)){
 		rename_mat = false;
 		DeshConsole->IMGUI_KEY_CAPTURE = false;
 	}
 	//delete material
-	if(selected && DeshInput->KeyPressedAnyMod(Key::DELETE)){
+	if(selected && DeshInput->KeyPressed(Key::DELETE)){
 		//TODO(Ui) re-enable this with a popup to delete OR with undoing on delete
 		//Storage::DeleteMaterial(sel_mat_idx);
 		//sel_mat_idx = -1;
@@ -1784,24 +1784,24 @@ void ModelsTab(){
     
 	//// selected model keybinds ////
 	//start renaming model
-	if(selected && DeshInput->KeyPressedAnyMod(Key::F2)){
+	if(selected && DeshInput->KeyPressed(Key::F2)){
 		rename_model = true;
 		DeshConsole->IMGUI_KEY_CAPTURE = true;
 		cpystr(rename_buffer, selected->name, DESHI_NAME_SIZE);
 	}
 	//submit renaming model
-	if(selected && rename_model && DeshInput->KeyPressedAnyMod(Key::ENTER)){
+	if(selected && rename_model && DeshInput->KeyPressed(Key::ENTER)){
 		rename_model = false;
 		DeshConsole->IMGUI_KEY_CAPTURE = false;
 		cpystr(selected->name, rename_buffer, DESHI_NAME_SIZE);
 	}
 	//stop renaming model
-	if(rename_model && DeshInput->KeyPressedAnyMod(Key::ESCAPE)){
+	if(rename_model && DeshInput->KeyPressed(Key::ESCAPE)){
 		rename_model = false;
 		DeshConsole->IMGUI_KEY_CAPTURE = false;
 	}
 	//delete model
-	if(selected && DeshInput->KeyPressedAnyMod(Key::DELETE)){
+	if(selected && DeshInput->KeyPressed(Key::DELETE)){
 		//TODO(Ui) re-enable this with a popup to delete OR with undoing on delete
 		//Storage::DeleteModel(sel_model_idx);
 		//sel_model_idx = -1;
