@@ -2,6 +2,7 @@
 #include "math/InertiaTensors.h"
 #include "core/console.h"
 #include "core/model.h"
+#include "core/logging.h"
 
 
 
@@ -18,8 +19,8 @@ AABBCollider::AABBCollider(Mesh* mesh, mat3 tensor_, u32 collisionLayer, bool no
 	collLayer = collisionLayer;
 	noCollide = nocollide;
     
-	if (!mesh)              { halfDims = vec3::ZERO; ERROR("null mesh passed for AABB creation"); return; }
-	if (!mesh->vertexCount) { halfDims = vec3::ZERO; ERROR("mesh with no vertices passed to AABB creation"); return; }
+	if (!mesh)              { halfDims = vec3::ZERO; logE("collider","null mesh passed for AABB creation"); return; }
+	if (!mesh->vertexCount) { halfDims = vec3::ZERO; logE("collider","mesh with no vertices passed to AABB creation"); return; }
     
 	vec3 min = mesh->aabbMin.absV();
 	vec3 max = mesh->aabbMax.absV();
@@ -45,8 +46,8 @@ AABBCollider::AABBCollider(Mesh* mesh, f32 mass, u32 collisionLayer, bool nocoll
 	collLayer = collisionLayer;
 	noCollide = nocollide;
     
-	if (!mesh) { halfDims = vec3::ZERO; ERROR("null mesh passed for AABB creation"); return; }
-	if (!mesh->vertexCount) { halfDims = vec3::ZERO; ERROR("mesh with no vertices passed to AABB creation"); return; }
+	if (!mesh) { halfDims = vec3::ZERO; logE("collider","null mesh passed for AABB creation"); return; }
+	if (!mesh->vertexCount) { halfDims = vec3::ZERO; logE("collider","mesh with no vertices passed to AABB creation"); return; }
     
 	vec3 min = mesh->aabbMin.absV();
 	vec3 max = mesh->aabbMax.absV();
@@ -85,13 +86,13 @@ void AABBCollider::RecalculateTensor(f32 mass){
 
 SphereCollider::SphereCollider(float radius, mat3& tensor, u32 collisionLayer, bool noCollide){
 	//!!Incomplete
-
+    
 }
 
 SphereCollider::SphereCollider(float radius, f32 mass, mat3& tensor, u32 collisionLayer, bool noCollide){
 	//!!Incomplete
-
-
+    
+    
 }
 
 void SphereCollider::RecalculateTensor(f32 mass){
@@ -111,5 +112,5 @@ void SphereCollider::RecalculateTensor(f32 mass){
 
 ComplexCollider::ComplexCollider(Mesh* mesh, u32 collisionLayer, bool noCollide){
 	//!!Incomplete
-
+    
 }

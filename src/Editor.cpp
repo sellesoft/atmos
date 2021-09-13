@@ -4,9 +4,10 @@
 #include "entities/PlayerEntity.h"
 #include "camerainstance.h"
 #include "entities/Entity.h"
+#include "core/imgui.h"
+#include "core/logging.h"
 #include "core/assets.h"
 #include "core/console.h"
-#include "core/imgui.h"
 #include "core/renderer.h"
 #include "core/window.h"
 #include "core/input.h"
@@ -436,7 +437,7 @@ void MenuBar(){
 			}
 			if(ImGui::MenuItem("Save")){
 				if(level_name == ""){
-					ERROR("Level not saved before; Use 'Save As'");
+					log("editor","Level not saved before; Use 'Save As'");
 				}
 				else{
 					//AtmoAdmin->SaveTEXT(level_name);
