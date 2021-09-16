@@ -475,7 +475,7 @@ void MenuBar(){
 				forX(di, dir_meshes.count){
 					bool loaded = false;
 					forX(li, Storage::MeshCount()){
-						if(strncmp(Storage::MeshName(li), dir_meshes[di].str, dir_meshes[di].size - 5) == 0){
+						if(strncmp(Storage::MeshName(li), dir_meshes[di].str, dir_meshes[di].count - 5) == 0){
 							loaded = true;  break;
 						}
 					}
@@ -512,7 +512,7 @@ void MenuBar(){
 				forX(di, dir_materials.count){
 					bool loaded = false;
 					forX(li, Storage::MaterialCount()){
-						if(strncmp(Storage::MaterialName(li), dir_materials[di].str, dir_materials[di].size - 4) == 0){
+						if(strncmp(Storage::MaterialName(li), dir_materials[di].str, dir_materials[di].count - 4) == 0){
 							loaded = true;  break;
 						}
 					}
@@ -531,7 +531,7 @@ void MenuBar(){
 				forX(di, dir_models.count){
 					bool loaded = false;
 					forX(li, Storage::ModelCount()){
-						if(strncmp(Storage::ModelName(li), dir_models[di].str, dir_models[di].size - 6) == 0){
+						if(strncmp(Storage::ModelName(li), dir_models[di].str, dir_models[di].count - 6) == 0){
 							loaded = true;  break;
 						}
 					}
@@ -2305,7 +2305,7 @@ void DebugBar(){
                 }else{
                     str6 = string(DeshConsole->alert_message.c_str());
                 }
-                float strlen6 = (fontw) * str6.size;
+                float strlen6 = (fontw) * str6.count;
                 ImGui::SameLine((ImGui::GetColumnWidth() - strlen6) / 2); ImGui::PushItemWidth(-1);
                 ImGui::PushStyleColor(ImGuiCol_Text, ImGui::ColorToImVec4(color(col_text)));
                 ImGui::TextEx(str6.str);
@@ -2316,7 +2316,7 @@ void DebugBar(){
         //Show Time
         if(ImGui::TableNextColumn()){
             string str7 = DeshTime->FormatDateTime("{h}:{m}:{s}").c_str();
-            float strlen7 = fontw * str7.size;
+            float strlen7 = fontw * str7.count;
             ImGui::SameLine(32 - (strlen7 / 2));
             ImGui::TextEx(str7.str);
         }
