@@ -5,32 +5,36 @@
 #include "Entity.h"
 
 #include "attributes/Physics.h"
-#include "attributes/Collider.h"
 #include "attributes/ModelInstance.h"
 #include "core/storage.h"
 
 struct PhysicsEntity : public Entity {
-	Physics       physics;
-	Collider      collider;
-	ModelInstance model;
-
-	void Init(const char* name, Mesh* mesh, Transform transform, f32 mass, bool static_pos = 0, bool static_rot = 0) {
-		type = EntityType_NonStaticMesh;
+	ModelInstance* model;
+	Physics*       physics;
+    
+	void Init(const char* name, Model* _model, Transform transform, f32 mass, bool static_pos = 0, bool static_rot = 0) {
+		type = (static_pos && static_rot) ? EntityType_StaticMesh : EntityType_NonStaticMesh;
 		this->name = name;
 		this->transform = transform;
-
-		physics  = Physics(transform.position, transform.rotation, mass, 0); physicsPtr  = &physics;
-		model    = ModelInstance((mesh) ? mesh : Storage::NullMesh());       modelPtr    = &model;
-		collider = AABBCollider(model.mesh, mass);                           colliderPtr = &collider;
-		
-		if (static_pos) { physics.staticPosition = 1;  type = EntityType_StaticMesh; }
-		if (static_rot) physics.staticRotation = 1;
+        
+		AtmoAdmin->modelArr.add(ModelInstance((_model) ? _model : Storage::NullModel()));
+		model = AtmoAdmin->modelArr.last; modelPtr = model;
+        model->attribute.entity = this;
+        
+        AtmoAdmin->physicsArr.add(Physics());
+        physics = AtmoAdmin->physicsArr.last; physicsPtr = physics;
+		physics->attribute.entity = this;
+        physics->collider       = new AABBCollider(_model->mesh, mass);
+        physics->position       = transform.position;
+        physics->rotation       = transform.rotation;
+        physics->scale          = transform.scale;
+        physics->mass           = mass;
+        physics->staticPosition = static_pos;
+        physics->staticRotation = static_rot;
 	}
-
+    
 	void SendEvent(Event event) override {};
 	void ReceiveEvent(Event event) override {};
-
 };
 
-
-#endif
+#endif //ATMOS_PHYSICSENTITY_H

@@ -6,140 +6,152 @@
 #include "attributes/Physics.h"
 #include "attributes/Collider.h"
 
-struct PhysicsTuple {
-	Transform* transform = 0;
-	Physics*   physics	 = 0;
-	Collider*  collider	 = 0;
-};
-
-array<PhysicsTuple> GetPhysicsTuples() {
-	array<PhysicsTuple> out;
-	for (Entity* e : AtmoAdmin->entities) 
-		if (Physics* phys = e->physicsPtr) 
-			out.add({ &e->transform, phys, e->colliderPtr });
-	return out;
-}
-
-inline void PhysicsTick(PhysicsTuple& t, PhysicsSystem* ps) {
-
-	//TODO contact states
-
-	t.physics->acceleration = t.physics->netForce / t.physics->mass;
-	
-	//add gravity
-	t.physics->acceleration += vec3(0, -ps->gravity, 0);
-	
-	//update linear motion
-	if (!t.physics->staticPosition) {
-		t.physics->velocity += t.physics->acceleration * DeshTime->fixedDeltaTime;
-	
-		f32 vm = t.physics->velocity.mag();
-		if (vm > ps->maxVelocity) {
-			t.physics->velocity /= vm;
-			t.physics->velocity *= ps->maxVelocity;
-		}
-		else if (vm < ps->maxVelocity) {
-			t.physics->velocity = vec3::ZERO;
-			t.physics->acceleration = vec3::ZERO;
-		}
-		t.physics->position += t.physics->velocity * DeshTime->fixedDeltaTime;
-	}
-
-	//// rotation ////
-
-	//make fake rotational friction
-	if (t.physics->rotVelocity != vec3::ZERO) {
-		t.physics->rotAcceleration = vec3(t.physics->rotVelocity.x > 0 ? -1 : 1, t.physics->rotVelocity.y > 0 ? -1 : 1, t.physics->rotVelocity.z > 0 ? -1 : 1) * ps->frictionAir * t.physics->mass * 100;
-	}
-
-	//update rotational motion
-	t.physics->rotVelocity += t.physics->rotAcceleration * DeshTime->fixedDeltaTime;
-	t.physics->rotation += t.physics->rotVelocity * DeshTime->fixedDeltaTime;
-
-	t.physics->netForce = vec3::ZERO;
-	t.physics->acceleration = 0;
-}
-
-inline void AABBAABBCollision(Physics* obj1, AABBCollider* obj1Col, Physics* obj2, AABBCollider* obj2Col) {
-	vec3 min1 = obj1->position - (obj1Col->halfDims * obj1->attribute.entity->transform.scale);
-	vec3 max1 = obj1->position + (obj1Col->halfDims * obj1->attribute.entity->transform.scale);
-	vec3 min2 = obj2->position - (obj2Col->halfDims * obj2->attribute.entity->transform.scale);
-	vec3 max2 = obj2->position + (obj2Col->halfDims * obj2->attribute.entity->transform.scale);
-
-
-	if (//check if overlapping
-		(min1.x <= max2.x && max1.x >= min2.x) &&
-		(min1.y <= max2.y && max1.y >= min2.y) &&
-		(min1.z <= max2.z && max1.z >= min2.z)) {
+bool AABBAABBCollision(Physics* p1, AABBCollider* c1, Physics* p2, AABBCollider* c2){
+	vec3 min1 = p1->position - (c1->halfDims * p1->scale); vec3 max1 = p1->position + (c1->halfDims * p1->scale);
+	vec3 min2 = p2->position - (c2->halfDims * p2->scale); vec3 max2 = p2->position + (c2->halfDims * p2->scale);
+    
+	if((min1.x <= max2.x && max1.x >= min2.x) && //check if overlapping
+       (min1.y <= max2.y && max1.y >= min2.y) &&
+       (min1.z <= max2.z && max1.z >= min2.z)){
 		
 		//TODO(sushi) implement keeping track of contacts
-
-		if (obj1Col->noCollide || obj2Col->noCollide) return;
-
-		float xover, yover, zover;
-
-		//we need to know which box is in front over each axis so
-		//the overlap is correct
-		if (max1.x < max2.x) xover = max1.x - min2.x;
-		else                 xover = max2.x - min1.x;
-		if (max1.y < max2.y) yover = max1.y - min2.y;
-		else                 yover = max2.y - min1.y;
-		if (max1.z < max2.z) zover = max1.z - min2.z;
-		else                 zover = max2.z - min1.z;
-
-		Manifold m1;
-		Manifold m2;
-
-		//static resolution
+        
+        //early out if no collision or both are static
+		if(c1->noCollide || c2->noCollide) return true;
+        if(p1->staticPosition && p2->staticPosition) return true;
+        
 		vec3 norm;
-		if (xover < yover && xover < zover) {
-			if (!obj1->staticPosition) obj1->position.x += xover / 2;
-			if (!obj2->staticPosition) obj2->position.x -= xover / 2;
-			norm = vec3::LEFT;
-		}
-		else if (yover < xover && yover < zover) {
-			if (!obj1->staticPosition) obj1->position.y += yover / 2;
-			if (!obj2->staticPosition) obj2->position.y -= yover / 2;
+        
+		//// static resolution ////
+        f32 xover = (max1.x < max2.x) ? max1.x - min2.x : max2.x - min1.x; //we need to know which box is in front 
+        f32 yover = (max1.y < max2.y) ? max1.y - min2.y : max2.y - min1.y; //over each axis so the overlap is correct
+        f32 zover = (max1.z < max2.z) ? max1.z - min2.z : max2.z - min1.z;
+		if      (xover < yover && xover < zover){
+			if     (p1->staticPosition){ p2->position.x -= xover; }
+			else if(p2->staticPosition){ p1->position.x += xover; }
+            else                       { p1->position.x += xover/2.f; p2->position.x -= xover/2.f;}
+            norm = vec3::LEFT;
+		}else if(yover < xover && yover < zover){
+			if     (p1->staticPosition){ p2->position.y -= yover; }
+			else if(p2->staticPosition){ p1->position.y += yover; }
+            else                       { p1->position.y += yover/2.f; p2->position.y -= yover/2.f;}
 			norm = vec3::DOWN;
-		}
-		else if (zover < yover && zover < xover) {
-			if (!obj1->staticPosition) obj1->position.z += zover / 2;
-			if (!obj2->staticPosition) obj2->position.z -= zover / 2;
+		}else if(zover < yover && zover < xover){
+			if     (p1->staticPosition){ p2->position.z -= zover; }
+			else if(p2->staticPosition){ p1->position.z += zover; }
+            else                       { p1->position.z += zover/2.f; p2->position.z -= zover/2.f;}
 			norm = vec3::BACK;
 		}
-
+        
+		Manifold m1; Manifold m2;
 		m1.norm = norm; m2.norm = norm;
-
-		//dynamic resolution
+        
+		//// dynamic resolution ////
 		//get relative velocity between both objects with obj1 as the F.O.R
-		vec3 rv = obj2->velocity - obj1->velocity;
-
+		vec3 rv = p2->velocity - p1->velocity;
+        
 		//find the velocity along the normal and dynamically resolve
 		f32 vAlongNorm = rv.dot(norm);
-		if (vAlongNorm < 0) {
-			float j = -(1 + (obj1->elasticity + obj2->elasticity) / 2) * vAlongNorm;
-			j /= 1 / obj1->mass + 1 / obj2->mass;
-
+		if(vAlongNorm < 0){
+			float j = -(1 + (p1->elasticity + p2->elasticity) / 2) * vAlongNorm;
+			j /= 1.f/p1->mass + 1.f/p2->mass;
+            
 			vec3 impulse = j * norm;
-			if (!obj1->staticPosition) obj1->velocity -= impulse / obj1->mass;
-			if (!obj2->staticPosition) obj2->velocity += impulse / obj2->mass;
-		
+			p1->velocity -= impulse / p1->mass;
+			p2->velocity += impulse / p2->mass;
+            
 			//TODO(sushi) set contact state here
-		
 		}
-	}
-
+        return true;
+	}else{
+        return false;
+    }
 }
 
-void PhysicsSystem::Init() {
-	gravity = 9.81;
-	frictionAir = 0.01f;
-	minVelocity = 0.005f;
-	maxVelocity = 100.f;
+void PhysicsSystem::Init(f32 fixedUpdatesPerSecond){
+	gravity        = 9.81f;
+	frictionAir    = 0.01f;
+	minVelocity    = 0.005f;
+	maxVelocity    = 100.f;
 	minRotVelocity = 1.f;
 	maxRotVelocity = 360.f;
+    
+    fixedTimeStep    = fixedUpdatesPerSecond;
+	fixedDeltaTime   = 1.f / fixedUpdatesPerSecond;
+    fixedTotalTime   = 0;
+    fixedUpdateCount = 0;
+    fixedAccumulator = 0;
+    
+    paused = false;
 }
 
-void PhysicsSystem::Update() {
-
+void PhysicsSystem::Update(){
+    if(paused) return;
+    
+    fixedAccumulator += DeshTime->deltaTime;
+    while(fixedAccumulator >= fixedDeltaTime){
+        for(Physics* p1 = AtmoAdmin->physicsArr.begin(); p1 != AtmoAdmin->physicsArr.end(); ++p1){
+            //TODO contact states
+            
+            //linear motion
+            if(!p1->staticPosition){
+                p1->acceleration = p1->netForce / p1->mass;
+                p1->acceleration += vec3(0, -gravity, 0); //add gravity
+                p1->velocity += p1->acceleration * fixedDeltaTime;
+                
+                f32 vm = p1->velocity.mag();
+                if(vm > maxVelocity) {
+                    p1->velocity /= vm;
+                    p1->velocity *= maxVelocity;
+                }else if(vm < minVelocity){
+                    p1->velocity = vec3::ZERO;
+                    p1->acceleration = vec3::ZERO;
+                }
+                p1->position += p1->velocity * fixedDeltaTime;
+                
+                p1->netForce = vec3::ZERO;
+                p1->acceleration = vec3::ZERO;
+            }
+            
+            //rotational motion
+            if(!p1->staticRotation){
+                if(p1->rotVelocity != vec3::ZERO){ //fake rotational friction
+                    p1->rotAcceleration += vec3(p1->rotVelocity.x > 0 ? -1 : 1, 
+                                                p1->rotVelocity.y > 0 ? -1 : 1, 
+                                                p1->rotVelocity.z > 0 ? -1 : 1) * frictionAir * p1->mass * 100;
+                }
+                
+                p1->rotVelocity += p1->rotAcceleration * fixedDeltaTime;
+                p1->rotation += p1->rotVelocity * fixedDeltaTime;
+            }
+            
+            //collision check
+            if(p1->collider->shape != ColliderShape_NONE){
+                for(Physics* p2 = AtmoAdmin->physicsArr.begin(); p2 != AtmoAdmin->physicsArr.end(); ++p2){
+                    if((p1 != p2) && (p2->collider->shape != ColliderShape_NONE) && (p1->collider->collLayer == p2->collider->collLayer)){
+                        //TODO generate polys
+                        switch(p1->collider->shape){
+                            case ColliderShape_Sphere:
+                            switch(p2->collider->shape){
+                                case ColliderShape_AABB:  {  }break; //TODO AABB-Sphere
+                                case ColliderShape_Sphere:{  }break; //TODO Sphere-Sphere
+                            }break;
+                            case ColliderShape_AABB:
+                            switch(p2->collider->shape){
+                                case ColliderShape_AABB:  { AABBAABBCollision(p1, (AABBCollider*)p1->collider, 
+                                                                              p2, (AABBCollider*)p2->collider); }break;
+                                case ColliderShape_Sphere:{  }break; //TODO AABB-Sphere
+                            }break;
+                        }
+                    }
+                }
+                //TODO fill manifolds
+                //TODO solve manifolds
+            }
+        }
+        
+        //// update fixed time ////
+        fixedAccumulator -= fixedDeltaTime;
+		fixedTotalTime += fixedDeltaTime;
+    }
 }

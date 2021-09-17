@@ -1,6 +1,6 @@
 #include "Physics.h"
-
 #include "../admin.h"
+#include "../entities/entity.h"
 
 Physics::Physics() {
 	position = vec3::ZERO;
@@ -15,7 +15,7 @@ Physics::Physics() {
 }
 
 Physics::Physics(vec3 position, vec3 rotation, vec3 velocity, vec3 acceleration, vec3 rotVeloctiy,
-	vec3 rotAcceleration, float elasticity, float mass, bool staticPosition) {
+                 vec3 rotAcceleration, float elasticity, float mass, bool staticPosition) {
 	this->position = position;
 	this->rotation = rotation;
 	this->velocity = velocity;
@@ -36,6 +36,16 @@ Physics::Physics(vec3 position, vec3 rotation, float mass, float elasticity) {
 	this->rotAcceleration = vec3::ZERO;
 	this->mass = mass;
 	this->elasticity = elasticity;
+}
+
+void Physics::Update(f32 alpha){
+    //interpolate between new physics transform and old transform by the leftover time
+    attribute.entity->transform.prevPosition = attribute.entity->transform.position;
+    attribute.entity->transform.prevRotation = attribute.entity->transform.rotation;
+    attribute.entity->transform.prevScale    = attribute.entity->transform.scale;
+    attribute.entity->transform.position = (attribute.entity->transform.position * (1.f - alpha)) + (position * alpha);
+    attribute.entity->transform.rotation = (attribute.entity->transform.rotation * (1.f - alpha)) + (rotation * alpha);
+    attribute.entity->transform.scale    = (attribute.entity->transform.scale    * (1.f - alpha)) + (scale    * alpha);
 }
 
 void Physics::AddForce(vec3 force) {

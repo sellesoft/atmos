@@ -1,6 +1,6 @@
 #pragma once
-#ifndef ATTRIBUTE_COLLIDER_H
-#define ATTRIBUTE_COLLIDER_H
+#ifndef ATMOS_COLLIDER_H
+#define ATMOS_COLLIDER_H
 
 #include "Attribute.h"
 #include "math/VectorMatrix.h"
@@ -18,47 +18,37 @@ global_ const char* ColliderShapeStrings[] = {
 	"None", "AABB", "Sphere", "Complex"
 };
 
-
-struct Collider {
-	Attribute attribute{ AttributeType_Collider };
-	
+struct Collider{
 	ColliderShape shape;
 	u32           collLayer;
+    b32           noCollide;
 	mat3          tensor;
-
-	bool noCollide;
-
+    
 	//evenly distributes mass through the respective body
-	virtual void RecalculateTensor(f32 mass) {}
+	virtual void RecalculateTensor(f32 mass){};
 };
 
-struct AABBCollider : public Collider {
+struct AABBCollider : public Collider{
 	vec3 halfDims;
-
-	AABBCollider(Mesh* mesh,    mat3 tensor, u32 collisionLayer = 0, bool nocollide = 0);
-	AABBCollider(vec3 halfDims, mat3 tensor, u32 collisionLayer = 0, bool nocollide = 0);
+    
 	AABBCollider(Mesh* mesh,    f32 mass,    u32 collisionLayer = 0, bool nocollide = 0);
 	AABBCollider(vec3 halfDims, f32 mass,    u32 collisionLayer = 0, bool nocollide = 0);
-
 	void RecalculateTensor(f32 mass) override;
 };
 
-struct SphereCollider : public Collider {
+struct SphereCollider : public Collider{
 	f32 radius;
-
-	SphereCollider(float radius, mat3& tensor, u32 collisionLayer = 0, bool noollide = 0);
-	SphereCollider(float radius, f32 mass, mat3& tensor, u32 collisionLayer = 0, bool noollide = 0);
-
+    
+	SphereCollider(float radius, f32 mass, u32 collisionLayer = 0, bool nocollide = 0);
 	void RecalculateTensor(f32 mass) override;
 };
 
-struct ComplexCollider : public Collider {
+struct ComplexCollider : public Collider{
 	Mesh* mesh;
-
+    
 	ComplexCollider(Mesh* mesh, u32 collisionLayer = 0, bool nocollide = 0);
-
 	//TODO(sushi) implement tensor generation from an arbitrary mesh
 	void RecalculateTensor(f32 mass) override {};
 };
 
-#endif
+#endif //ATMOS_COLLIDER_H
