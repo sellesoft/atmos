@@ -1,8 +1,6 @@
 #pragma once
-#ifndef SYSTEM_PHYSICS_H
-#define SYSTEM_PHYSICS_H
-
-
+#ifndef ATMOS_PHYSICSSYSTEM_H
+#define ATMOS_PHYSICSSYSTEM_H
 
 #include "defines.h"
 
@@ -13,19 +11,17 @@ struct PhysicsSystem {
 	f32 maxVelocity;
 	f32 minRotVelocity;
 	f32 maxRotVelocity; 
-
-	void Init();
+    
+    f32 fixedTimeStep;
+	f32 fixedDeltaTime;
+	f64 fixedTotalTime;
+	u64 fixedUpdateCount;
+	f32 fixedAccumulator;
+    
+    b32 paused;
+    
+	void Init(f32 fixedUpdatesPerSecond);
 	void Update();
-
 };
 
-
-
-
-
-
-
-
-
-
-#endif
+#endif //ATMOS_PHYSICSSYSTEM

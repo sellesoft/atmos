@@ -2,12 +2,13 @@
 #ifndef ATMOS_ENTITY_H
 #define ATMOS_ENTITY_H
 
+#include "../admin.h"
+#include "../attributes/Attribute.h"
 #include "utils/string.h"
 #include "utils/array.h"
 #include "utils/map.h"
 #include "utils/utils.h"
 #include "math/VectorMatrix.h"
-#include "../attributes/Attribute.h"
 
 enum Event_ {
 	Event_NONE = 0,
@@ -32,11 +33,14 @@ global_ const char* EntityTypeStrings[] = {
 };
 
 struct Transform{
-	vec3 position;
-	vec3 rotation;
-	vec3 scale;
-	vec3 prevPosition;
-	vec3 prevRotation;
+	vec3 position = vec3::ZERO;
+	vec3 rotation = vec3::ZERO;
+	vec3 scale    = vec3::ONE;
+	vec3 prevPosition = vec3::ZERO;
+	vec3 prevRotation = vec3::ZERO;
+	vec3 prevScale    = vec3::ONE;
+	
+	//Transform(vec3 position = vec3::ZERO, vec3 rotation = vec3::ZERO, vec3 scale = vec3::ONE);
     
 	inline vec3 Up()     { return vec3::UP * mat4::RotationMatrix(rotation); }
 	inline vec3 Right()  { return vec3::RIGHT * mat4::RotationMatrix(rotation); }
@@ -54,14 +58,12 @@ struct Entity{
 	string name;
 	EntityType type;
 	Transform transform;
-	u32 id; //do ents need ids anymore?
     
 	Player*       playerPtr = nullptr;
 	Physics*     physicsPtr = nullptr;
-	Collider*   colliderPtr = nullptr;
 	Movement*   movementPtr = nullptr;
 	ModelInstance* modelPtr = nullptr;
-
+    
 	set<Entity*> connections;
 	
 	virtual void SendEvent(Event event) {};

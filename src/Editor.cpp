@@ -654,7 +654,8 @@ void EntitiesTab(){
 				ImGui::TextEx(str1.str+i, str1.str+i+1);
 			}
 		}else{
-			if(ImGui::BeginTable("##entity_list_table", 5, ImGuiTableFlags_BordersInner)){
+            
+			if(ImGui::BeginTable("##entity_list_table", 4, ImGuiTableFlags_BordersInner)){
 				ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed, fontw * 3.5f);  //visible ImGui::Button
 				ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed, fontw * 5.f);  //id
 				ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthStretch);             //name
@@ -664,7 +665,7 @@ void EntitiesTab(){
 				forX(ent_idx, AtmoAdmin->entities.count){
 					Entity* ent = AtmoAdmin->entities[ent_idx];
 					if(!ent) assert(!"NULL entity when creating entity list table");
-					ImGui::PushID(ent->id);
+					ImGui::PushID(ent_idx);
 					ImGui::TableNextRow();
                     
 					//// visible button ////
@@ -673,20 +674,14 @@ void EntitiesTab(){
 						if(ImGui::Button((m->visible) ? "(M)" : "( )", ImVec2(-FLT_MIN, 0.0f))){
 							m->ToggleVisibility();
 						}
-					}
-					//else if(Light* l = ent->GetAttribute<Light>()){
-					//	if(ImGui::Button((l->active) ? "(L)" : "( )", ImVec2(-FLT_MIN, 0.0f))){
-					//		l->active = !l->active;
-					//	}
-					//}
-					else{
+					}else{
 						if(ImGui::Button("(?)", ImVec2(-FLT_MIN, 0.0f))){}
 					}
                     
 					//// id + label (selectable row) ////
 					ImGui::TableSetColumnIndex(1);
-					char label[8];
-					sprintf(label, " %04d ", ent->id);
+					char label[16];
+					sprintf(label, "%04d ", ent_idx);
 					u32 selected_idx = -1;
 					forI(selected_entities.count){ if(ent == selected_entities[i]){ selected_idx = i; break; } }
 					bool is_selected = selected_idx != -1;
@@ -732,7 +727,7 @@ void EntitiesTab(){
 					//EventsMenu(events_ent);
                     
 					//// delete button ////
-					ImGui::TableSetColumnIndex(4);
+					ImGui::TableSetColumnIndex(3);
 					if(ImGui::Button("X", ImVec2(-FLT_MIN, 0.0f))){
 						if(is_selected) selected_entities.remove(selected_idx);
 						//AtmoAdmin->DeleteEntity(ent);
@@ -785,7 +780,7 @@ void EntitiesTab(){
 	if(ImGui::BeginChild("##ent_inspector", ImVec2(ImGui::GetWindowWidth() * 0.95f, ImGui::GetWindowHeight() * .9f), true, ImGuiWindowFlags_NoScrollbar)){
         
 		//// name ////
-		SetPadding; ImGui::TextEx(TOSTDSTRING(sel->id, ":").c_str());
+		SetPadding; ImGui::TextEx("Name:");
 		ImGui::SameLine(); ImGui::SetNextItemWidth(-FLT_MIN); ImGui::InputText("##ent_name_input", sel->name.str, DESHI_NAME_SIZE,
                                                                                ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_AutoSelectAll);
         
@@ -1110,22 +1105,22 @@ void EntitiesTab(){
 		ImGui::SetCursorPosX(ImGui::GetWindowWidth() * 0.025);
 		if(ImGui::Button("Add Attribute")){
 			switch (1 << (add_comp_index - 1)){
-				case AttributeType_ModelInstance: {
-					switch (sel->type) {
-						case EntityType_Player: {
-							PlayerEntity* p = (PlayerEntity*)sel;
-							p->model = ModelInstance();
-							p->modelPtr = &p->model;
-						}break;
-                        
-						default: {
-							//do something like say the currently selected type cant add that
-							//or even better only show the things that can be added to that type
-                            
-						}break;
-					}
-					//admin->AddAttributeToLayers(comp);
-				}break;
+				//case AttributeType_ModelInstance: {
+                //switch (sel->type) {
+                //case EntityType_Player: {
+                //PlayerEntity* p = (PlayerEntity*)sel;
+                //p->model = new ModelInstance();
+                //p->modelPtr = p->model;
+                //}break;
+                //
+                //default: {
+                ////do something like say the currently selected type cant add that
+                ////or even better only show the things that can be added to that type
+                //
+                //}break;
+                //}
+                ////admin->AddAttributeToLayers(comp);
+				//}break;
                 //	case AttributeType_Physics: {
                 //		Attribute* comp = new Physics();
                 //		sel->AddAttribute(comp);
@@ -1996,9 +1991,9 @@ void SettingsTab(){
 	if(ImGui::BeginChild("##settings_tab", ImVec2(ImGui::GetWindowWidth() * 0.95f, ImGui::GetWindowHeight() * .9f))){
 		//// physics properties ////
 		if(ImGui::CollapsingHeader("Physics", 0)){
-			ImGui::TextEx("Pause Physics "); ImGui::SameLine();
-			if(ImGui::Button((AtmoAdmin->pause_phys) ? "True" : "False", ImVec2(-FLT_MIN, 0))){
-				AtmoAdmin->pause_phys = !AtmoAdmin->pause_phys;
+			ImGui::TextEx("Sim Physics"); ImGui::SameLine();
+			if(ImGui::Button((AtmoAdmin->simulateInEditor) ? "True" : "False", ImVec2(-FLT_MIN, 0))){
+				AtmoAdmin->simulateInEditor = !AtmoAdmin->simulateInEditor;
 			}
 			//ImGui::TextEx("Gravity       "); ImGui::SameLine(); ImGui::InputFloat("##phys_gravity", &AtmoAdmin->physics.gravity);
             
@@ -2452,10 +2447,8 @@ void Editor::Update(){
 	fonth = ImGui::GetFontSize();
 	fontw = fonth / 2.f;
 	
-	{//general
-		if(DeshInput->KeyPressed(Key::P | InputMod_Lctrl))
-			AtmoAdmin->paused = !AtmoAdmin->paused;
-	}
+    //simulate physics in editor
+    if(DeshInput->KeyPressed(Key::P | InputMod_Lctrl)) AtmoAdmin->simulateInEditor = !AtmoAdmin->simulateInEditor;
     
 	{//select
         

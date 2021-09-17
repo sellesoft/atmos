@@ -52,27 +52,48 @@ void Controller::Init(){
 void Controller::Update(){
 	vec3 inputs = vec3::ZERO;
 	
-    //camera movement
-	if(DeshInput->KeyDown(MouseButton::RIGHT)){
-		if(DeshInput->KeyDown(movementFlyingUp))     { inputs.y += 1; }
-		if(DeshInput->KeyDown(movementFlyingDown))   { inputs.y -= 1; }
-		if(DeshInput->KeyDown(movementFlyingForward)){ inputs += AtmoAdmin->camera.forward; }
-		if(DeshInput->KeyDown(movementFlyingBack))   { inputs -= AtmoAdmin->camera.forward; }
-		if(DeshInput->KeyDown(movementFlyingRight))  { inputs += AtmoAdmin->camera.right; }
-		if(DeshInput->KeyDown(movementFlyingLeft))   { inputs -= AtmoAdmin->camera.right; }
+    switch(AtmoAdmin->gameState){
+        case GameState_Play:{
+            //game state
+            if(DeshInput->KeyPressed(Key::ESCAPE)) AtmoAdmin->gameState = GameState_Menu;
+            if(DeshInput->KeyPressed(Key::F10))    AtmoAdmin->gameState = GameState_Editor;
+            
+        }break;
         
-		if     (DeshInput->LShiftDown()){ AtmoAdmin->camera.position += inputs.normalized() * 16.f * DeshTime->deltaTime; }
-		else if(DeshInput->LCtrlDown()) { AtmoAdmin->camera.position += inputs.normalized() * 4.f  * DeshTime->deltaTime; }
-		else                            { AtmoAdmin->camera.position += inputs.normalized() * 8.f  * DeshTime->deltaTime; }
-	}
-    
-	//camera rotation
-	if(DeshInput->KeyPressed(MouseButton::RIGHT)){ DeshWindow->UpdateCursorMode(CursorMode_FirstPerson); }
-	if(DeshInput->KeyReleased(MouseButton::RIGHT)){ DeshWindow->UpdateCursorMode(CursorMode_Default); }
-	if(DeshInput->KeyDown(MouseButton::RIGHT)){
-		AtmoAdmin->camera.rotation.y += (DeshInput->mouseX - DeshWindow->centerX) * cameraSensitivity * MOUSE_SENS_FRACTION;
-		AtmoAdmin->camera.rotation.x += (DeshInput->mouseY - DeshWindow->centerY) * cameraSensitivity * MOUSE_SENS_FRACTION;
-	}
+        case GameState_Menu:{
+            //game state
+            if(DeshInput->KeyPressed(Key::ESCAPE)) AtmoAdmin->gameState = GameState_Play;
+            
+            
+        }break;
+        
+        case GameState_Editor:{
+            //game state
+            if(DeshInput->KeyPressed(Key::F10)) AtmoAdmin->gameState = GameState_Play;
+            
+            //camera movement
+            if(DeshInput->KeyDown(MouseButton::RIGHT)){
+                if(DeshInput->KeyDown(movementFlyingUp))     { inputs.y += 1; }
+                if(DeshInput->KeyDown(movementFlyingDown))   { inputs.y -= 1; }
+                if(DeshInput->KeyDown(movementFlyingForward)){ inputs += AtmoAdmin->camera.forward; }
+                if(DeshInput->KeyDown(movementFlyingBack))   { inputs -= AtmoAdmin->camera.forward; }
+                if(DeshInput->KeyDown(movementFlyingRight))  { inputs += AtmoAdmin->camera.right; }
+                if(DeshInput->KeyDown(movementFlyingLeft))   { inputs -= AtmoAdmin->camera.right; }
+                
+                if     (DeshInput->LShiftDown()){ AtmoAdmin->camera.position += inputs.normalized() * 32.f * DeshTime->deltaTime; }
+                else if(DeshInput->LCtrlDown()) { AtmoAdmin->camera.position += inputs.normalized() * 4.f  * DeshTime->deltaTime; }
+                else                            { AtmoAdmin->camera.position += inputs.normalized() * 8.f  * DeshTime->deltaTime; }
+            }
+            
+            //camera rotation
+            if(DeshInput->KeyPressed(MouseButton::RIGHT)){ DeshWindow->UpdateCursorMode(CursorMode_FirstPerson); }
+            if(DeshInput->KeyReleased(MouseButton::RIGHT)){ DeshWindow->UpdateCursorMode(CursorMode_Default); }
+            if(DeshInput->KeyDown(MouseButton::RIGHT)){
+                AtmoAdmin->camera.rotation.y += (DeshInput->mouseX - DeshWindow->centerX) * cameraSensitivity * MOUSE_SENS_FRACTION;
+                AtmoAdmin->camera.rotation.x += (DeshInput->mouseY - DeshWindow->centerY) * cameraSensitivity * MOUSE_SENS_FRACTION;
+            }
+        }break;
+    }
 }
 
 void Controller::Save(){
