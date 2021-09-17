@@ -23,7 +23,7 @@ struct Entity;
 struct PlayerEntity;
 typedef u32 EntityType;
 struct Admin{
-    GameState      gameState;
+    GameState      state;
 	Controller     controller;
 	CameraInstance camera; //admin controls all cameras in the world, but for now its just one
     PhysicsSystem  physics;
@@ -44,6 +44,7 @@ struct Admin{
 	void Reset();
 	void Cleanup();
     
+	void Admin::ChangeState(GameState new_state);
 	Entity* EntityRaycast(vec3 origin, vec3 direction, f32 maxDistance, EntityType filter = 0);
 };
 

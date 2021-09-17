@@ -12,6 +12,17 @@
 struct PlayerEntity : public Entity {
 	ModelInstance* model;
 	Physics*       physics;
+	
+	f32 walkSpeed   = 5.f;
+	f32 sprintMult  = 2.f;
+	f32 crouchMult  = .5f;
+	f32 jumpImpulse = 10.f;
+	
+	b32 isJumping   = false;
+	b32 isCrouching = false;
+	b32 isRunning   = false;
+	
+	vec3 inputs;
     
 	void Init(const char* name, Mesh* mesh, Transform transform, f32 mass) {
 		type = EntityType_Player;
@@ -32,7 +43,12 @@ struct PlayerEntity : public Entity {
         physics->mass       = mass;
         physics->elasticity = 0;
 	}
-    
+	
+	void Update(){
+		
+		//AtmoAdmin->camera.position
+	}
+	
 	void SendEvent(Event event) override {};
 	void ReceiveEvent(Event event) override {};
 };

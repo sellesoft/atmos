@@ -3,9 +3,11 @@
 #include "entities/PlayerEntity.h"
 #include "entities/PhysicsEntity.h"
 #include "core/storage.h"
+#include "core/logging.h"
+#include "core/window.h"
 
 void Admin::Init(){
-    gameState = GameState_Editor;
+    state = GameState_Editor;
     simulateInEditor = false;
     
 	camera = CameraInstance(90);
@@ -32,9 +34,10 @@ void Admin::Init(){
 }
 
 void Admin::Update(){
-    switch(gameState){
+    switch(state){
         case GameState_Play:{
             controller.Update();
+			player->Update();
             camera.Update();
             forE(movementArr) it->Update();
             physics.Update();
@@ -44,6 +47,7 @@ void Admin::Update(){
         }break;
         
         case GameState_Menu:{
+			controller.Update();
             forE(modelArr)    it->Update();
         }break;
         
@@ -59,6 +63,59 @@ void Admin::Update(){
             forE(modelArr)    it->Update();
         }break;
     }
+}
+
+void Admin::ChangeState(GameState new_state){
+	if(state == new_state) return;
+    if(state >= GameState_COUNT) return logE("Admin attempted to switch to unhandled gamestate: ", new_state);
+	
+	const char* from; const char* to;
+	switch(state){
+		case GameState_Play:    from = "PLAY";
+		switch(new_state){
+			case GameState_Menu:{   to = "MENU";
+				DeshWindow->UpdateCursorMode(CursorMode_Default);
+				player->model->visible = false;
+				//TODO save binary
+			}break;
+			case GameState_Editor:{ to = "EDITOR";
+				DeshWindow->UpdateCursorMode(CursorMode_Default);
+				player->model->visible = true;
+				//TODO save binary
+				//TODO load text
+			}break;
+		}break;
+		case GameState_Menu:    from = "MENU";
+		switch(new_state){
+			case GameState_Play:{   to = "PLAY";
+				DeshWindow->UpdateCursorMode(CursorMode_FirstPerson);
+				player->model->visible = false;
+				//TODO save binary
+			}break;
+			case GameState_Editor:{ to = "EDITOR";
+				DeshWindow->UpdateCursorMode(CursorMode_Default);
+				player->model->visible = true;
+				//TODO save binary
+				//TODO load text
+			}break;
+		}break;
+		case GameState_Editor:  from = "EDITOR";
+		switch(new_state){
+			case GameState_Play:{   to = "PLAY";
+				DeshWindow->UpdateCursorMode(CursorMode_FirstPerson);
+				player->model->visible = false;
+				//TODO save text
+			}break;
+			case GameState_Menu:{   to = "MENU";
+				DeshWindow->UpdateCursorMode(CursorMode_Default);
+				player->model->visible = true;
+				//TODO save text
+			}break;
+		}break;
+	}
+	
+	state = new_state;
+	logf("atmos","Changed gamestate from %s to %s", from,to);
 }
 
 void Admin::PostRenderUpdate(){

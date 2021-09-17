@@ -1,6 +1,7 @@
 #include "controller.h"
 #include "Admin.h"
 #include "camerainstance.h"
+#include "entities/PlayerEntity.h"
 #include "core/window.h"
 
 local f32 MOUSE_SENS_FRACTION = .03f; //TODO(delle) calculate this to be the same as Source
@@ -52,24 +53,38 @@ void Controller::Init(){
 void Controller::Update(){
 	vec3 inputs = vec3::ZERO;
 	
-    switch(AtmoAdmin->gameState){
+    switch(AtmoAdmin->state){
         case GameState_Play:{
             //game state
-            if(DeshInput->KeyPressed(Key::ESCAPE)) AtmoAdmin->gameState = GameState_Menu;
-            if(DeshInput->KeyPressed(Key::F10))    AtmoAdmin->gameState = GameState_Editor;
+            if(DeshInput->KeyPressed(Key::ESCAPE)) AtmoAdmin->ChangeState(GameState_Menu);
+            if(DeshInput->KeyPressed(Key::F10))    AtmoAdmin->ChangeState(GameState_Editor);
             
+			if(DeshInput->KeyDown(movementWalkingForward)) { inputs += vec3(AtmoAdmin->camera.forward.x, 0, AtmoAdmin->camera.forward.z); }
+			if(DeshInput->KeyDown(movementWalkingBackward)){ inputs -= vec3(AtmoAdmin->camera.forward.x, 0, AtmoAdmin->camera.forward.z); }
+			if(DeshInput->KeyDown(movementWalkingRight))   { inputs += vec3(AtmoAdmin->camera.right.x, 0, AtmoAdmin->camera.right.z); }
+			if(DeshInput->KeyDown(movementWalkingLeft))    { inputs -= vec3(AtmoAdmin->camera.right.x, 0, AtmoAdmin->camera.right.z); }
+			
+			if(DeshInput->KeyPressed (movementJump))  { AtmoAdmin->player->isJumping   = true; }
+			if(DeshInput->KeyPressed (movementCrouch)){ AtmoAdmin->player->isCrouching = true; }
+			if(DeshInput->KeyReleased(movementCrouch)){ AtmoAdmin->player->isCrouching = false; }
+			if(DeshInput->KeyPressed (movementRun))   { AtmoAdmin->player->isRunning   = true; }
+			if(DeshInput->KeyReleased(movementRun))   { AtmoAdmin->player->isRunning   = false; }
+			
+			AtmoAdmin->camera.rotation.y += (DeshInput->mouseX - DeshWindow->centerX) * cameraSensitivity * MOUSE_SENS_FRACTION;
+			AtmoAdmin->camera.rotation.x += (DeshInput->mouseY - DeshWindow->centerY) * cameraSensitivity * MOUSE_SENS_FRACTION;
+			AtmoAdmin->player->inputs = inputs;
         }break;
         
         case GameState_Menu:{
             //game state
-            if(DeshInput->KeyPressed(Key::ESCAPE)) AtmoAdmin->gameState = GameState_Play;
+            if(DeshInput->KeyPressed(Key::ESCAPE)) AtmoAdmin->ChangeState(GameState_Play);
             
             
         }break;
         
         case GameState_Editor:{
             //game state
-            if(DeshInput->KeyPressed(Key::F10)) AtmoAdmin->gameState = GameState_Play;
+            if(DeshInput->KeyPressed(Key::F10)) AtmoAdmin->ChangeState(GameState_Play);
             
             //camera movement
             if(DeshInput->KeyDown(MouseButton::RIGHT)){
