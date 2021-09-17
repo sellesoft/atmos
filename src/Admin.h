@@ -6,11 +6,16 @@
 #include "camerainstance.h"
 #include "editor.h"
 #include "physicssystem.h"
-#include "attributes/Movement.h"
-#include "attributes/ModelInstance.h"
-#include "attributes/Physics.h"
+//#include "attributes/Movement.h"
+//#include "attributes/ModelInstance.h"
+//#include "attributes/Physics.h"
 #include "utils/array.h"
 #include "utils/string.h"
+
+#include "entities/PlayerEntity.h"
+#include "entities/PhysicsEntity.h"
+#include "entities/StaticEntity.h"
+
 
 enum GameState_{
     GameState_Play,
@@ -19,8 +24,6 @@ enum GameState_{
     GameState_COUNT,
 }; typedef u32 GameState;
 
-struct Entity;
-struct PlayerEntity;
 typedef u32 EntityType;
 struct Admin{
     GameState      state;
@@ -30,13 +33,15 @@ struct Admin{
 	
     Editor editor;
     b32    simulateInEditor;
+
+	PlayerEntity  player; //store player separate so we can access it directly
+	array<PhysicsEntity> physicsEntities;
+	array<SceneryEntity> staticEntities;
+
     
-	PlayerEntity*  player; //store player separate so we can access it directly
-	array<Entity*> entities;
-    
-	array<Movement>      movementArr;
-	array<Physics>       physicsArr;
-	array<ModelInstance> modelArr;
+	//array<Movement>      movementArr;
+	//array<Physics>       physicsArr;
+	//array<ModelInstance> modelArr;
     
 	void Init();
 	void Update();
@@ -44,7 +49,7 @@ struct Admin{
 	void Reset();
 	void Cleanup();
     
-	void Admin::ChangeState(GameState new_state);
+	void ChangeState(GameState new_state);
 	Entity* EntityRaycast(vec3 origin, vec3 direction, f32 maxDistance, EntityType filter = 0);
 };
 

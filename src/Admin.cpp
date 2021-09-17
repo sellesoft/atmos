@@ -15,40 +15,39 @@ void Admin::Init(){
 	editor.Init();
     physics.Init(300);
 	
-    player = new PlayerEntity;
-    player->Init("player",0,Transform{vec3(10,20,10)},1.0f);
+    player.Init("player",0,Transform{vec3(10,20,10)},1.0f);
     
     {//sandbox
         Mesh* box_mesh = Storage::CreateBoxMesh(1,1,1,Color_Red).second;
         u32 flat_mat = Storage::CreateMaterial("flat", Shader_Flat, MaterialFlags_NONE, {}).first;
         Model* model = Storage::CreateModelFromMesh(box_mesh).second;
         model->batches[0].material = flat_mat;
-        PhysicsEntity* box1 = new PhysicsEntity;
-        box1->Init("floor",model,Transform{vec3(0,-2,0),vec3::ZERO,vec3(20,1,20)},1.0f,true);
-        AtmoAdmin->entities.add(box1);
+		PhysicsEntity box1;
+		box1.Init("floor", model, Transform{ vec3(0,-2,0),vec3::ZERO,vec3(20,1,20) }, 1.0f, true);
+        AtmoAdmin->physicsEntities.add(box1);
         
-        PhysicsEntity* box2 = new PhysicsEntity;
-        box2->Init("falling",Storage::NullModel(),Transform{vec3(0,10,0),vec3::ZERO,vec3::ONE},1.0f);
-        AtmoAdmin->entities.add(box2);
+		PhysicsEntity box2;
+		box2.Init("falling", Storage::NullModel(), Transform{ vec3(0,10,0),vec3::ZERO,vec3::ONE }, 1.0f);
+        AtmoAdmin->physicsEntities.add(box2);
     }
 }
 
 void Admin::Update(){
     switch(state){
         case GameState_Play:{
-            controller.Update();
-			player->Update();
-            camera.Update();
-            forE(movementArr) it->Update();
-            physics.Update();
+			controller.Update(); // get inputs from player
+			player   . Update();     // inputs determine how player affects world
+            camera  .  Update();     // player determines where the camera is now
+			physics  . Update();    // physics then determines how all objects move in the world and updates each entity's physics attribute
+
             f32 alpha = physics.fixedAccumulator / physics.fixedDeltaTime;
-            forE(physicsArr)  it->Update(alpha);
-            forE(modelArr)    it->Update();
+			forE(physicsEntities) it->Update();
+			forE(staticEntities)  it->Update();
         }break;
         
         case GameState_Menu:{
-			controller.Update();
-            forE(modelArr)    it->Update();
+			//controller.Update();
+            //forE(modelArr)    it->Update();
         }break;
         
         case GameState_Editor:{
@@ -58,9 +57,11 @@ void Admin::Update(){
             if(simulateInEditor){
                 physics.Update();
                 f32 alpha = physics.fixedAccumulator / physics.fixedDeltaTime;
-                forE(physicsArr)  it->Update(alpha);
             }
-            forE(modelArr)    it->Update();
+			player.ModelInstance::Update();
+            forE(physicsEntities)    it->ModelInstance::Update();
+			forE(staticEntities)     it->ModelInstance::Update();
+
         }break;
     }
 }
@@ -75,47 +76,47 @@ void Admin::ChangeState(GameState new_state){
 		switch(new_state){
 			case GameState_Menu:{   to = "MENU";
 				DeshWindow->UpdateCursorMode(CursorMode_Default);
-				player->model->visible = false;
+				player.ModelInstance::visible = false;
 				//TODO save binary
 			}break;
 			case GameState_Editor:{ to = "EDITOR";
 				DeshWindow->UpdateCursorMode(CursorMode_Default);
-				player->model->visible = true;
+				player.ModelInstance::visible = true;
 				//TODO save binary
 				//TODO load text
 			}break;
 		}break;
 		case GameState_Menu:    from = "MENU";
-		switch(new_state){
-			case GameState_Play:{   to = "PLAY";
-				DeshWindow->UpdateCursorMode(CursorMode_FirstPerson);
-				player->model->visible = false;
-				//TODO save binary
+			switch (new_state) {
+				case GameState_Play: {   to = "PLAY";
+					DeshWindow->UpdateCursorMode(CursorMode_FirstPerson);
+					player.ModelInstance::visible = false;
+					//TODO save binary
+				}break;
+				case GameState_Editor: { to = "EDITOR";
+					DeshWindow->UpdateCursorMode(CursorMode_Default);
+					player.ModelInstance::visible = true;
+					//TODO save binary
+					//TODO load text
+				}break;
 			}break;
-			case GameState_Editor:{ to = "EDITOR";
-				DeshWindow->UpdateCursorMode(CursorMode_Default);
-				player->model->visible = true;
-				//TODO save binary
-				//TODO load text
-			}break;
-		}break;
 		case GameState_Editor:  from = "EDITOR";
-		switch(new_state){
-			case GameState_Play:{   to = "PLAY";
-				DeshWindow->UpdateCursorMode(CursorMode_FirstPerson);
-				player->model->visible = false;
-				//TODO save text
-			}break;
-			case GameState_Menu:{   to = "MENU";
-				DeshWindow->UpdateCursorMode(CursorMode_Default);
-				player->model->visible = true;
+			switch (new_state) {
+				case GameState_Play: {   to = "PLAY";
+					DeshWindow->UpdateCursorMode(CursorMode_FirstPerson);
+					player.ModelInstance::visible = false;
+					//TODO save text
+				}break;
+				case GameState_Menu: {   to = "MENU";
+					DeshWindow->UpdateCursorMode(CursorMode_Default);
+					player.ModelInstance::visible = true;
 				//TODO save text
 			}break;
 		}break;
 	}
 	
 	state = new_state;
-	logf("atmos","Changed gamestate from %s to %s", from,to);
+	logf("atmos","Changed gamestate from %s to %s", from, to);
 }
 
 void Admin::PostRenderUpdate(){

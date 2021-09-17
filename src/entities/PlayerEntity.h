@@ -9,9 +9,14 @@
 #include "attributes/ModelInstance.h"
 #include "core/storage.h"
 
-struct PlayerEntity : public Entity {
-	ModelInstance* model;
-	Physics*       physics;
+struct PlayerEntity : 
+	public Entity, 
+	public Player, 
+	public Movement,
+	public ModelInstance, 
+	public Physics {
+	//ModelInstance* model;
+	//Physics*       physics;
 	
 	f32 walkSpeed   = 5.f;
 	f32 sprintMult  = 2.f;
@@ -25,28 +30,24 @@ struct PlayerEntity : public Entity {
 	vec3 inputs;
     
 	void Init(const char* name, Mesh* mesh, Transform transform, f32 mass) {
-		type = EntityType_Player;
-		this->name = name;
-		this->transform = transform;
+		Entity::type = EntityType_Player;
+		Entity::name = name;
+		Entity::transform = transform;
         
-        AtmoAdmin->modelArr.add(ModelInstance((mesh) ? mesh : Storage::NullMesh()));
-		model = AtmoAdmin->modelArr.last; modelPtr = model;
-		model->attribute.entity = this;
+		ModelInstance::mesh = (mesh) ? mesh : Storage::NullMesh();
         
-        AtmoAdmin->physicsArr.add(Physics());
-        physics = AtmoAdmin->physicsArr.last; physicsPtr = physics;
-		physics->attribute.entity = this;
-        physics->collider   = new AABBCollider(model->mesh, mass);
-        physics->position   = transform.position;
-        physics->rotation   = transform.rotation;
-        physics->scale      = transform.scale;
-        physics->mass       = mass;
-        physics->elasticity = 0;
+		Physics::collider   = new AABBCollider(ModelInstance::mesh, mass);
+        Physics::position   = transform.position;
+        Physics::rotation   = transform.rotation;
+        Physics::scale      = transform.scale;
+        Physics::mass       = mass;
+        Physics::elasticity = 0;
 	}
 	
 	void Update(){
-		
-		//AtmoAdmin->camera.position
+		Player::       Update();
+		Movement::     Update();
+		ModelInstance::Update();
 	}
 	
 	void SendEvent(Event event) override {};
