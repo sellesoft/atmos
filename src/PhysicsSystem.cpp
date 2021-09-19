@@ -7,10 +7,10 @@
 #include "attributes/Collider.h"
 
 bool AABBAABBCollision(Physics* p1, AABBCollider* c1, Physics* p2, AABBCollider* c2){
-	vec3 min1 = p1->position - ((c1->halfDims * p1->scale) + c1->offset); 
-	vec3 max1 = p1->position + ((c1->halfDims * p1->scale) + c1->offset);
-	vec3 min2 = p2->position - ((c2->halfDims * p2->scale) + c2->offset); 
-	vec3 max2 = p2->position + ((c2->halfDims * p2->scale) + c2->offset);
+	vec3 min1 = (p1->position - (c1->halfDims * p1->scale)) + c1->offset;
+	vec3 max1 = (p1->position + (c1->halfDims * p1->scale)) + c1->offset;
+	vec3 min2 = (p2->position - (c2->halfDims * p2->scale)) + c2->offset;
+	vec3 max2 = (p2->position + (c2->halfDims * p2->scale)) + c2->offset;
     
 	if((min1.x <= max2.x && max1.x >= min2.x) && //check if overlapping
        (min1.y <= max2.y && max1.y >= min2.y) &&
@@ -154,6 +154,7 @@ void PhysicsSystem::Update(){
                 //TODO solve manifolds
             }
         }
+		AtmoAdmin->player->PostCollisionUpdate();
         
         //// update fixed time ////
         fixedAccumulator -= fixedDeltaTime;

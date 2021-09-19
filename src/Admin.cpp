@@ -16,7 +16,7 @@ void Admin::Init(){
     physics.Init(300);
 	
     player = new PlayerEntity;
-    player->Init("player",Transform{vec3(10,20,10)},1.0f);
+    player->Init("player",Transform{vec3(10,10,10),vec3::ZERO,vec3::ONE},1.0f);
     
     {//sandbox
         Mesh* box_mesh = Storage::CreateBoxMesh(1,1,1,Color_Red).second;
@@ -24,11 +24,11 @@ void Admin::Init(){
         Model* model = Storage::CreateModelFromMesh(box_mesh).second;
         model->batches[0].material = flat_mat;
         PhysicsEntity* box1 = new PhysicsEntity;
-        box1->Init("floor",model,Transform{vec3(0,-2,0),vec3::ZERO,vec3(20,1,20)},1.0f,true);
+        box1->Init("floor",model,Transform{vec3(0,-.5f,0),vec3::ZERO,vec3(40,1,40)},1.0f,true);
         AtmoAdmin->entities.add(box1);
         
         PhysicsEntity* box2 = new PhysicsEntity;
-        box2->Init("falling",Storage::NullModel(),Transform{vec3(0,10,0),vec3::ZERO,vec3::ONE},1.0f);
+        box2->Init("falling",Storage::NullModel(),Transform{vec3(0,5,0),vec3::ZERO,vec3::ONE},1.0f);
         AtmoAdmin->entities.add(box2);
     }
 }
@@ -66,7 +66,7 @@ void Admin::ChangeState(GameState new_state){
 	if(state == new_state) return;
     if(state >= GameState_COUNT) return LogE("Admin attempted to switch to unhandled gamestate: ", new_state);
 	
-	const char* from; const char* to;
+	const char* from = 0; const char* to = 0;
 	switch(state){
 		case GameState_Play:    from = "PLAY";
 		switch(new_state){
@@ -128,36 +128,39 @@ void Admin::Cleanup(){
 }
 
 Entity* Admin::EntityRaycast(vec3 origin, vec3 direction, f32 maxDistance, EntityType filter) {
+	Assert(maxDistance > 0 && direction != vec3::ZERO);
+	
 	Entity* result = 0;
-	f32 min_depth = INFINITY;
+	f32 min_depth = maxDistance;
 	f32 depth;
 	vec3 p0, p1, p2, normal;
 	vec3 intersect;
 	vec3 perp01, perp12, perp20;
 	mat4 transform, rotation;
 	Mesh::Triangle* tri;
-	for (Entity* e : entities) {
-		if (!(filter & e->type)) {
+	for(Entity* e : entities){
+		if(!(filter & e->type)){
 			transform = e->transform.Matrix();
 			rotation = mat4::RotationMatrix(e->transform.rotation);
-			if (ModelInstance* mc = e->modelPtr) {
-				if (!mc->visible) continue;
-				forX(tri_idx, mc->mesh->triangleCount) {
+			if(ModelInstance* mc = e->modelPtr){
+				if(!mc->visible) continue;
+				forX(tri_idx, mc->mesh->triangleCount){
 					tri = &mc->mesh->triangleArray[tri_idx];
 					p0 = tri->p[0] * transform;
-					p1 = tri->p[1] * transform;
-					p2 = tri->p[2] * transform;
 					normal = tri->normal * rotation;
                     
 					//early out if triangle is not facing us
-					if (normal.dot(p0 - origin) >= 0) continue;
+					if(normal.dot(p0 - origin) >= 0) continue;
                     
 					//find where on the plane defined by the triangle our raycast intersects
 					depth = (p0 - origin).dot(normal) / direction.dot(normal);
 					intersect = origin + (direction * depth);
                     
 					//early out if intersection is behind us
-					if (depth <= 0) continue;
+					if(depth <= 0) continue;
+					
+					p1 = tri->p[1] * transform;
+					p2 = tri->p[2] * transform;
                     
 					//make vectors perpendicular to each edge of the triangle
 					perp01 = normal.cross(p1 - p0).normalized();
@@ -165,12 +168,13 @@ Entity* Admin::EntityRaycast(vec3 origin, vec3 direction, f32 maxDistance, Entit
 					perp20 = normal.cross(p0 - p2).normalized();
                     
 					//check that the intersection point is within the triangle and its the closest triangle found so far
-					if (perp01.dot(intersect - p0) > 0 &&
-						perp12.dot(intersect - p1) > 0 &&
-						perp20.dot(intersect - p2) > 0) {
+					if(perp01.dot(intersect - p0) > 0 &&
+					   perp12.dot(intersect - p1) > 0 &&
+					   perp20.dot(intersect - p2) > 0){
+						//Log("raycast",origin," ",intersect," ",depth);
                         
 						//if its the closest triangle so far we store its index
-						if (depth < min_depth) {
+						if(depth < min_depth){
 							result = e;
 							min_depth = depth;
 							break;
@@ -181,8 +185,6 @@ Entity* Admin::EntityRaycast(vec3 origin, vec3 direction, f32 maxDistance, Entit
 		}
 	}
     
-	if (result && (depth <= maxDistance) && (depth > 0)) 
-		return result;
-	return 0;
+	return (result) ? result : 0;
 }
 

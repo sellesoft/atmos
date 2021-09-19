@@ -13,17 +13,17 @@ struct PlayerEntity : public Entity {
 	Physics*       physics;
 	
 	f32 standHeight    = 2.0;
-	f32 standEyeLevel  = 1.8;
-	f32 crouchHeight   = 1.2;
-	f32 crouchEyeLevel = 1.1;
+	f32 standEyeLevel  = 2.0;
+	f32 crouchHeight   = 1.0;
+	f32 crouchEyeLevel = 1.0;
 	f32 timeToCrouch   = 0.2;
 	f32 crouchTimer    = 0.0;
 	f32 walkSpeed      = 5.0;
 	f32 runMult        = 2.0;
 	f32 crouchMult     = 0.5;
-	f32 jumpImpulse    = 2.0;
+	f32 jumpImpulse    = 1.0;
 	f32 groundAccel    = 10.0;
-	f32 airAccel       = 100.0;
+	f32 airAccel       = 10.0;
 	f32 minSpeed       = 0.12;
 	
 	b32 isJumping   = false;
@@ -57,7 +57,6 @@ struct PlayerEntity : public Entity {
 	void Update(){
 		f32 gravity = AtmoAdmin->physics.gravity;
 		f32 dt = AtmoAdmin->physics.fixedDeltaTime;
-		AABBCollider* collider = (AABBCollider*)physics->collider;
 		f32 max_speed = walkSpeed;
 		
 		if(isCrouching){
@@ -70,16 +69,16 @@ struct PlayerEntity : public Entity {
 			}
 		}
 		
+		//check if in air or on ground
+		vec3 ray_start = physics->position; ray_start.y += .1f;
+		Entity* below = AtmoAdmin->EntityRaycast(physics->position, vec3::DOWN, .2f);
+		bool inAir = (below == 0);
+		
 		//apply gravity to velocity
 		physics->velocity += vec3(0,-gravity,0) * dt;
 		
-		//check if in air or on ground
-		Entity* below = AtmoAdmin->EntityRaycast(physics->position, vec3::DOWN, .25f);
-		bool inAir = (below == 0);
-		if(below) Logf("","%s",below->name);
-		
 		if(inAir){
-			physics->velocity += inputs * airAccel * dt;
+			physics->velocity += inputs * airAccel * dt; //TODO(delle) dont keep adding forward speed
 		}else{
 			physics->velocity += inputs * groundAccel * dt;
 			physics->velocity.clampMag(0, max_speed);
@@ -97,7 +96,7 @@ struct PlayerEntity : public Entity {
 			}
 			
 			if(isJumping){
-				physics->AddImpulse(vec3(0,jumpImpulse,0));
+				physics->AddImpulse(vec3(0,jumpImpulse,0)); //TODO(delle) this is boosted when sprinting?
 				inAir = true;
 			}
 		}
@@ -105,8 +104,12 @@ struct PlayerEntity : public Entity {
 		physics->position += physics->velocity * dt;
 		physics->acceleration = vec3::ZERO;
 		
+		AABBCollider* collider = (AABBCollider*)physics->collider;
 		f32 crouch_interp = Math::lerpf(standHeight, crouchHeight, crouchTimer / timeToCrouch) / 2.f;
 		collider->halfDims.y = crouch_interp; collider->offset.y = crouch_interp;
+	}
+	
+	void PostCollisionUpdate(){
 		AtmoAdmin->camera.position = vec3(physics->position.x, 
 										  physics->position.y+Math::lerpf(standEyeLevel, crouchEyeLevel, crouchTimer / timeToCrouch),
 										  physics->position.z);
@@ -115,6 +118,5 @@ struct PlayerEntity : public Entity {
 	void SendEvent(Event event) override {};
 	void ReceiveEvent(Event event) override {};
 };
-
 
 #endif //ATMOS_PLAYERENTITY_H

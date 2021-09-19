@@ -43,7 +43,7 @@ struct Admin{
 	void Reset();
 	void Cleanup();
     
-	void Admin::ChangeState(GameState new_state);
+	void ChangeState(GameState new_state);
 	Entity* EntityRaycast(vec3 origin, vec3 direction, f32 maxDistance, EntityType filter = 0);
 };
 
