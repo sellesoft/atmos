@@ -1,23 +1,15 @@
 #include "Collider.h"
 #include "math/InertiaTensors.h"
-#include "core/console.h"
 #include "core/model.h"
-#include "core/logging.h"
-
 
 /////////
 // 
 //    AABB
 // 
 /////////
-AABBCollider::AABBCollider(Mesh* mesh, f32 mass, vec3 _offset, u32 collisionLayer, bool nocollide){
-	shape     = ColliderShape_AABB;
-	collLayer = collisionLayer;
-	noCollide = nocollide;
-	offset    = _offset;
-    
-	if (!mesh) { halfDims = vec3::ZERO; LogE("collider","null mesh passed for AABB creation"); return; }
-	if (!mesh->vertexCount) { halfDims = vec3::ZERO; LogE("collider","mesh with no vertices passed to AABB creation"); return; }
+AABBCollider::AABBCollider(Mesh* mesh, f32 mass){
+	Assert(mesh && mesh->vertexCount && mass > 0);
+	shape = ColliderShape_AABB;
     
 	vec3 min = mesh->aabbMin.absV();
 	vec3 max = mesh->aabbMax.absV();
@@ -25,20 +17,19 @@ AABBCollider::AABBCollider(Mesh* mesh, f32 mass, vec3 _offset, u32 collisionLaye
 	halfDims.y = (min.y > max.y) ? min.y : max.y;
 	halfDims.z = (min.z > max.z) ? min.z : max.z;
     
-	tensor    = InertiaTensors::SolidCuboid(2.f*abs(halfDims.x), 2.f*abs(halfDims.y), 2.f*abs(halfDims.z), mass);
+	tensor = InertiaTensors::SolidCuboid(2.f*halfDims.x, 2.f*halfDims.y, 2.f*halfDims.z, mass);
 }
 
-AABBCollider::AABBCollider(vec3 _halfDims, f32 mass, vec3 _offset, u32 collisionLayer, bool nocollide){
-	shape     = ColliderShape_AABB;
-	collLayer = collisionLayer;
-	noCollide = nocollide;
-	halfDims  = _halfDims;
-	offset    = _offset;
-	tensor    = InertiaTensors::SolidCuboid(2.f*abs(halfDims.x), 2.f*abs(halfDims.y), 2.f*abs(halfDims.z), mass);
+AABBCollider::AABBCollider(vec3 _halfDims, f32 mass){
+	Assert(_halfDims.x > 0 && _halfDims.y > 0 && _halfDims.z > 0 && mass > 0);
+	shape    = ColliderShape_AABB;
+	halfDims = _halfDims;
+	tensor   = InertiaTensors::SolidCuboid(2.f*halfDims.x, 2.f*halfDims.y, 2.f*halfDims.z, mass);
 }
 
 void AABBCollider::RecalculateTensor(f32 mass){
-	tensor = InertiaTensors::SolidCuboid(2.f*abs(halfDims.x), 2.f*abs(halfDims.y), 2.f*abs(halfDims.z), mass);
+	Assert(mass > 0);
+	tensor = InertiaTensors::SolidCuboid(2.f*halfDims.x, 2.f*halfDims.y, 2.f*halfDims.z, mass);
 }
 
 
@@ -47,16 +38,15 @@ void AABBCollider::RecalculateTensor(f32 mass){
 //    Sphere
 // 
 /////////
-SphereCollider::SphereCollider(float _radius, f32 mass, vec3 _offset, u32 collisionLayer, bool nocollide){
-	shape     = ColliderShape_AABB;
-	collLayer = collisionLayer;
-	noCollide = nocollide;
-    radius    = _radius;
-	offset    = _offset;
-    tensor    = InertiaTensors::SolidSphere(radius,mass);
+SphereCollider::SphereCollider(float _radius, f32 mass){
+	Assert(_radius > 0 && mass > 0);
+	shape  = ColliderShape_AABB;
+    radius = _radius;
+    tensor = InertiaTensors::SolidSphere(radius,mass);
 }
 
 void SphereCollider::RecalculateTensor(f32 mass){
+	Assert(mass > 0);
 	tensor = InertiaTensors::SolidSphere(radius,mass);
 }
 
@@ -66,7 +56,8 @@ void SphereCollider::RecalculateTensor(f32 mass){
 //    Complex
 // 
 /////////
-ComplexCollider::ComplexCollider(Mesh* mesh, f32 mass, vec3 _offset, u32 collisionLayer, bool noCollide){
+ComplexCollider::ComplexCollider(Mesh* mesh, f32 mass){
+	Assert(mesh && mass > 0);
 	//!!Incomplete
-    
+    Assert(!"not implemented");
 }

@@ -4,6 +4,7 @@
 
 #include "Entity.h"
 #include "attributes/Physics.h"
+#include "attributes/Collider.h"
 #include "attributes/ModelInstance.h"
 #include "math/math.h"
 #include "core/logging.h"
@@ -30,12 +31,13 @@ struct PlayerEntity : public Entity {
 	b32 isCrouching = false;
 	b32 isRunning   = false;
 	
+	Transform spawnpoint;
 	vec3 inputs;
     
-	void Init(const char* name, Transform transform, f32 mass) {
+	void Init(const char* _name, Transform _transform) {
 		type = EntityType_Player;
-		this->name = name;
-		this->transform = transform;
+		name = _name;
+		transform = _transform;
         
         AtmoAdmin->modelArr.add(ModelInstance());
 		model = AtmoAdmin->modelArr.last; modelPtr = model;
@@ -44,12 +46,14 @@ struct PlayerEntity : public Entity {
         AtmoAdmin->physicsArr.add(Physics());
         physics = AtmoAdmin->physicsArr.last; physicsPtr = physics;
 		physics->attribute.entity = this;
-        physics->collider   = new AABBCollider(vec3(.5f,standHeight/2.f,.5f), mass, vec3(0,standHeight/2.f,0));
-        physics->position   = transform.position;
-        physics->rotation   = transform.rotation;
-        physics->scale      = transform.scale;
-        physics->mass       = mass;
+        physics->collider   = new AABBCollider(vec3(.5f,standHeight/2.f,.5f), 1.0);
+        physics->position   = _transform.position;
+        physics->rotation   = _transform.rotation;
+        physics->scale      = _transform.scale;
+        physics->mass       = 1.0;
         physics->elasticity = 0;
+		physics->collider->offset = vec3(0,standHeight/2.f,0);
+		spawnpoint = _transform;
 		
 		AtmoAdmin->entities.add(this);
 	}
@@ -115,8 +119,16 @@ struct PlayerEntity : public Entity {
 										  physics->position.z);
 	}
 	
-	void SendEvent(Event event) override {};
-	void ReceiveEvent(Event event) override {};
+	void ReceiveEvent(Event event)override{
+		if      (event == Event_ModelVisibleToggle){
+			model->visible = !model->visible;
+		}else if(event == Event_PlayerRespawn){
+			transform         = spawnpoint;
+			physics->position = spawnpoint.position;
+			physics->rotation = spawnpoint.rotation;
+			physics->scale    = spawnpoint.scale;
+		}
+	};
 };
 
 #endif //ATMOS_PLAYERENTITY_H

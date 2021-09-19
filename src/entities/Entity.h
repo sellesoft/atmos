@@ -11,25 +11,26 @@
 #include "math/VectorMatrix.h"
 
 enum Event_ {
-	Event_NONE = 0,
-	Event_DoorToggle,
-	Event_LightToggle,
+	Event_NONE,
 	Event_ModelVisibleToggle,
+	Event_PlayerRespawn,
+	Event_ToggleTriggerActive,
+	Event_COUNT
 }; typedef u32 Event;
 global_ const char* EventStrings[] = {
-	"NONE", "DoorToggle", "LightToggle", "ModelVisibleToggle",
+	"NONE", "ModelVisibleToggle", "PlayerRespawn", "ToggleTriggerActive",
 };
 
 enum EntityTypeBits {
-	EntityType_Anonymous     = 1 << 0,
-	EntityType_Player        = 1 << 1,
-	EntityType_NonStaticMesh = 1 << 2,
-	EntityType_StaticMesh    = 1 << 3,
-	EntityType_SceneryMesh   = 1 << 4,
-	EntityType_Trigger       = 1 << 5,
+	EntityType_Anonymous,
+	EntityType_Player,
+	EntityType_Physics,
+	EntityType_Scenery,
+	EntityType_Trigger,
+	EntityType_COUNT
 }; typedef u32 EntityType;
 global_ const char* EntityTypeStrings[] = {
-	"Anonymous", "Player", "StaticMesh", "Trigger"
+	"Anonymous", "Player", "Physics", "Scenery", "Trigger"
 };
 
 struct Transform{
@@ -39,9 +40,11 @@ struct Transform{
 	vec3 prevPosition = vec3::ZERO;
 	vec3 prevRotation = vec3::ZERO;
 	vec3 prevScale    = vec3::ONE;
-	
-	//Transform(vec3 position = vec3::ZERO, vec3 rotation = vec3::ZERO, vec3 scale = vec3::ONE);
     
+	Transform(vec3 pos=vec3::ZERO, vec3 rot=vec3::ZERO, vec3 _scale=vec3::ONE,
+			  vec3 prevPos=vec3::ZERO, vec3 prevRot=vec3::ZERO, vec3 _prevScale=vec3::ZERO){
+		position = pos; rotation = rot; scale = _scale; prevPosition = prevPos; prevRotation = prevRot; prevScale = _prevScale;
+	}
 	inline vec3 Up()     { return vec3::UP      * mat4::RotationMatrix(rotation); }
 	inline vec3 Right()  { return vec3::RIGHT   * mat4::RotationMatrix(rotation); }
 	inline vec3 Forward(){ return vec3::FORWARD * mat4::RotationMatrix(rotation); }
@@ -64,10 +67,15 @@ struct Entity {
 	Movement*   movementPtr = nullptr;
 	ModelInstance* modelPtr = nullptr;
     
-	set<Entity*> connections;
+	array<Entity*> connections;
 	
-	virtual void SendEvent(Event event) {};
-	virtual void ReceiveEvent(Event event) {};
+	virtual void SendEvent(Event event){
+		for(Entity* e : connections) e->ReceiveEvent(event);
+	};
+	
+	virtual void ReceiveEvent(Event event){
+		if(modelPtr && event == Event_ModelVisibleToggle) modelPtr->visible = !modelPtr->visible;
+	};
 };
 
 //this maybe should be more explicit, we'll see

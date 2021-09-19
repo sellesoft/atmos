@@ -21,6 +21,7 @@ enum GameState_{
 
 struct Entity;
 struct PlayerEntity;
+struct TriggerEntity;
 typedef u32 EntityType;
 struct Admin{
     GameState      state;
@@ -33,6 +34,7 @@ struct Admin{
     
 	PlayerEntity*  player; //store player separate so we can access it directly
 	array<Entity*> entities;
+	array<TriggerEntity*> triggers;
     
 	array<Physics>       physicsArr;
 	array<ModelInstance> modelArr;

@@ -3,7 +3,6 @@
 #define ATMOS_PHYSICSENTITY_H
 
 #include "Entity.h"
-
 #include "attributes/Physics.h"
 #include "attributes/ModelInstance.h"
 #include "core/storage.h"
@@ -11,30 +10,30 @@
 struct PhysicsEntity : public Entity {
 	ModelInstance* model;
 	Physics*       physics;
+	Collider*      collider;
     
-	void Init(const char* name, Model* _model, Transform transform, f32 mass, bool static_pos = 0, bool static_rot = 0) {
-		type = (static_pos && static_rot) ? EntityType_StaticMesh : EntityType_NonStaticMesh;
-		this->name = name;
-		this->transform = transform;
+	void Init(const char* _name, Transform _transform, Model* _model, Collider* _collider, f32 _mass, b32 _static = false){
+		type = EntityType_Physics;
+		name = _name;
+		transform = _transform;
         
-		AtmoAdmin->modelArr.add(ModelInstance((_model) ? _model : Storage::NullModel()));
+		Assert(_model);
+		AtmoAdmin->modelArr.add(ModelInstance(_model));
 		model = AtmoAdmin->modelArr.last; modelPtr = model;
-        model->attribute.entity = this;
+		model->attribute.entity = this;
         
         AtmoAdmin->physicsArr.add(Physics());
         physics = AtmoAdmin->physicsArr.last; physicsPtr = physics;
 		physics->attribute.entity = this;
-        physics->collider       = new AABBCollider(_model->mesh, mass);
-        physics->position       = transform.position;
-        physics->rotation       = transform.rotation;
-        physics->scale          = transform.scale;
-        physics->mass           = mass;
-        physics->staticPosition = static_pos;
-        physics->staticRotation = static_rot;
+        physics->collider       = _collider;
+        physics->position       = _transform.position;
+        physics->rotation       = _transform.rotation;
+        physics->scale          = _transform.scale;
+        physics->mass           = _mass;
+		physics->staticPosition = _static;
+		physics->staticRotation = _static;
+		AtmoAdmin->entities.add(this);
 	}
-    
-	void SendEvent(Event event) override {};
-	void ReceiveEvent(Event event) override {};
 };
 
 #endif //ATMOS_PHYSICSENTITY_H

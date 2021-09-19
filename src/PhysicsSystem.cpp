@@ -44,12 +44,11 @@ bool AABBAABBCollision(Physics* p1, AABBCollider* c1, Physics* p2, AABBCollider*
             else                       { p1->position.z += zover/2.f; p2->position.z -= zover/2.f; }
 			norm = vec3::BACK;
 		}
-        
-		Manifold m1; Manifold m2;
-		m1.norm = norm; m2.norm = norm;
+		
+		//TODO(sushi) create manifolds
         
 		//// dynamic resolution ////
-		//get relative velocity between both objects with obj1 as the F.O.R
+		//get relative velocity between both objects with p1 as the F.O.R
 		vec3 rv = p2->velocity - p1->velocity;
         
 		//find the velocity along the normal and dynamically resolve
@@ -129,25 +128,29 @@ void PhysicsSystem::Update(){
 					p1->rotation += p1->rotVelocity * fixedDeltaTime;
 				}
 			}
-            
+			
             //collision check
-            if(p1->collider->shape != ColliderShape_NONE){
+            if(p1->collider && p1->collider->shape != ColliderShape_NONE){
                 for(Physics* p2 = AtmoAdmin->physicsArr.begin(); p2 != AtmoAdmin->physicsArr.end(); ++p2){
-                    if((p1 != p2) && (p2->collider->shape != ColliderShape_NONE) && (p1->collider->collLayer == p2->collider->collLayer)){
-                        //TODO generate polys
+                    //check if able to collide
+					if((p1 != p2) && (p2->collider != 0) && (p2->collider->shape != ColliderShape_NONE) 
+					   && (p1->collider->layer == p2->collider->layer)){
+						//find collision type and check for it
+						bool collision = false;
                         switch(p1->collider->shape){
-                            case ColliderShape_Sphere:
-                            switch(p2->collider->shape){
-                                case ColliderShape_AABB:  {  }break; //TODO AABB-Sphere
-                                case ColliderShape_Sphere:{  }break; //TODO Sphere-Sphere
-                            }break;
                             case ColliderShape_AABB:
                             switch(p2->collider->shape){
-                                case ColliderShape_AABB:  { AABBAABBCollision(p1, (AABBCollider*)p1->collider, 
-                                                                              p2, (AABBCollider*)p2->collider); }break;
-                                case ColliderShape_Sphere:{  }break; //TODO AABB-Sphere
+                                case ColliderShape_AABB:{ collision = AABBAABBCollision(p1, (AABBCollider*)p1->collider, 
+																						p2, (AABBCollider*)p2->collider); }break;
+                                default: Assert(!"not implemented"); break;
                             }break;
+							default: Assert(!"not implemented"); break;
                         }
+						//set triggers as active
+						if(collision){
+							if(p1->collider->isTrigger) p1->collider->triggerActive = true;
+							if(p2->collider->isTrigger) p2->collider->triggerActive = true;
+						}
                     }
                 }
                 //TODO fill manifolds

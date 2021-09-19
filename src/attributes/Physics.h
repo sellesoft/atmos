@@ -3,33 +3,11 @@
 #define ATMOS_ATTRIBUTE_PHYSICS_H
 
 #include "Attribute.h"
-#include "collider.h"
-#include "math/Vector.h"
-#include "utils/map.h"
+#include "Collider.h"
+#include "math/vector.h"
 
-typedef u32 ColliderType;
-struct Physics;
-struct Manifold {
-	Collider* a = nullptr;
-	Collider* b = nullptr;
-    
-	ColliderType coltypea;
-	ColliderType coltypeb;
-    
-	int refID = 0;
-	//point then depth
-	std::vector<pair<vec3, float>> colpoints;
-    
-	vec3 norm;
-};
-
-enum ContactState {
-	ContactNONE,
-	ContactStationary,
-	ContactMoving
-};
-
-struct Physics {
+struct Collider;
+struct Physics{
 	Attribute attribute{ AttributeType_Physics };
     Collider* collider = 0;
 	
@@ -50,8 +28,6 @@ struct Physics {
 	b32 staticRotation = false;
 	
 	vec3 netForce;
-	ContactState contactState;
-	map<Physics*, ContactState> contacts;
     
 	Physics();
 	Physics(vec3 position, vec3 rotation, vec3 velocity = vec3::ZERO, vec3 acceleration = vec3::ZERO,

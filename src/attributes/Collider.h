@@ -4,8 +4,18 @@
 
 #include "Attribute.h"
 #include "math/VectorMatrix.h"
+#include "utils/array.h"
 
+struct Entity;
+struct Physics;
+struct Collider;
 struct Mesh;
+
+enum ContactState_{
+	ContactState_NONE,
+	ContactState_Stationary,
+	ContactState_Moving,
+}; typedef u32 ContactState;
 
 enum ColliderShapeBits {
 	ColliderShape_NONE,
@@ -18,36 +28,56 @@ global_ const char* ColliderShapeStrings[] = {
 	"None", "AABB", "Sphere", "Complex"
 };
 
+struct Contact{
+	vec3 point;
+	f32  penetration;
+};
+
+struct Manifold{
+	Entity*   e1 = 0;
+	Entity*   e2 = 0;
+	Physics*  p1 = 0;
+	Physics*  p2 = 0;
+	Collider* c1 = 0;
+	Collider* c2 = 0;
+	vec3 normal{};
+	ContactState state = ContactState_NONE;
+	array<Contact> contacts;
+};
+
 struct Collider{
-	ColliderShape shape;
-	vec3 offset;
-	mat3 tensor;
-	u32  collLayer;
-    b32  noCollide;
+	ColliderShape shape = ColliderShape_NONE;
+	mat3 tensor{};
+	vec3 offset{};
+	u32  layer = 0;
+    b32  noCollide = false;
+	b32  isTrigger = false;
+	
+	b32 triggerActive = false; //TODO replace this with manifold stuffs
     
 	//evenly distributes mass through the respective body
-	virtual void RecalculateTensor(f32 mass){};
+	virtual void RecalculateTensor(f32 mass) = 0;
 };
 
 struct AABBCollider : public Collider{
 	vec3 halfDims;
     
-	AABBCollider(Mesh* mesh,    f32 mass, vec3 offset = vec3::ZERO, u32 collisionLayer = 0, bool nocollide = 0);
-	AABBCollider(vec3 halfDims, f32 mass, vec3 offset = vec3::ZERO, u32 collisionLayer = 0, bool nocollide = 0);
+	AABBCollider(Mesh* mesh,    f32 mass);
+	AABBCollider(vec3 halfDims, f32 mass);
 	void RecalculateTensor(f32 mass) override;
 };
 
 struct SphereCollider : public Collider{
 	f32 radius;
     
-	SphereCollider(float radius, f32 mass, vec3 offset = vec3::ZERO, u32 collisionLayer = 0, bool nocollide = 0);
+	SphereCollider(f32 radius, f32 mass);
 	void RecalculateTensor(f32 mass) override;
 };
 
 struct ComplexCollider : public Collider{
 	Mesh* mesh;
     
-	ComplexCollider(Mesh* mesh, f32 mass, vec3 offset = vec3::ZERO, u32 collisionLayer = 0, bool nocollide = 0);
+	ComplexCollider(Mesh* mesh, f32 mass);
 	//TODO(sushi) implement tensor generation from an arbitrary mesh
 	void RecalculateTensor(f32 mass) override {};
 };
