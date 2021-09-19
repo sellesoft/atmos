@@ -7,8 +7,10 @@
 #include "attributes/Collider.h"
 
 bool AABBAABBCollision(Physics* p1, AABBCollider* c1, Physics* p2, AABBCollider* c2){
-	vec3 min1 = p1->position - (c1->halfDims * p1->scale); vec3 max1 = p1->position + (c1->halfDims * p1->scale);
-	vec3 min2 = p2->position - (c2->halfDims * p2->scale); vec3 max2 = p2->position + (c2->halfDims * p2->scale);
+	vec3 min1 = p1->position - ((c1->halfDims * p1->scale) + c1->offset); 
+	vec3 max1 = p1->position + ((c1->halfDims * p1->scale) + c1->offset);
+	vec3 min2 = p2->position - ((c2->halfDims * p2->scale) + c2->offset); 
+	vec3 max2 = p2->position + ((c2->halfDims * p2->scale) + c2->offset);
     
 	if((min1.x <= max2.x && max1.x >= min2.x) && //check if overlapping
        (min1.y <= max2.y && max1.y >= min2.y) &&
@@ -29,17 +31,17 @@ bool AABBAABBCollision(Physics* p1, AABBCollider* c1, Physics* p2, AABBCollider*
 		if      (xover < yover && xover < zover){
 			if     (p1->staticPosition){ p2->position.x -= xover; }
 			else if(p2->staticPosition){ p1->position.x += xover; }
-            else                       { p1->position.x += xover/2.f; p2->position.x -= xover/2.f;}
+            else                       { p1->position.x += xover/2.f; p2->position.x -= xover/2.f; }
             norm = vec3::LEFT;
 		}else if(yover < xover && yover < zover){
 			if     (p1->staticPosition){ p2->position.y -= yover; }
 			else if(p2->staticPosition){ p1->position.y += yover; }
-            else                       { p1->position.y += yover/2.f; p2->position.y -= yover/2.f;}
+            else                       { p1->position.y += yover/2.f; p2->position.y -= yover/2.f; }
 			norm = vec3::DOWN;
 		}else if(zover < yover && zover < xover){
 			if     (p1->staticPosition){ p2->position.z -= zover; }
 			else if(p2->staticPosition){ p1->position.z += zover; }
-            else                       { p1->position.z += zover/2.f; p2->position.z -= zover/2.f;}
+            else                       { p1->position.z += zover/2.f; p2->position.z -= zover/2.f; }
 			norm = vec3::BACK;
 		}
         
@@ -90,40 +92,43 @@ void PhysicsSystem::Update(){
     
     fixedAccumulator += DeshTime->deltaTime;
     while(fixedAccumulator >= fixedDeltaTime){
+		AtmoAdmin->player->Update();
         for(Physics* p1 = AtmoAdmin->physicsArr.begin(); p1 != AtmoAdmin->physicsArr.end(); ++p1){
-            //TODO contact states
-            
-            //linear motion
-            if(!p1->staticPosition){
-                p1->acceleration = p1->netForce / p1->mass;
-                p1->acceleration += vec3(0, -gravity, 0); //add gravity
-                p1->velocity += p1->acceleration * fixedDeltaTime;
-                
-                f32 vm = p1->velocity.mag();
-                if(vm > maxVelocity) {
-                    p1->velocity /= vm;
-                    p1->velocity *= maxVelocity;
-                }else if(vm < minVelocity){
-                    p1->velocity = vec3::ZERO;
-                    p1->acceleration = vec3::ZERO;
-                }
-                p1->position += p1->velocity * fixedDeltaTime;
-                
-                p1->netForce = vec3::ZERO;
-                p1->acceleration = vec3::ZERO;
-            }
-            
-            //rotational motion
-            if(!p1->staticRotation){
-                if(p1->rotVelocity != vec3::ZERO){ //fake rotational friction
-                    p1->rotAcceleration += vec3(p1->rotVelocity.x > 0 ? -1 : 1, 
-                                                p1->rotVelocity.y > 0 ? -1 : 1, 
-                                                p1->rotVelocity.z > 0 ? -1 : 1) * frictionAir * p1->mass * 100;
-                }
-                
-                p1->rotVelocity += p1->rotAcceleration * fixedDeltaTime;
-                p1->rotation += p1->rotVelocity * fixedDeltaTime;
-            }
+			if(p1->attribute.entity != AtmoAdmin->player){
+				//TODO contact states
+				
+				//linear motion
+				if(!p1->staticPosition){
+					p1->acceleration = p1->netForce / p1->mass;
+					p1->acceleration += vec3(0, -gravity, 0); //add gravity
+					p1->velocity += p1->acceleration * fixedDeltaTime;
+					
+					f32 vm = p1->velocity.mag();
+					if(vm > maxVelocity) {
+						p1->velocity /= vm;
+						p1->velocity *= maxVelocity;
+					}else if(vm < minVelocity){
+						p1->velocity = vec3::ZERO;
+						p1->acceleration = vec3::ZERO;
+					}
+					p1->position += p1->velocity * fixedDeltaTime;
+					
+					p1->netForce = vec3::ZERO;
+					p1->acceleration = vec3::ZERO;
+				}
+				
+				//rotational motion
+				if(!p1->staticRotation){
+					if(p1->rotVelocity != vec3::ZERO){ //fake rotational friction
+						p1->rotAcceleration += vec3(p1->rotVelocity.x > 0 ? -1 : 1, 
+													p1->rotVelocity.y > 0 ? -1 : 1, 
+													p1->rotVelocity.z > 0 ? -1 : 1) * frictionAir * p1->mass * 100;
+					}
+					
+					p1->rotVelocity += p1->rotAcceleration * fixedDeltaTime;
+					p1->rotation += p1->rotVelocity * fixedDeltaTime;
+				}
+			}
             
             //collision check
             if(p1->collider->shape != ColliderShape_NONE){
@@ -154,4 +159,5 @@ void PhysicsSystem::Update(){
         fixedAccumulator -= fixedDeltaTime;
 		fixedTotalTime += fixedDeltaTime;
     }
+	fixedAlpha = fixedAccumulator / fixedDeltaTime;
 }

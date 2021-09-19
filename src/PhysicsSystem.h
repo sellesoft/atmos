@@ -17,6 +17,7 @@ struct PhysicsSystem {
 	f64 fixedTotalTime;
 	u64 fixedUpdateCount;
 	f32 fixedAccumulator;
+	f32 fixedAlpha;
     
     b32 paused;
     

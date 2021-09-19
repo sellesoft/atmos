@@ -65,6 +65,7 @@ void Controller::Update(){
 			if(DeshInput->KeyDown(movementWalkingLeft))    { inputs -= vec3(AtmoAdmin->camera.right.x, 0, AtmoAdmin->camera.right.z); }
 			
 			if(DeshInput->KeyPressed (movementJump))  { AtmoAdmin->player->isJumping   = true; }
+			if(DeshInput->KeyReleased(movementJump))  { AtmoAdmin->player->isJumping   = false; }
 			if(DeshInput->KeyPressed (movementCrouch)){ AtmoAdmin->player->isCrouching = true; }
 			if(DeshInput->KeyReleased(movementCrouch)){ AtmoAdmin->player->isCrouching = false; }
 			if(DeshInput->KeyPressed (movementRun))   { AtmoAdmin->player->isRunning   = true; }
@@ -72,7 +73,7 @@ void Controller::Update(){
 			
 			AtmoAdmin->camera.rotation.y += (DeshInput->mouseX - DeshWindow->centerX) * cameraSensitivity * MOUSE_SENS_FRACTION;
 			AtmoAdmin->camera.rotation.x += (DeshInput->mouseY - DeshWindow->centerY) * cameraSensitivity * MOUSE_SENS_FRACTION;
-			AtmoAdmin->player->inputs = inputs;
+			AtmoAdmin->player->inputs = inputs.normalized();
         }break;
         
         case GameState_Menu:{

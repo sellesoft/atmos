@@ -20,9 +20,10 @@ global_ const char* ColliderShapeStrings[] = {
 
 struct Collider{
 	ColliderShape shape;
-	u32           collLayer;
-    b32           noCollide;
-	mat3          tensor;
+	vec3 offset;
+	mat3 tensor;
+	u32  collLayer;
+    b32  noCollide;
     
 	//evenly distributes mass through the respective body
 	virtual void RecalculateTensor(f32 mass){};
@@ -31,22 +32,22 @@ struct Collider{
 struct AABBCollider : public Collider{
 	vec3 halfDims;
     
-	AABBCollider(Mesh* mesh,    f32 mass,    u32 collisionLayer = 0, bool nocollide = 0);
-	AABBCollider(vec3 halfDims, f32 mass,    u32 collisionLayer = 0, bool nocollide = 0);
+	AABBCollider(Mesh* mesh,    f32 mass, vec3 offset = vec3::ZERO, u32 collisionLayer = 0, bool nocollide = 0);
+	AABBCollider(vec3 halfDims, f32 mass, vec3 offset = vec3::ZERO, u32 collisionLayer = 0, bool nocollide = 0);
 	void RecalculateTensor(f32 mass) override;
 };
 
 struct SphereCollider : public Collider{
 	f32 radius;
     
-	SphereCollider(float radius, f32 mass, u32 collisionLayer = 0, bool nocollide = 0);
+	SphereCollider(float radius, f32 mass, vec3 offset = vec3::ZERO, u32 collisionLayer = 0, bool nocollide = 0);
 	void RecalculateTensor(f32 mass) override;
 };
 
 struct ComplexCollider : public Collider{
 	Mesh* mesh;
     
-	ComplexCollider(Mesh* mesh, u32 collisionLayer = 0, bool nocollide = 0);
+	ComplexCollider(Mesh* mesh, f32 mass, vec3 offset = vec3::ZERO, u32 collisionLayer = 0, bool nocollide = 0);
 	//TODO(sushi) implement tensor generation from an arbitrary mesh
 	void RecalculateTensor(f32 mass) override {};
 };

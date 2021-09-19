@@ -16,7 +16,7 @@ void Admin::Init(){
     physics.Init(300);
 	
     player = new PlayerEntity;
-    player->Init("player",0,Transform{vec3(10,20,10)},1.0f);
+    player->Init("player",Transform{vec3(10,20,10)},1.0f);
     
     {//sandbox
         Mesh* box_mesh = Storage::CreateBoxMesh(1,1,1,Color_Red).second;
@@ -37,18 +37,15 @@ void Admin::Update(){
     switch(state){
         case GameState_Play:{
             controller.Update();
-			player->Update();
-            camera.Update();
-            forE(movementArr) it->Update();
             physics.Update();
-            f32 alpha = physics.fixedAccumulator / physics.fixedDeltaTime;
-            forE(physicsArr)  it->Update(alpha);
-            forE(modelArr)    it->Update();
+            camera.Update();
+            forE(physicsArr) it->Update(physics.fixedAlpha);
+            forE(modelArr) it->Update();
         }break;
         
         case GameState_Menu:{
 			controller.Update();
-            forE(modelArr)    it->Update();
+            forE(modelArr) it->Update();
         }break;
         
         case GameState_Editor:{
@@ -58,16 +55,16 @@ void Admin::Update(){
             if(simulateInEditor){
                 physics.Update();
                 f32 alpha = physics.fixedAccumulator / physics.fixedDeltaTime;
-                forE(physicsArr)  it->Update(alpha);
+                forE(physicsArr) it->Update(alpha);
             }
-            forE(modelArr)    it->Update();
+            forE(modelArr) it->Update();
         }break;
     }
 }
 
 void Admin::ChangeState(GameState new_state){
 	if(state == new_state) return;
-    if(state >= GameState_COUNT) return logE("Admin attempted to switch to unhandled gamestate: ", new_state);
+    if(state >= GameState_COUNT) return LogE("Admin attempted to switch to unhandled gamestate: ", new_state);
 	
 	const char* from; const char* to;
 	switch(state){
@@ -76,13 +73,13 @@ void Admin::ChangeState(GameState new_state){
 			case GameState_Menu:{   to = "MENU";
 				DeshWindow->UpdateCursorMode(CursorMode_Default);
 				player->model->visible = false;
-				//TODO save binary
+				//TODO save game
 			}break;
 			case GameState_Editor:{ to = "EDITOR";
 				DeshWindow->UpdateCursorMode(CursorMode_Default);
 				player->model->visible = true;
-				//TODO save binary
-				//TODO load text
+				//TODO save game
+				//TODO load level
 			}break;
 		}break;
 		case GameState_Menu:    from = "MENU";
@@ -90,13 +87,13 @@ void Admin::ChangeState(GameState new_state){
 			case GameState_Play:{   to = "PLAY";
 				DeshWindow->UpdateCursorMode(CursorMode_FirstPerson);
 				player->model->visible = false;
-				//TODO save binary
+				//TODO save game
 			}break;
 			case GameState_Editor:{ to = "EDITOR";
 				DeshWindow->UpdateCursorMode(CursorMode_Default);
 				player->model->visible = true;
-				//TODO save binary
-				//TODO load text
+				//TODO save game
+				//TODO load level
 			}break;
 		}break;
 		case GameState_Editor:  from = "EDITOR";
@@ -104,18 +101,18 @@ void Admin::ChangeState(GameState new_state){
 			case GameState_Play:{   to = "PLAY";
 				DeshWindow->UpdateCursorMode(CursorMode_FirstPerson);
 				player->model->visible = false;
-				//TODO save text
+				//TODO save level
 			}break;
 			case GameState_Menu:{   to = "MENU";
 				DeshWindow->UpdateCursorMode(CursorMode_Default);
 				player->model->visible = true;
-				//TODO save text
+				//TODO save level
 			}break;
 		}break;
 	}
 	
 	state = new_state;
-	logf("atmos","Changed gamestate from %s to %s", from,to);
+	Logf("atmos","Changed gamestate from %s to %s", from,to);
 }
 
 void Admin::PostRenderUpdate(){
@@ -127,7 +124,7 @@ void Admin::Reset(){
 }
 
 void Admin::Cleanup(){
-    
+    //TODO save game
 }
 
 Entity* Admin::EntityRaycast(vec3 origin, vec3 direction, f32 maxDistance, EntityType filter) {
@@ -163,9 +160,9 @@ Entity* Admin::EntityRaycast(vec3 origin, vec3 direction, f32 maxDistance, Entit
 					if (depth <= 0) continue;
                     
 					//make vectors perpendicular to each edge of the triangle
-					perp01 = normal.cross(p1 - p0).yInvert().normalized();
-					perp12 = normal.cross(p2 - p1).yInvert().normalized();
-					perp20 = normal.cross(p0 - p2).yInvert().normalized();
+					perp01 = normal.cross(p1 - p0).normalized();
+					perp12 = normal.cross(p2 - p1).normalized();
+					perp20 = normal.cross(p0 - p2).normalized();
                     
 					//check that the intersection point is within the triangle and its the closest triangle found so far
 					if (perp01.dot(intersect - p0) > 0 &&
@@ -184,7 +181,7 @@ Entity* Admin::EntityRaycast(vec3 origin, vec3 direction, f32 maxDistance, Entit
 		}
 	}
     
-	if (result && depth <= maxDistance) 
+	if (result && (depth <= maxDistance) && (depth > 0)) 
 		return result;
 	return 0;
 }

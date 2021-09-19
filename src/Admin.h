@@ -34,7 +34,6 @@ struct Admin{
 	PlayerEntity*  player; //store player separate so we can access it directly
 	array<Entity*> entities;
     
-	array<Movement>      movementArr;
 	array<Physics>       physicsArr;
 	array<ModelInstance> modelArr;
     
