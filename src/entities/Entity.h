@@ -42,8 +42,8 @@ struct Transform{
 	
 	//Transform(vec3 position = vec3::ZERO, vec3 rotation = vec3::ZERO, vec3 scale = vec3::ONE);
     
-	inline vec3 Up()     { return vec3::UP * mat4::RotationMatrix(rotation); }
-	inline vec3 Right()  { return vec3::RIGHT * mat4::RotationMatrix(rotation); }
+	inline vec3 Up()     { return vec3::UP      * mat4::RotationMatrix(rotation); }
+	inline vec3 Right()  { return vec3::RIGHT   * mat4::RotationMatrix(rotation); }
 	inline vec3 Forward(){ return vec3::FORWARD * mat4::RotationMatrix(rotation); }
 	inline mat4 Matrix() { return mat4::TransformationMatrix(position, rotation, scale); }
 };
@@ -54,7 +54,7 @@ struct ModelInstance;
 struct Physics;
 struct Collider;
 
-struct Entity{
+struct Entity {
 	string name;
 	EntityType type;
 	Transform transform;

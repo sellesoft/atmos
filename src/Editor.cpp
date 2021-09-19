@@ -771,7 +771,7 @@ void EntitiesTab(){
 	ImGui::SameLine(); ImGui::Combo("##preset_combo", &current_preset, presets, ArrayCount(presets));
     
 	ImGui::Separator();
-    
+
 	//// selected entity inspector panel ////
 	Entity* sel = selected_entities.count ? selected_entities[0] : 0;
 	if(!sel) return;
