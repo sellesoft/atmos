@@ -4,30 +4,24 @@
 #include "../entities/Entity.h"
 
 ModelInstance::ModelInstance(){
-	model     = Storage::NullModel();
-	mesh      = model->mesh;
-	armature  = model->armature;
-	transform = mat4::IDENTITY;
-	visible   = true;
-	control   = false;
+	model    = Storage::NullModel();
+	mesh     = model->mesh;
+	armature = model->armature;
+	visible  = true;
 }
 
 ModelInstance::ModelInstance(Model* _model){
-	model     = _model;
-	mesh      = model->mesh;
-	armature  = model->armature;
-	transform = mat4::IDENTITY;
-	visible   = true;
-	control   = false;
+	model    = _model;
+	mesh     = model->mesh;
+	armature = model->armature;
+	visible  = true;
 }
 
 ModelInstance::ModelInstance(Mesh* _mesh){
-	model     = Storage::CreateModelFromMesh(_mesh).second;
-	mesh      = model->mesh;
-	armature  = model->armature;
-	transform = mat4::IDENTITY;
-	visible   = true;
-	control   = false;
+	model    = Storage::CreateModelFromMesh(_mesh).second;
+	mesh     = model->mesh;
+	armature = model->armature;
+	visible  = true;
 }
 
 void ModelInstance::ChangeModel(Model* _model){
@@ -43,6 +37,5 @@ void ModelInstance::ChangeModel(Mesh* _mesh){
 }
 
 void ModelInstance::Update(){
-	if(!control) transform = attribute.entity->transform.Matrix();
-	if(visible)  Render::DrawModel(model, transform);
+	if(visible) Render::DrawModel(model, attribute.entity->transform.Matrix());
 }

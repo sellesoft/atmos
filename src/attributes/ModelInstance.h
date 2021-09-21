@@ -14,9 +14,7 @@ struct ModelInstance {
 	Model* model;
 	Mesh* mesh;
 	Armature* armature;
-	mat4 transform;
 	bool visible;
-	bool control;
     
 	ModelInstance();
 	ModelInstance(Model* model);
@@ -26,7 +24,6 @@ struct ModelInstance {
 	void ChangeModel(Model* model);
 	void ChangeModel(Mesh* mesh);
     inline void ToggleVisibility(){ visible = !visible; }
-	inline void ToggleControl()   { control = !control; }
 };
 
 #endif //ATMOS_MODELINSTANCE_H
