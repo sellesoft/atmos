@@ -771,7 +771,7 @@ void EntitiesTab(){
 	ImGui::SameLine(); ImGui::Combo("##preset_combo", &current_preset, presets, ArrayCount(presets));
     
 	ImGui::Separator();
-
+	
 	//// selected entity inspector panel ////
 	Entity* sel = selected_entities.count ? selected_entities[0] : 0;
 	if(!sel) return;
@@ -783,7 +783,7 @@ void EntitiesTab(){
 		SetPadding; ImGui::TextEx("Name:");
 		ImGui::SameLine(); ImGui::SetNextItemWidth(-FLT_MIN); ImGui::InputText("##ent_name_input", sel->name.str, DESHI_NAME_SIZE,
                                                                                ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_AutoSelectAll);
-        
+		
 		//// transform ////
 		int tree_flags = ImGuiTreeNodeFlags_DefaultOpen;
 		if(ImGui::CollapsingHeader("Transform", 0, tree_flags)){
@@ -856,6 +856,14 @@ void EntitiesTab(){
                 
 				ImGui::Unindent();
 				ImGui::Separator();
+			}
+		}
+		
+		if(sel->physicsPtr){
+			if(sel->physicsPtr->collider){
+				if(sel->physicsPtr->collider->shape == ColliderShape_AABB){
+					Render::DrawBox(sel->transform.Matrix(), Color_Green);
+				}
 			}
 		}
         

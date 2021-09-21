@@ -9,6 +9,7 @@
 #include "attributes/Movement.h"
 #include "attributes/ModelInstance.h"
 #include "attributes/Physics.h"
+#include "attributes/InterpTransform.h"
 #include "utils/array.h"
 #include "utils/string.h"
 
@@ -32,12 +33,13 @@ struct Admin{
     Editor editor;
     b32    simulateInEditor;
     
-	PlayerEntity*  player; //store player separate so we can access it directly
+	PlayerEntity* player; //store player separate so we can access it directly
 	array<Entity*> entities;
 	array<TriggerEntity*> triggers;
     
-	array<Physics>       physicsArr;
+	array<Physics> physicsArr;
 	array<ModelInstance> modelArr;
+	array<InterpTransform> interpTransformArr;
     
 	void Init();
 	void Update();

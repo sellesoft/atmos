@@ -14,10 +14,10 @@ struct PlayerEntity : public Entity {
 	Physics*       physics;
 	
 	f32 standHeight    = 2.0;
-	f32 standEyeLevel  = 2.0;
-	f32 crouchHeight   = 1.0;
-	f32 crouchEyeLevel = 1.0;
-	f32 timeToCrouch   = 0.2;
+	f32 standEyeLevel  = 1.8;
+	f32 crouchHeight   = 1.2;
+	f32 crouchEyeLevel = 1.1;
+	f32 timeToCrouch   = 0.1;
 	f32 crouchTimer    = 0.0;
 	f32 walkSpeed      = 5.0;
 	f32 runMult        = 2.0;
@@ -75,7 +75,7 @@ struct PlayerEntity : public Entity {
 		
 		//check if in air or on ground
 		vec3 ray_start = physics->position; ray_start.y += .1f;
-		Entity* below = AtmoAdmin->EntityRaycast(physics->position, vec3::DOWN, .2f);
+		Entity* below = AtmoAdmin->EntityRaycast(ray_start, vec3::DOWN, .4f);
 		bool inAir = (below == 0);
 		
 		//apply gravity to velocity
@@ -109,13 +109,13 @@ struct PlayerEntity : public Entity {
 		physics->acceleration = vec3::ZERO;
 		
 		AABBCollider* collider = (AABBCollider*)physics->collider;
-		f32 crouch_interp = Math::lerpf(standHeight, crouchHeight, crouchTimer / timeToCrouch) / 2.f;
+		f32 crouch_interp = Math::lerp(standHeight, crouchHeight, crouchTimer / timeToCrouch) / 2.f;
 		collider->halfDims.y = crouch_interp; collider->offset.y = crouch_interp;
 	}
 	
 	void PostCollisionUpdate(){
 		AtmoAdmin->camera.position = vec3(physics->position.x, 
-										  physics->position.y+Math::lerpf(standEyeLevel, crouchEyeLevel, crouchTimer / timeToCrouch),
+										  physics->position.y+Math::lerp(standEyeLevel, crouchEyeLevel, crouchTimer / timeToCrouch),
 										  physics->position.z);
 	}
 	

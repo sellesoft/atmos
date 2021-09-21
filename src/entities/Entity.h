@@ -3,22 +3,23 @@
 #define ATMOS_ENTITY_H
 
 #include "../admin.h"
+#include "../transform.h"
 #include "../attributes/Attribute.h"
 #include "utils/string.h"
 #include "utils/array.h"
 #include "utils/map.h"
 #include "utils/utils.h"
-#include "math/VectorMatrix.h"
 
 enum Event_ {
 	Event_NONE,
 	Event_ModelVisibleToggle,
 	Event_PlayerRespawn,
 	Event_ToggleTriggerActive,
+	Event_ToggleDoor,
 	Event_COUNT
 }; typedef u32 Event;
 global_ const char* EventStrings[] = {
-	"NONE", "ModelVisibleToggle", "PlayerRespawn", "ToggleTriggerActive",
+	"NONE", "ModelVisibleToggle", "PlayerRespawn", "ToggleTriggerActive", "ToggleDoor",
 };
 
 enum EntityTypeBits {
@@ -27,28 +28,11 @@ enum EntityTypeBits {
 	EntityType_Physics,
 	EntityType_Scenery,
 	EntityType_Trigger,
+	EntityType_Door,
 	EntityType_COUNT
 }; typedef u32 EntityType;
 global_ const char* EntityTypeStrings[] = {
-	"Anonymous", "Player", "Physics", "Scenery", "Trigger"
-};
-
-struct Transform{
-	vec3 position = vec3::ZERO;
-	vec3 rotation = vec3::ZERO;
-	vec3 scale    = vec3::ONE;
-	vec3 prevPosition = vec3::ZERO;
-	vec3 prevRotation = vec3::ZERO;
-	vec3 prevScale    = vec3::ONE;
-    
-	Transform(vec3 pos=vec3::ZERO, vec3 rot=vec3::ZERO, vec3 _scale=vec3::ONE,
-			  vec3 prevPos=vec3::ZERO, vec3 prevRot=vec3::ZERO, vec3 _prevScale=vec3::ZERO){
-		position = pos; rotation = rot; scale = _scale; prevPosition = prevPos; prevRotation = prevRot; prevScale = _prevScale;
-	}
-	inline vec3 Up()     { return vec3::UP      * mat4::RotationMatrix(rotation); }
-	inline vec3 Right()  { return vec3::RIGHT   * mat4::RotationMatrix(rotation); }
-	inline vec3 Forward(){ return vec3::FORWARD * mat4::RotationMatrix(rotation); }
-	inline mat4 Matrix() { return mat4::TransformationMatrix(position, rotation, scale); }
+	"Anonymous", "Player", "Physics", "Scenery", "Trigger", "Door"
 };
 
 struct Player;

@@ -3,6 +3,7 @@
 #include "entities/PlayerEntity.h"
 #include "entities/PhysicsEntity.h"
 #include "entities/TriggerEntity.h"
+#include "entities/DoorEntity.h"
 #include "core/storage.h"
 #include "core/logging.h"
 #include "core/window.h"
@@ -16,18 +17,20 @@ void Admin::Init(){
 	editor.Init();
     physics.Init(300);
 	
+	//NOTE temp reserves before we arena them so their pointers dont change
 	physicsArr.reserve(1024);
 	modelArr.reserve(1024);
+	interpTransformArr.reserve(1024);
 	
     player = new PlayerEntity;
     player->Init("player",Transform(vec3(10,10,10)));
     
     {//sandbox
-        Mesh* box_mesh = Storage::CreateBoxMesh(1,1,1,Color_Red).second;
-        Model* flat_box = Storage::CreateModelFromMesh(box_mesh).second;
-        flat_box->batches[0].material = Storage::CreateMaterial("flat", Shader_Flat, MaterialFlags_NONE, {}).first;
+		Mesh* box_mesh = Storage::CreateBoxMesh(1,1,1,Color_Red).second;
+		Model* flat_box = Storage::CreateModelFromMesh(box_mesh).second;
+		flat_box->batches[0].material = Storage::CreateMaterial("flat", Shader_Flat, MaterialFlags_NONE, {}).first;
 		Model* lava_box = Storage::CreateModelFromMesh(box_mesh).second;
-        lava_box->batches[0].material = Storage::CreateMaterial("lava", Shader_Lavalamp, MaterialFlags_NONE, {}).first;
+		lava_box->batches[0].material = Storage::CreateMaterial("lava", Shader_Lavalamp, MaterialFlags_NONE, {}).first;
 		
 		//respawn trigger
 		TriggerEntity* trigger0 = new TriggerEntity;
@@ -37,7 +40,13 @@ void Admin::Init(){
 		
 		//first island
 		PhysicsEntity* floor0 = new PhysicsEntity;
-        floor0->Init("floor0", Transform(vec3(0,-.5f,0),vec3::ZERO,vec3(50,1,50)), Storage::CopyModel(flat_box).second, new AABBCollider(box_mesh,1.0f),1.0f,true);
+		floor0->Init("floor0", Transform(vec3(0,-.5f,0),vec3::ZERO,vec3(50,1,50)), Storage::CopyModel(flat_box).second, new AABBCollider(box_mesh,1.0f),1.0f,true);
+		DoorEntity* wall0 = new DoorEntity;
+		wall0->Init("wall0", new AABBCollider(box_mesh,1.0f), Storage::CopyModel(flat_box).second, Transform(vec3(24,-5.5f,0),vec3(0,0,0),vec3(2,10,50)), Transform(vec3(24,8,0),vec3(0,0,0),vec3(2,20,50)), 2);
+		DoorEntity* wall1 = new DoorEntity;
+		wall1->Init("wall1", new AABBCollider(box_mesh,1.0f), Storage::CopyModel(flat_box).second, Transform(vec3(-24,-5.5f,0),vec3(0,0,0),vec3(2,10,50)), Transform(vec3(-24,8,0),vec3(0,0,0),vec3(2,20,50)), 2);
+		DoorEntity* wall2 = new DoorEntity;
+		wall2->Init("wall2", new AABBCollider(box_mesh,1.0f), Storage::CopyModel(flat_box).second, Transform(vec3(0,-5.5f,-24),vec3(0,0,0),vec3(50,10,2)), Transform(vec3(0,8,-24),vec3(0,0,0),vec3(50,20,2)), 2);
 		
 		//stairs
 		PhysicsEntity* stairs0 = new PhysicsEntity;
@@ -45,9 +54,9 @@ void Admin::Init(){
 		PhysicsEntity* stairs2 = new PhysicsEntity;
 		PhysicsEntity* stairs3 = new PhysicsEntity;
 		PhysicsEntity* stairs4 = new PhysicsEntity;
-        stairs0->Init("stairs0", Transform(vec3(20,3,30),vec3::ZERO,vec3(5,.5f,5)), Storage::CopyModel(lava_box).second, new AABBCollider(box_mesh,1.0f),1.0f,true);
-        stairs1->Init("stairs1", Transform(vec3(10,6,30),vec3::ZERO,vec3(5,.5f,5)), Storage::CopyModel(lava_box).second, new AABBCollider(box_mesh,1.0f),1.0f,true);
-        stairs2->Init("stairs2", Transform(vec3(0,9,30),vec3::ZERO,vec3(5,.5f,5)), Storage::CopyModel(lava_box).second, new AABBCollider(box_mesh,1.0f),1.0f,true);
+		stairs0->Init("stairs0", Transform(vec3(20,3,30),vec3::ZERO,vec3(5,.5f,5)), Storage::CopyModel(lava_box).second, new AABBCollider(box_mesh,1.0f),1.0f,true);
+		stairs1->Init("stairs1", Transform(vec3(10,6,30),vec3::ZERO,vec3(5,.5f,5)), Storage::CopyModel(lava_box).second, new AABBCollider(box_mesh,1.0f),1.0f,true);
+		stairs2->Init("stairs2", Transform(vec3(0,9,30),vec3::ZERO,vec3(5,.5f,5)), Storage::CopyModel(lava_box).second, new AABBCollider(box_mesh,1.0f),1.0f,true);
 		stairs3->Init("stairs3", Transform(vec3(-10,12,30),vec3::ZERO,vec3(5,.5f,5)), Storage::CopyModel(lava_box).second, new AABBCollider(box_mesh,1.0f),1.0f,true);
 		stairs4->Init("stairs4", Transform(vec3(-20,15,30),vec3::ZERO,vec3(5,.5f,5)), Storage::CopyModel(lava_box).second, new AABBCollider(box_mesh,1.0f),1.0f,true);
 		stairs0->model->visible = false;
@@ -61,21 +70,27 @@ void Admin::Init(){
 		trigger1->Init("island trigger", Transform(vec3{0,.55f,0},vec3::ZERO,vec3{1,.5f,1}), new AABBCollider(box_mesh,1.0f), Storage::CopyModel(lava_box).second);
 		trigger1->events.add(Event_ModelVisibleToggle);
 		trigger1->events.add(Event_ToggleTriggerActive);
+		trigger1->events.add(Event_ToggleDoor);
 		trigger1->connections.add(stairs0);
 		trigger1->connections.add(stairs1);
 		trigger1->connections.add(stairs2);
 		trigger1->connections.add(stairs3);
 		trigger1->connections.add(stairs4);
 		trigger1->connections.add(trigger1); //NOTE hide its own model
+		trigger1->connections.add(wall0);
+		trigger1->connections.add(wall1);
+		trigger1->connections.add(wall2);
     }
 }
 
 void Admin::Update(){
-	Assert(physicsArr.count <= 1024 && modelArr.count <= 1024, "temp max limit before we arena them so their pointers dont change");
+	Assert(physicsArr.count <= 1024 && modelArr.count <= 1024 && interpTransformArr.count <= 1024,
+		   "temp max limit before we arena them so their pointers dont change");
 	
     switch(state){
         case GameState_Play:{
             controller.Update();
+			forE(interpTransformArr) it->Update();
             physics.Update();
             camera.Update();
             forE(physicsArr) it->Update(physics.fixedAlpha);
@@ -90,13 +105,14 @@ void Admin::Update(){
         
         case GameState_Editor:{
             controller.Update();
-            camera.Update();
             editor.Update();
             if(simulateInEditor){
+				forE(interpTransformArr) it->Update();
                 physics.Update();
-                f32 alpha = physics.fixedAccumulator / physics.fixedDeltaTime;
-                forE(physicsArr) it->Update(alpha);
+                forE(physicsArr) it->Update(physics.fixedAlpha);
+				for(TriggerEntity* t : triggers) t->Update(); //TODO(delle) remove this with better trigger system
             }
+			camera.Update();
             forE(modelArr) it->Update();
         }break;
     }

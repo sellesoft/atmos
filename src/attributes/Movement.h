@@ -23,41 +23,32 @@ struct Movement {
 	
 	vec3 inputs;
 	Physics* phys;
-
+	
 	Camera* camera;
-
+	
 	bool inAir;
 	MoveState moveState;
-
+	
 	float gndAccel = 100;
 	float airAccel = 1000;
-
+	
 	float jumpImpulse = 10;
-
+	
 	float maxWalkingSpeed = 5;
 	float maxRunningSpeed = 12;
 	float maxCrouchingSpeed = 2.5;
-
+	
 	bool jump = false;
-
+	
 	float maxGrabbingDistance = 5;
-
+	
 	Movement();
 	Movement(Physics* phys);
 	Movement(Physics* phys, float gndAccel, float airAccel, float maxWalkingSpeed, float maxRunningSpeed, float maxCrouchingSpeed, bool jump, float jumpImpulse);
-
+	
 	void Update();
-
 	void DecideMovementState();
-
 	void GrabObject();
-
-	//std::string SaveTEXT() override;
-	//static void LoadDESH(Admin* admin, const char* data, u32& cursor, u32 count);
 };
 
-
-
-
-
-#endif //COMPONENT_MOVEMENT_H
+#endif //ATTRIBUTE_MOVEMENT_H
