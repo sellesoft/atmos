@@ -12,6 +12,7 @@
 #include "attributes/InterpTransform.h"
 #include "utils/array.h"
 #include "utils/string.h"
+#include "utils/cstring.h"
 
 enum GameState_{
     GameState_Play,
@@ -25,6 +26,8 @@ struct PlayerEntity;
 struct TriggerEntity;
 typedef u32 EntityType;
 struct Admin{
+	string dataPath;
+	
     GameState      state;
 	Controller     controller;
 	CameraInstance camera; //admin controls all cameras in the world, but for now its just one
@@ -41,13 +44,15 @@ struct Admin{
 	array<ModelInstance> modelArr;
 	array<InterpTransform> interpTransformArr;
     
-	void Init();
+	void Init(string _dataPath);
 	void Update();
 	void PostRenderUpdate();
 	void Reset();
 	void Cleanup();
     
 	void ChangeState(GameState new_state);
+	void SaveLevel(cstring level_name);
+	void LoadLevel(cstring level_name);
 	Entity* EntityRaycast(vec3 origin, vec3 direction, f32 maxDistance, EntityType filter = 0);
 };
 

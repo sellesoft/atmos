@@ -10,7 +10,7 @@ REM                                       Includes/Sources/Libs
 REM _____________________________________________________________________________________________________
 
 @set INCLUDES=/I"..\src" /I"..\deshi\src" /I"..\deshi\src\external" /I"C:\src\glfw-3.3.2.bin.WIN64\include" /I"%VULKAN_SDK%\include"
-@set SOURCES=..\deshi\src\deshi.cpp *.cpp attributes\*.cpp
+@set SOURCES=..\deshi\src\deshi.cpp attributes\*.cpp atmos.cpp admin.cpp camerainstance.cpp controller.cpp editor.cpp physicssystem.cpp
 @set LIBS=/LIBPATH:C:\src\glfw-3.3.2.bin.WIN64\lib-vc2019 /libpath:%VULKAN_SDK%\lib glfw3.lib opengl32.lib gdi32.lib shell32.lib vulkan-1.lib shaderc_combined.lib
 
 REM _____________________________________________________________________________________________________

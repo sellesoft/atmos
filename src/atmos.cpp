@@ -70,7 +70,10 @@ __________ it might have something to do with our rotate by axis function
 */
 
 #include "deshi.h"
+#include "core/commands.h"
+
 #include "Admin.h"
+#include "atmos_commands.cpp"
 
 local Admin admin; Admin* g_admin = &admin;
 
@@ -79,7 +82,8 @@ int main() {
 	deshi::init();
     
     //init atmos
-	AtmoAdmin->Init();
+	AddAtmosCommands();
+	AtmoAdmin->Init("data/");
     
 	TIMER_START(t_d); TIMER_START(t_f);
 	while (!deshi::shouldClose()) {

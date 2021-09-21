@@ -8,7 +8,8 @@
 #include "core/logging.h"
 #include "core/window.h"
 
-void Admin::Init(){
+void Admin::Init(string _dataPath){
+	dataPath = _dataPath;
     state = GameState_Editor;
     simulateInEditor = false;
     
@@ -118,11 +119,23 @@ void Admin::Update(){
     }
 }
 
+void Admin::PostRenderUpdate(){
+    
+}
+
+void Admin::Reset(){
+    
+}
+
+void Admin::Cleanup(){
+    //TODO save game
+}
+
 void Admin::ChangeState(GameState new_state){
 	if(state == new_state) return;
     if(state >= GameState_COUNT) return LogE("Admin attempted to switch to unhandled gamestate: ", new_state);
 	
-	const char* from = 0; const char* to = 0;
+	const char* from = "ERROR"; const char* to = "ERROR";
 	switch(state){
 		case GameState_Play:    from = "PLAY";
 		switch(new_state){
@@ -171,16 +184,26 @@ void Admin::ChangeState(GameState new_state){
 	Logf("atmos","Changed gamestate from %s to %s", from,to);
 }
 
-void Admin::PostRenderUpdate(){
-    
+void Admin::SaveLevel(cstring level_name){
+	string level_text; level_text.reserve(4092);
+	
+	//level headers
+	level_text += TOSTRING(">level"
+						   "\nname        \"",level_name,"\""
+						   "\nlast_updated ",0); //TODO add last_updated once diff checking is setup
+	
+	level_text += TOSTRING("\n"
+						   "\n>player"
+						   "\n");
+	
+	level_text += "\n\n>entities";
+	
+	//write to file
+	string level_path = dataPath + "levels/" + to_string(level_name) + ".level";
 }
 
-void Admin::Reset(){
-    
-}
-
-void Admin::Cleanup(){
-    //TODO save game
+void Admin::LoadLevel(cstring level_name){
+	Assert(!"not implemented yet");
 }
 
 Entity* Admin::EntityRaycast(vec3 origin, vec3 direction, f32 maxDistance, EntityType filter) {
