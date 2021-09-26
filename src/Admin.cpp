@@ -26,63 +26,7 @@ void Admin::Init(string _dataPath){
 	
 	/*
     {//sandbox
-		player = new PlayerEntity;
-		player->Init(Transform(vec3(10,10,10)));
 		
-		Mesh* box_mesh = Storage::CreateBoxMesh(1,1,1,Color_Red).second;
-		Model* flat_box = Storage::CreateModelFromMesh(box_mesh).second;
-		flat_box->batches[0].material = Storage::CreateMaterial("flat", Shader_Flat, MaterialFlags_NONE, {}).first;
-		Model* lava_box = Storage::CreateModelFromMesh(box_mesh).second;
-		lava_box->batches[0].material = Storage::CreateMaterial("lava", Shader_Lavalamp, MaterialFlags_NONE, {}).first;
-		
-		//respawn trigger
-		TriggerEntity* trigger0 = new TriggerEntity;
-		trigger0->Init("respawn trigger", Transform(vec3{0,-20,0},vec3::ZERO,vec3{10000,5,10000}), new AABBCollider(box_mesh,1.0f));
-		trigger0->events.add(Event_PlayerRespawn);
-		trigger0->connections.add(player);
-		
-		//first island
-		PhysicsEntity* floor0 = new PhysicsEntity;
-		floor0->Init("floor0", Transform(vec3(0,-.5f,0),vec3::ZERO,vec3(50,1,50)), flat_box, new AABBCollider(box_mesh,1.0f),1.0f,true);
-		DoorEntity* wall0 = new DoorEntity;
-		wall0->Init("wall0", new AABBCollider(box_mesh,1.0f), flat_box, Transform(vec3(24,-5.5f,0),vec3(0,0,0),vec3(2,10,50)), Transform(vec3(24,8,0),vec3(0,0,0),vec3(2,20,50)), 2);
-		DoorEntity* wall1 = new DoorEntity;
-		wall1->Init("wall1", new AABBCollider(box_mesh,1.0f), flat_box, Transform(vec3(-24,-5.5f,0),vec3(0,0,0),vec3(2,10,50)), Transform(vec3(-24,8,0),vec3(0,0,0),vec3(2,20,50)), 2);
-		DoorEntity* wall2 = new DoorEntity;
-		wall2->Init("wall2", new AABBCollider(box_mesh,1.0f), flat_box, Transform(vec3(0,-5.5f,-24),vec3(0,0,0),vec3(50,10,2)), Transform(vec3(0,8,-24),vec3(0,0,0),vec3(50,20,2)), 2);
-		
-		//stairs
-		PhysicsEntity* stairs0 = new PhysicsEntity;
-		PhysicsEntity* stairs1 = new PhysicsEntity;
-		PhysicsEntity* stairs2 = new PhysicsEntity;
-		PhysicsEntity* stairs3 = new PhysicsEntity;
-		PhysicsEntity* stairs4 = new PhysicsEntity;
-		stairs0->Init("stairs0", Transform(vec3(20,3,30),vec3::ZERO,vec3(5,.5f,5)), lava_box, new AABBCollider(box_mesh,1.0f),1.0f,true);
-		stairs1->Init("stairs1", Transform(vec3(10,6,30),vec3::ZERO,vec3(5,.5f,5)), lava_box, new AABBCollider(box_mesh,1.0f),1.0f,true);
-		stairs2->Init("stairs2", Transform(vec3(0,9,30),vec3::ZERO,vec3(5,.5f,5)), lava_box, new AABBCollider(box_mesh,1.0f),1.0f,true);
-		stairs3->Init("stairs3", Transform(vec3(-10,12,30),vec3::ZERO,vec3(5,.5f,5)), lava_box, new AABBCollider(box_mesh,1.0f),1.0f,true);
-		stairs4->Init("stairs4", Transform(vec3(-20,15,30),vec3::ZERO,vec3(5,.5f,5)), lava_box, new AABBCollider(box_mesh,1.0f),1.0f,true);
-		stairs0->model->visible = false;
-		stairs1->model->visible = false;
-		stairs2->model->visible = false;
-		stairs3->model->visible = false;
-		stairs4->model->visible = false;
-		
-		//island trigger
-		TriggerEntity* trigger1 = new TriggerEntity;
-		trigger1->Init("island trigger", Transform(vec3{0,.55f,0},vec3::ZERO,vec3{1,.5f,1}), new AABBCollider(box_mesh,1.0f), lava_box);
-		trigger1->events.add(Event_ModelVisibleToggle);
-		trigger1->events.add(Event_ToggleTriggerActive);
-		trigger1->events.add(Event_ToggleDoor);
-		trigger1->connections.add(stairs0);
-		trigger1->connections.add(stairs1);
-		trigger1->connections.add(stairs2);
-		trigger1->connections.add(stairs3);
-		trigger1->connections.add(stairs4);
-		trigger1->connections.add(trigger1); //NOTE hide its own model
-		trigger1->connections.add(wall0);
-		trigger1->connections.add(wall1);
-		trigger1->connections.add(wall2);
     }
 	*/
 }
