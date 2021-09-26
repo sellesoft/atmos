@@ -10,6 +10,13 @@
 #include "utils/map.h"
 #include "utils/utils.h"
 
+struct Player;
+struct Movement;
+struct ModelInstance;
+struct Physics;
+struct Collider;
+struct InterpTransform;
+
 enum Event_ {
 	Event_NONE,
 	Event_ModelVisibleToggle,
@@ -23,7 +30,7 @@ global_ const char* EventStrings[] = {
 };
 
 enum EntityTypeBits {
-	EntityType_Anonymous,
+	EntityType_NONE,
 	EntityType_Player,
 	EntityType_Physics,
 	EntityType_Scenery,
@@ -32,24 +39,20 @@ enum EntityTypeBits {
 	EntityType_COUNT
 }; typedef u32 EntityType;
 global_ const char* EntityTypeStrings[] = {
-	"Anonymous", "Player", "Physics", "Scenery", "Trigger", "Door"
+	"NONE", "Player", "Physics", "Scenery", "Trigger", "Door"
 };
 
-struct Player;
-struct Movement;
-struct ModelInstance;
-struct Physics;
-struct Collider;
-
 struct Entity {
-	string name;
+	u32 id;
 	EntityType type;
+	string name;
 	Transform transform;
     
-	Player*       playerPtr = nullptr;
-	Physics*     physicsPtr = nullptr;
-	Movement*   movementPtr = nullptr;
-	ModelInstance* modelPtr = nullptr;
+	Player*          player = 0;
+	Movement*      movement = 0;
+	ModelInstance*    model = 0;
+	Physics*        physics = 0;
+	InterpTransform* interp = 0;
     
 	array<Entity*> connections;
 	
@@ -58,7 +61,7 @@ struct Entity {
 	};
 	
 	virtual void ReceiveEvent(Event event){
-		if(modelPtr && event == Event_ModelVisibleToggle) modelPtr->visible = !modelPtr->visible;
+		if(model && event == Event_ModelVisibleToggle) model->visible = !model->visible;
 	};
 };
 

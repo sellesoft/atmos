@@ -9,22 +9,17 @@
 #include "core/storage.h"
 
 struct DoorEntity : public Entity{
-	ModelInstance*   model;
-	Physics*         physics;
-	InterpTransform* interp;
-    
 	void Init(const char* _name, Collider* _collider, Model* _model, Transform _start, Transform _end, f32 _duration){
 		type = EntityType_Door;
 		name = _name;
 		transform = _start;
         
-		Assert(_collider && _model);
 		AtmoAdmin->modelArr.add(ModelInstance(_model));
-		model = AtmoAdmin->modelArr.last; modelPtr = model;
+		model = AtmoAdmin->modelArr.last;
 		model->attribute.entity = this;
         
         AtmoAdmin->physicsArr.add(Physics());
-        physics = AtmoAdmin->physicsArr.last; physicsPtr = physics;
+        physics = AtmoAdmin->physicsArr.last;
 		physics->attribute.entity = this;
         physics->collider       = _collider;
         physics->position       = _start.position;
@@ -43,6 +38,7 @@ struct DoorEntity : public Entity{
 		interp->stages.add(_start);
 		interp->stages.add(_end);
 		
+		id = AtmoAdmin->entities.count;
 		AtmoAdmin->entities.add(this);
 	}
     

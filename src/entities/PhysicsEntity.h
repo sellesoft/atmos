@@ -8,10 +8,6 @@
 #include "core/storage.h"
 
 struct PhysicsEntity : public Entity {
-	ModelInstance* model;
-	Physics*       physics;
-	Collider*      collider;
-    
 	void Init(const char* _name, Transform _transform, Model* _model, Collider* _collider, f32 _mass, b32 _static = false){
 		type = EntityType_Physics;
 		name = _name;
@@ -19,11 +15,11 @@ struct PhysicsEntity : public Entity {
         
 		Assert(_model);
 		AtmoAdmin->modelArr.add(ModelInstance(_model));
-		model = AtmoAdmin->modelArr.last; modelPtr = model;
+		model = AtmoAdmin->modelArr.last;
 		model->attribute.entity = this;
         
         AtmoAdmin->physicsArr.add(Physics());
-        physics = AtmoAdmin->physicsArr.last; physicsPtr = physics;
+        physics = AtmoAdmin->physicsArr.last;
 		physics->attribute.entity = this;
         physics->collider       = _collider;
         physics->position       = _transform.position;
@@ -32,6 +28,8 @@ struct PhysicsEntity : public Entity {
         physics->mass           = _mass;
 		physics->staticPosition = _static;
 		physics->staticRotation = _static;
+		
+		id = AtmoAdmin->entities.count;
 		AtmoAdmin->entities.add(this);
 	}
 };

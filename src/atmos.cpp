@@ -93,10 +93,9 @@ int main() {
 	    DeshInput->  Update();
 		AtmoAdmin->  Update();
 		DeshConsole->Update(); Console2::Update();
-		
-		UI::Update();
-		Render::Update();                          //place imgui calls before this
-		AtmoAdmin->PostRenderUpdate();
+		UI::         Update();
+		Render::     Update();                     //place imgui calls before this
+		AtmoAdmin->  PostRenderUpdate();
         
 		DeshTime->frameTime = TIMER_END(t_f); TIMER_RESET(t_f);
 	}

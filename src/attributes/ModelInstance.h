@@ -19,11 +19,15 @@ struct ModelInstance {
 	ModelInstance();
 	ModelInstance(Model* model);
 	ModelInstance(Mesh* mesh);
+	~ModelInstance();
     
 	void Update();
 	void ChangeModel(Model* model);
 	void ChangeModel(Mesh* mesh);
     inline void ToggleVisibility(){ visible = !visible; }
+	
+	static void SaveText(ModelInstance* model, string& level);
+	//static void LoadText();
 };
 
 #endif //ATMOS_MODELINSTANCE_H

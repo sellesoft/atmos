@@ -8,9 +8,7 @@
 #include "core/storage.h"
 
 struct TriggerEntity : public Entity {
-	ModelInstance* model;
-	Physics*       physics;
-	array<Event>   events;
+	array<Event> events;
     
 	void Init(const char* _name, Transform _transform, Collider* _collider, Model* _model = 0){
 		type = EntityType_Trigger;
@@ -19,13 +17,12 @@ struct TriggerEntity : public Entity {
         
 		if(_model){
 			AtmoAdmin->modelArr.add(ModelInstance(_model));
-			model = AtmoAdmin->modelArr.last; modelPtr = model;
+			model = AtmoAdmin->modelArr.last;
 			model->attribute.entity = this;
 		}
         
-		Assert(_collider);
         AtmoAdmin->physicsArr.add(Physics());
-        physics = AtmoAdmin->physicsArr.last; physicsPtr = physics;
+        physics = AtmoAdmin->physicsArr.last;
 		physics->attribute.entity = this;
         physics->collider       = _collider;
         physics->position       = _transform.position;
@@ -37,20 +34,22 @@ struct TriggerEntity : public Entity {
 		physics->collider->isTrigger = true;
 		physics->collider->noCollide = true;
 		
+		id = AtmoAdmin->entities.count;
 		AtmoAdmin->entities.add(this);
 		AtmoAdmin->triggers.add(this);
 	}
     
 	void Update(){
-		if(physics->collider->triggerActive) forI(events.count) SendEvent(events[i]);
+		if(physics->collider->triggerActive) 
+			forI(events.count) SendEvent(events[i]);
 		physics->collider->triggerActive = false;
 	}
 	
 	void ReceiveEvent(Event event)override{
 		if      (event == Event_ToggleTriggerActive){
 			physics->collider->isTrigger = !physics->collider->isTrigger;
-		}else if(event == Event_ModelVisibleToggle){
-			modelPtr->visible = !modelPtr->visible;
+		}else if(model && event == Event_ModelVisibleToggle){
+			model->visible = !model->visible;
 		}
 	};
 };

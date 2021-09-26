@@ -7,6 +7,7 @@
 #include "../transform.h"
 #include "math/math.h"
 #include "utils/array.h"
+#include "utils/string_conversion.h"
 
 enum InterpTransformType{
 	InterpTransformType_Once,
@@ -40,6 +41,20 @@ struct InterpTransform{
 			physics->scale    = Math::lerp(stages[lo].scale,    stages[hi].scale,    alpha);
 		}else if(type == InterpTransformType_Bounce){
 			Assert(!"not implemented yet");
+		}
+	}
+	
+	static void SaveText(InterpTransform* interp, string& level){
+		level += TOSTRING("\n:",AttributeType_InterpTransform," #",AttributeTypeStrings[AttributeType_InterpTransform],
+						  "\ntype        ",interp->type,
+						  "\nduration    ",interp->duration,
+						  "\ncurrent     ",interp->current,
+						  "\nactive      ",(interp->active) ? "true" : "false",
+						  "\nstage_count ",interp->stages.count);
+		forI(interp->stages.count){
+			level += TOSTRING("\nstage_position ",interp->stages[i].position,
+							  "\nstage_rotation ",interp->stages[i].rotation,
+							  "\nstage_scale    ",interp->stages[i].scale);
 		}
 	}
 };

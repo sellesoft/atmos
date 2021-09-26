@@ -11,18 +11,18 @@ struct Physics{
 	Attribute attribute{ AttributeType_Physics };
     Collider* collider = 0;
 	
-	vec3 position;
-	vec3 rotation;
-	vec3 scale;
-	vec3 velocity;
-	vec3 acceleration;
-	vec3 rotVelocity;
-	vec3 rotAcceleration;
+	vec3 position        = vec3::ZERO;
+	vec3 rotation        = vec3::ZERO;
+	vec3 scale           = vec3::ONE;
+	vec3 velocity        = vec3::ZERO;
+	vec3 acceleration    = vec3::ZERO;
+	vec3 rotVelocity     = vec3::ZERO;
+	vec3 rotAcceleration = vec3::ZERO;
     
-	f32 elasticity; //less than 1 in most cases
-	f32 mass;
-	f32 kineticFricCoef;
-	f32 staticFricCoef;
+	f32 mass            = 1.0;
+	f32 elasticity      = 0.2; //less than 1 in most cases
+	f32 kineticFricCoef = 0.3;
+	f32 staticFricCoef  = 0.3;
     
     b32 staticPosition = false;
 	b32 staticRotation = false;
@@ -44,6 +44,8 @@ struct Physics{
 	//changes velocity by adding an impulse to target, target also applies the impulse to creator
 	void AddImpulse(vec3 impulse);
 	void AddImpulseNomass(vec3 impulse);
+	
+	static void SaveText(Physics* physics, string& level);
 };
 
 #endif //ATMOS_ATTRIBUTE_PHYSICS_H

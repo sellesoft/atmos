@@ -10,9 +10,6 @@
 #include "core/logging.h"
 
 struct PlayerEntity : public Entity {
-	ModelInstance* model;
-	Physics*       physics;
-	
 	f32 standHeight    = 2.0;
 	f32 standEyeLevel  = 1.8;
 	f32 crouchHeight   = 1.2;
@@ -32,19 +29,19 @@ struct PlayerEntity : public Entity {
 	b32 isRunning   = false;
 	
 	Transform spawnpoint;
-	vec3 inputs;
+	vec3 inputs = vec3::ZERO;
     
-	void Init(const char* _name, Transform _transform) {
+	void Init(Transform _transform = Transform()) {
 		type = EntityType_Player;
-		name = _name;
+		name = "player";
 		transform = _transform;
         
         AtmoAdmin->modelArr.add(ModelInstance());
-		model = AtmoAdmin->modelArr.last; modelPtr = model;
+		model = AtmoAdmin->modelArr.last;
 		model->attribute.entity = this;
         
         AtmoAdmin->physicsArr.add(Physics());
-        physics = AtmoAdmin->physicsArr.last; physicsPtr = physics;
+        physics = AtmoAdmin->physicsArr.last;
 		physics->attribute.entity = this;
         physics->collider   = new AABBCollider(vec3(.5f,standHeight/2.f,.5f), 1.0);
         physics->position   = _transform.position;
@@ -55,6 +52,7 @@ struct PlayerEntity : public Entity {
 		physics->collider->offset = vec3(0,standHeight/2.f,0);
 		spawnpoint = _transform;
 		
+		id = AtmoAdmin->entities.count;
 		AtmoAdmin->entities.add(this);
 	}
 	

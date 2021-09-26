@@ -36,7 +36,7 @@ struct Admin{
     Editor editor;
     b32    simulateInEditor;
     
-	PlayerEntity* player; //store player separate so we can access it directly
+	PlayerEntity* player = 0; //store player separate so we can access it directly
 	array<Entity*> entities;
 	array<TriggerEntity*> triggers;
     

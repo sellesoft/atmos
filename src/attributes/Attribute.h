@@ -3,6 +3,7 @@
 #define ATMOS_ATTRIBUTE_H
 
 #include "defines.h"
+#include "utils/string.h"
 
 enum AttributeType_{
 	AttributeType_NONE,

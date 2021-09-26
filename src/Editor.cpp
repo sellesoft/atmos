@@ -670,7 +670,7 @@ void EntitiesTab(){
                     
 					//// visible button ////
 					ImGui::TableSetColumnIndex(0);
-					if(ModelInstance* m = ent->modelPtr){
+					if(ModelInstance* m = ent->model){
 						if(ImGui::Button((m->visible) ? "(M)" : "( )", ImVec2(-FLT_MIN, 0.0f))){
 							m->ToggleVisibility();
 						}
@@ -834,10 +834,10 @@ void EntitiesTab(){
         
         
 		//mesh
-		if(sel->modelPtr){
+		if(sel->model){
 			if(ImGui::CollapsingHeader("Model", &delete_button, tree_flags)){
 				ImGui::Indent();
-				ModelInstance* mc = sel->modelPtr;
+				ModelInstance* mc = sel->model;
                 
 				ImGui::TextEx("Visible  "); ImGui::SameLine();
 				if(ImGui::Button((mc->visible) ? "True" : "False", ImVec2(-FLT_MIN, 0))){
@@ -859,9 +859,9 @@ void EntitiesTab(){
 			}
 		}
 		
-		if(sel->physicsPtr){
-			if(sel->physicsPtr->collider){
-				if(sel->physicsPtr->collider->shape == ColliderShape_AABB){
+		if(sel->physics){
+			if(sel->physics->collider){
+				if(sel->physics->collider->shape == ColliderShape_AABB){
 					Render::DrawBox(sel->transform.Matrix(), Color_Green);
 				}
 			}

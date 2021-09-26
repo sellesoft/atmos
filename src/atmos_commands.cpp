@@ -10,6 +10,10 @@ void AddAtmosCommands(){
 	CMDSTART(load_level, "Loads a level after clearing the current editor state"){
 		AtmoAdmin->LoadLevel(args[0]);
 	}CMDEND(load_level, CmdArgument_String);
+	
+	CMDSTART(new_level, "Clears the current editor state"){
+		AtmoAdmin->Reset();
+	}CMDEND(new_level);
 }
 
 #undef CMDSTART

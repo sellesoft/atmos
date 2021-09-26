@@ -1,6 +1,7 @@
 #include "Physics.h"
 #include "../admin.h"
 #include "../entities/entity.h"
+#include "utils/string_conversion.h"
 
 Physics::Physics() {
 	position = vec3::ZERO;
@@ -59,4 +60,39 @@ void Physics::AddImpulse(vec3 impulse) {
 
 void Physics::AddImpulseNomass(vec3 impulse) {
 	velocity += impulse;
+}
+
+void Physics::SaveText(Physics* p, string& level){
+	level += TOSTRING("\n:",AttributeType_Physics," #",AttributeTypeStrings[AttributeType_Physics],
+					  "\nposition     ",p->position,
+					  "\nrotation     ",p->rotation,
+					  "\nscale        ",p->scale,
+					  "\nvelocity     ",p->velocity,
+					  "\naccel        ",p->acceleration,
+					  "\nrot_velocity ",p->rotVelocity,
+					  "\nrot_accel    ",p->rotAcceleration,
+					  "\nmass         ",p->mass,
+					  "\nelasticity   ",p->elasticity,
+					  "\nkinetic_fric ",p->kineticFricCoef,
+					  "\nstatic_fric  ",p->staticFricCoef,
+					  "\nstatic_pos   ",(p->staticPosition) ? "true" : "false",
+					  "\nstatic_rot   ",(p->staticRotation) ? "true" : "false");
+	if(p->collider){
+		level += TOSTRING("\ncollider_shape     ",p->collider->shape," #",ColliderShapeStrings[p->collider->shape],
+						  "\ncollider_offset    ",p->collider->offset,
+						  "\ncollider_layer     ",p->collider->layer,
+						  "\ncollider_nocollide ",(p->collider->noCollide) ? "true" : "false",
+						  "\ncollider_trigger   ",(p->collider->isTrigger) ? "true" : "false");
+		switch(p->collider->shape){
+			case ColliderShape_AABB:{
+				level += TOSTRING("\ncollider_half_dims ",((AABBCollider*)p->collider)->halfDims);
+			}break;
+			case ColliderShape_Sphere:{
+				level += TOSTRING("\ncollider_radius    ",((SphereCollider*)p->collider)->radius);
+			}break;
+			case ColliderShape_Complex:{
+				Assert(!"not implemented");
+			}break;
+		}
+	}
 }
