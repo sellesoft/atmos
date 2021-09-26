@@ -11,6 +11,11 @@ void AddAtmosCommands(){
 		AtmoAdmin->LoadLevel(args[0]);
 	}CMDEND(load_level, CmdArgument_String);
 	
+	CMDSTART(play_level, "Changes to play state after loading a level"){
+		AtmoAdmin->LoadLevel(args[0]);
+		AtmoAdmin->ChangeState(GameState_Play);
+	}CMDEND(play_level, CmdArgument_String);
+	
 	CMDSTART(new_level, "Clears the current editor state"){
 		AtmoAdmin->Reset();
 	}CMDEND(new_level);

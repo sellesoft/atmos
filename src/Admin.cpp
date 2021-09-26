@@ -1,4 +1,5 @@
 #include "Admin.h"
+#include "menu.h"
 #include "entities/Entity.h"
 #include "entities/PlayerEntity.h"
 #include "entities/PhysicsEntity.h"
@@ -15,6 +16,7 @@ void Admin::Init(string _dataPath){
     simulateInEditor = false;
     
 	camera = CameraInstance(90);
+	InitMenu();
 	controller.Init();
 	editor.Init();
     physics.Init(300);
@@ -49,6 +51,7 @@ void Admin::Update(){
         case GameState_Menu:{
 			controller.Update();
             forE(modelArr) it->Update();
+			UpdateMenu();
         }break;
         
         case GameState_Editor:{
