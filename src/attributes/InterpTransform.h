@@ -12,6 +12,7 @@
 enum InterpTransformType{
 	InterpTransformType_Once,
 	InterpTransformType_Bounce,
+	InterpTransformType_Cycle,
 };
 
 struct InterpTransform{
@@ -21,6 +22,7 @@ struct InterpTransform{
 	f32 duration = 0;
 	f32 current = 0;
 	b32 active = false;
+	b32 reset = false;
 	array<Transform> stages;
 	
 	void Update(){
@@ -36,11 +38,54 @@ struct InterpTransform{
 			f32 alpha = current / duration;
 			u32 lo = (u32)floor(alpha*(stages.count-1));
 			u32 hi = (u32)ceil(alpha*(stages.count-1));
-			physics->position = Math::lerp(stages[lo].position, stages[hi].position, alpha);
-			physics->rotation = Math::lerp(stages[lo].rotation, stages[hi].rotation, alpha);
-			physics->scale    = Math::lerp(stages[lo].scale,    stages[hi].scale,    alpha);
+			f32 local_duration = duration / (stages.count-1);
+			f32 local_alpha = (current - (f32(lo)*local_duration)) / local_duration;
+			physics->position = Math::lerp(stages[lo].position, stages[hi].position, local_alpha);
+			physics->rotation = Math::lerp(stages[lo].rotation, stages[hi].rotation, local_alpha);
+			physics->scale    = Math::lerp(stages[lo].scale,    stages[hi].scale,    local_alpha);
 		}else if(type == InterpTransformType_Bounce){
-			Assert(!"not implemented yet");
+			if(reset){
+				current -= DeshTime->deltaTime;
+				if(current <= 0){
+					current = 0;
+					reset = false;
+				}
+			}else{
+				current += DeshTime->deltaTime;
+				if(current >= duration){
+					current = duration;
+					reset = true;
+				}
+			}
+			
+			f32 alpha = current / duration;
+			u32 lo = (u32)floor(alpha*(stages.count-1));
+			u32 hi = (u32)ceil(alpha*(stages.count-1));
+			f32 local_duration = duration / (stages.count-1);
+			f32 local_alpha = (current - (f32(lo)*local_duration)) / local_duration;
+			physics->position = Math::lerp(stages[lo].position, stages[hi].position, local_alpha);
+			physics->rotation = Math::lerp(stages[lo].rotation, stages[hi].rotation, local_alpha);
+			physics->scale    = Math::lerp(stages[lo].scale,    stages[hi].scale,    local_alpha);
+		}else if(type == InterpTransformType_Cycle){
+			current += DeshTime->deltaTime;
+			if(current >= duration){
+				current = duration;
+				reset = true;
+			}
+			
+			f32 alpha = current / duration;
+			u32 lo = (u32)floor(alpha*(stages.count-1));
+			u32 hi = (u32)ceil(alpha*(stages.count-1));
+			f32 local_duration = duration / (stages.count-1);
+			f32 local_alpha = (current - (f32(lo)*local_duration)) / local_duration;
+			physics->position = Math::lerp(stages[lo].position, stages[hi].position, local_alpha);
+			physics->rotation = Math::lerp(stages[lo].rotation, stages[hi].rotation, local_alpha);
+			physics->scale    = Math::lerp(stages[lo].scale,    stages[hi].scale,    local_alpha);
+			
+			if(reset){
+				current = 0;
+				reset = false;
+			}
 		}
 	}
 	
