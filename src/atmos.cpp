@@ -81,13 +81,13 @@ __________ it might have something to do with our rotate by axis function
 local Admin admin; Admin* g_admin = &admin;
 
 int main() {
-    //init deshi
+	//init deshi
 	deshi::init();
-    
-    //init atmos
+	
+	//init atmos
 	AddAtmosCommands();
 	AtmoAdmin->Init("data/");
-    
+	
 	TIMER_START(t_d); TIMER_START(t_f);
 	while (!deshi::shouldClose()) {
 		DeshiImGui::NewFrame();                    //place imgui calls after this
@@ -99,10 +99,10 @@ int main() {
 		UI::         Update();
 		Render::     Update();                     //place imgui calls before this
 		AtmoAdmin->  PostRenderUpdate();
-        
+		
 		DeshTime->frameTime = TIMER_END(t_f); TIMER_RESET(t_f);
 	}
-    
+	
 	deshi::cleanup();
 	AtmoAdmin->Cleanup();
 }

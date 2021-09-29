@@ -9,25 +9,25 @@
 
 struct TriggerEntity : public Entity {
 	array<Event> events;
-    
+	
 	void Init(const char* _name, Transform _transform, Collider* _collider, Model* _model = 0){
 		type = EntityType_Trigger;
 		name = _name;
 		transform = _transform;
-        
+		
 		if(_model){
 			AtmoAdmin->modelArr.add(ModelInstance(_model));
 			model = AtmoAdmin->modelArr.last;
 			model->attribute.entity = this;
 		}
-        
-        AtmoAdmin->physicsArr.add(Physics());
-        physics = AtmoAdmin->physicsArr.last;
+		
+		AtmoAdmin->physicsArr.add(Physics());
+		physics = AtmoAdmin->physicsArr.last;
 		physics->attribute.entity = this;
-        physics->collider       = _collider;
-        physics->position       = _transform.position;
-        physics->rotation       = _transform.rotation;
-        physics->scale          = _transform.scale;
+		physics->collider       = _collider;
+		physics->position       = _transform.position;
+		physics->rotation       = _transform.rotation;
+		physics->scale          = _transform.scale;
 		physics->mass           = 1.0f;
 		physics->staticPosition = true;
 		physics->staticRotation = true;
@@ -38,7 +38,7 @@ struct TriggerEntity : public Entity {
 		AtmoAdmin->entities.add(this);
 		AtmoAdmin->triggers.add(this);
 	}
-    
+	
 	void Update(){
 		if(physics->collider->triggerActive) 
 			forI(events.count) SendEvent(events[i]);

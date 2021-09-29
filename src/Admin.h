@@ -15,10 +15,10 @@
 #include "utils/cstring.h"
 
 enum GameState_{
-    GameState_Play,
-    GameState_Menu,
-    GameState_Editor,
-    GameState_COUNT,
+	GameState_Play,
+	GameState_Menu,
+	GameState_Editor,
+	GameState_COUNT,
 }; typedef u32 GameState;
 
 struct Entity;
@@ -29,28 +29,28 @@ struct Admin{
 	string dataPath;
 	string levelName;
 	
-    GameState      state;
+	GameState      state;
 	Controller     controller;
 	CameraInstance camera; //admin controls all cameras in the world, but for now its just one
-    PhysicsSystem  physics;
+	PhysicsSystem  physics;
 	
-    Editor editor;
-    b32    simulateInEditor;
-    
+	Editor editor;
+	b32    simulateInEditor;
+	
 	PlayerEntity* player = 0; //store player separate so we can access it directly
 	array<Entity*> entities;
 	array<TriggerEntity*> triggers;
-    
+	
 	array<Physics> physicsArr;
 	array<ModelInstance> modelArr;
 	array<InterpTransform> interpTransformArr;
-    
+	
 	void Init(string _dataPath);
 	void Update();
 	void PostRenderUpdate();
 	void Reset();
 	void Cleanup();
-    
+	
 	void ChangeState(GameState new_state);
 	void SaveLevel(cstring level_name);
 	void LoadLevel(cstring level_name);

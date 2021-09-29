@@ -8,7 +8,7 @@ struct Transform{
 	vec3 position = vec3::ZERO;
 	vec3 rotation = vec3::ZERO;
 	vec3 scale    = vec3::ONE;
-    
+	
 	Transform(vec3 _position = vec3::ZERO, vec3 _rotation = vec3::ZERO, vec3 _scale = vec3::ONE){
 		position = _position; rotation = _rotation; scale = _scale;
 	}

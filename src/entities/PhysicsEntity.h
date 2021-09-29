@@ -12,20 +12,20 @@ struct PhysicsEntity : public Entity {
 		type = EntityType_Physics;
 		name = _name;
 		transform = _transform;
-        
+		
 		Assert(_model);
 		AtmoAdmin->modelArr.add(ModelInstance(_model));
 		model = AtmoAdmin->modelArr.last;
 		model->attribute.entity = this;
-        
-        AtmoAdmin->physicsArr.add(Physics());
-        physics = AtmoAdmin->physicsArr.last;
+		
+		AtmoAdmin->physicsArr.add(Physics());
+		physics = AtmoAdmin->physicsArr.last;
 		physics->attribute.entity = this;
-        physics->collider       = _collider;
-        physics->position       = _transform.position;
-        physics->rotation       = _transform.rotation;
-        physics->scale          = _transform.scale;
-        physics->mass           = _mass;
+		physics->collider       = _collider;
+		physics->position       = _transform.position;
+		physics->rotation       = _transform.rotation;
+		physics->scale          = _transform.scale;
+		physics->mass           = _mass;
 		physics->staticPosition = _static;
 		physics->staticRotation = _static;
 		

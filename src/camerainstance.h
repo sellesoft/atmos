@@ -9,12 +9,12 @@
 struct CameraInstance : public Camera{
 	CameraInstance() {};
 	CameraInstance(float fov, float nearZ = .01f, float farZ = 1000.01f, bool freeCam = true);
-    
+	
 	void Update();
-    
+	
 	mat4 MakePerspectiveProjection();
 	mat4 MakeOrthographicProjection();
-    
+	
 	void UpdateProjectionMatrix();
 };
 

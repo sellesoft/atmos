@@ -49,18 +49,18 @@ struct Collider{
 	mat3 tensor{};
 	vec3 offset{};
 	u32  layer = 0;
-    b32  noCollide = false;
+	b32  noCollide = false;
 	b32  isTrigger = false;
 	
 	b32 triggerActive = false; //TODO replace this with manifold stuffs
-    
+	
 	//evenly distributes mass through the respective body
 	virtual void RecalculateTensor(f32 mass) = 0;
 };
 
 struct AABBCollider : public Collider{
 	vec3 halfDims;
-    
+	
 	AABBCollider(Mesh* mesh,    f32 mass);
 	AABBCollider(vec3 halfDims, f32 mass);
 	void RecalculateTensor(f32 mass) override;
@@ -68,7 +68,7 @@ struct AABBCollider : public Collider{
 
 struct SphereCollider : public Collider{
 	f32 radius;
-    
+	
 	SphereCollider(f32 radius, f32 mass);
 	void RecalculateTensor(f32 mass) override;
 };

@@ -30,25 +30,25 @@ struct PlayerEntity : public Entity {
 	
 	Transform spawnpoint;
 	vec3 inputs = vec3::ZERO;
-    
+	
 	void Init(Transform _transform = Transform()) {
 		type = EntityType_Player;
 		name = "player";
 		transform = _transform;
-        
-        AtmoAdmin->modelArr.add(ModelInstance());
+		
+		AtmoAdmin->modelArr.add(ModelInstance());
 		model = AtmoAdmin->modelArr.last;
 		model->attribute.entity = this;
-        
-        AtmoAdmin->physicsArr.add(Physics());
-        physics = AtmoAdmin->physicsArr.last;
+		
+		AtmoAdmin->physicsArr.add(Physics());
+		physics = AtmoAdmin->physicsArr.last;
 		physics->attribute.entity = this;
-        physics->collider   = new AABBCollider(vec3(.5f,standHeight/2.f,.5f), 1.0);
-        physics->position   = _transform.position;
-        physics->rotation   = _transform.rotation;
-        physics->scale      = _transform.scale;
-        physics->mass       = 1.0;
-        physics->elasticity = 0;
+		physics->collider   = new AABBCollider(vec3(.5f,standHeight/2.f,.5f), 1.0);
+		physics->position   = _transform.position;
+		physics->rotation   = _transform.rotation;
+		physics->scale      = _transform.scale;
+		physics->mass       = 1.0;
+		physics->elasticity = 0;
 		physics->collider->offset = vec3(0,standHeight/2.f,0);
 		spawnpoint = _transform;
 		

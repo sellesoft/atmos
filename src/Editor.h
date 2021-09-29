@@ -5,12 +5,12 @@
 #include "defines.h"
 
 struct EditorSettings{
-    
+	
 };
 
 struct Editor{
 	EditorSettings settings;
-    
+	
 	void Init();
 	void Update();
 	void Reset();

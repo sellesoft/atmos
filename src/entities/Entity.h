@@ -47,7 +47,7 @@ struct Entity {
 	EntityType type;
 	string name;
 	Transform transform;
-    
+	
 	array<Entity*> connections;
 	ModelInstance*    model = 0;
 	Physics*        physics = 0;

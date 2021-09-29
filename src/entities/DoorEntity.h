@@ -13,18 +13,18 @@ struct DoorEntity : public Entity{
 		type = EntityType_Door;
 		name = _name;
 		transform = _start;
-        
+		
 		AtmoAdmin->modelArr.add(ModelInstance(_model));
 		model = AtmoAdmin->modelArr.last;
 		model->attribute.entity = this;
-        
-        AtmoAdmin->physicsArr.add(Physics());
-        physics = AtmoAdmin->physicsArr.last;
+		
+		AtmoAdmin->physicsArr.add(Physics());
+		physics = AtmoAdmin->physicsArr.last;
 		physics->attribute.entity = this;
-        physics->collider       = _collider;
-        physics->position       = _start.position;
-        physics->rotation       = _start.rotation;
-        physics->scale          = _start.scale;
+		physics->collider       = _collider;
+		physics->position       = _start.position;
+		physics->rotation       = _start.rotation;
+		physics->scale          = _start.scale;
 		physics->mass           = 1.0f;
 		physics->staticPosition = true;
 		physics->staticRotation = true;
@@ -41,7 +41,7 @@ struct DoorEntity : public Entity{
 		id = AtmoAdmin->entities.count;
 		AtmoAdmin->entities.add(this);
 	}
-    
+	
 	void ReceiveEvent(Event event)override{
 		if(event == Event_ToggleDoor){
 			interp->active = !interp->active;

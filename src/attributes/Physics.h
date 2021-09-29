@@ -9,7 +9,7 @@
 struct Collider;
 struct Physics{
 	Attribute attribute{ AttributeType_Physics };
-    Collider* collider = 0;
+	Collider* collider = 0;
 	
 	vec3 position        = vec3::ZERO;
 	vec3 rotation        = vec3::ZERO;
@@ -18,25 +18,25 @@ struct Physics{
 	vec3 acceleration    = vec3::ZERO;
 	vec3 rotVelocity     = vec3::ZERO;
 	vec3 rotAcceleration = vec3::ZERO;
-    
+	
 	f32 mass            = 1.0;
 	f32 elasticity      = 0.2; //less than 1 in most cases
 	f32 kineticFricCoef = 0.3;
 	f32 staticFricCoef  = 0.3;
-    
-    b32 staticPosition = false;
+	
+	b32 staticPosition = false;
 	b32 staticRotation = false;
 	
 	vec3 netForce;
-    
+	
 	Physics();
 	Physics(vec3 position, vec3 rotation, vec3 velocity = vec3::ZERO, vec3 acceleration = vec3::ZERO,
-            vec3 rotVeloctiy = vec3::ZERO, vec3 rotAcceleration = vec3::ZERO, float elasticity = .2f,
-            float mass = 1.f, bool staticPosition = false);
+			vec3 rotVeloctiy = vec3::ZERO, vec3 rotAcceleration = vec3::ZERO, float elasticity = .2f,
+			float mass = 1.f, bool staticPosition = false);
 	Physics(vec3 position, vec3 rotation, float mass, float elasticity);
-    
-    void Update(f32 alpha);
-    
+	
+	void Update(f32 alpha);
+	
 	//changes acceleration by adding a force to target, target also applies the force to creator
 	void AddForce(vec3 force);
 	//if no creator, assume air friction; if creator, assume sliding friction

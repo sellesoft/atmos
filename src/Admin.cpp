@@ -12,22 +12,22 @@
 
 void Admin::Init(string _dataPath){
 	dataPath = _dataPath;
-    state = GameState_Editor;
-    simulateInEditor = false;
+	state = GameState_Editor;
+	simulateInEditor = false;
 	levelName = "";
-    
+	
 	camera = CameraInstance(90);
 	InitMenu();
 	controller.Init();
 	editor.Init();
-    physics.Init(300);
+	physics.Init(300);
 	
 	//NOTE temp reserves before we arena them so their pointers dont change
 	physicsArr.reserve(1024);
 	modelArr.reserve(1024);
 	interpTransformArr.reserve(1024);
 	
-    {//sandbox
+	{//sandbox
 		/*
 PhysicsEntity* floor1 = new PhysicsEntity;
 		floor1->Init("floor1", Transform(vec3(20,2,20),vec3::ZERO,vec3(5,1,5)), flat_box, new AABBCollider(box_mesh,1.0f),1.0f,true);
@@ -41,47 +41,47 @@ PhysicsEntity* floor1 = new PhysicsEntity;
 		floor1->interp->stages.add(Transform(vec3( 20,2, 20),vec3::ZERO,vec3(5,1,5)));
 		floor1->interp->stages.add(Transform(vec3( 20,2,-20),vec3::ZERO,vec3(5,1,5)));
 */
-    }
+	}
 }
 
 void Admin::Update(){
 	Assert(physicsArr.count <= 1024 && modelArr.count <= 1024 && interpTransformArr.count <= 1024,
 		   "temp max limit before we arena them so their pointers dont change");
 	
-    switch(state){
-        case GameState_Play:{
-            controller.Update();
-			forE(interpTransformArr) it->Update();
-            physics.Update();
-            camera.Update();
-            forE(physicsArr) it->Update(physics.fixedAlpha);
-			for(TriggerEntity* t : triggers) t->Update(); //TODO(delle) remove this with better trigger system
-            forE(modelArr) it->Update();
-        }break;
-        
-        case GameState_Menu:{
+	switch(state){
+		case GameState_Play:{
 			controller.Update();
-            forE(modelArr) it->Update();
-			UpdateMenu();
-        }break;
-        
-        case GameState_Editor:{
-            controller.Update();
-            editor.Update();
-            if(simulateInEditor){
-				forE(interpTransformArr) it->Update();
-                physics.Update();
-                forE(physicsArr) it->Update(physics.fixedAlpha);
-				for(TriggerEntity* t : triggers) t->Update(); //TODO(delle) remove this with better trigger system
-            }
+			forE(interpTransformArr) it->Update();
+			physics.Update();
 			camera.Update();
-            forE(modelArr) it->Update();
-        }break;
-    }
+			forE(physicsArr) it->Update(physics.fixedAlpha);
+			for(TriggerEntity* t : triggers) t->Update(); //TODO(delle) remove this with better trigger system
+			forE(modelArr) it->Update();
+		}break;
+		
+		case GameState_Menu:{
+			controller.Update();
+			forE(modelArr) it->Update();
+			UpdateMenu();
+		}break;
+		
+		case GameState_Editor:{
+			controller.Update();
+			editor.Update();
+			if(simulateInEditor){
+				forE(interpTransformArr) it->Update();
+				physics.Update();
+				forE(physicsArr) it->Update(physics.fixedAlpha);
+				for(TriggerEntity* t : triggers) t->Update(); //TODO(delle) remove this with better trigger system
+			}
+			camera.Update();
+			forE(modelArr) it->Update();
+		}break;
+	}
 }
 
 void Admin::PostRenderUpdate(){
-    
+	
 }
 
 void Admin::Reset(){
@@ -92,9 +92,9 @@ void Admin::Reset(){
 	entities.clear();
 	triggers.clear();
 	
-    physicsArr.clear();
-    modelArr.clear();
-    interpTransformArr.clear();
+	physicsArr.clear();
+	modelArr.clear();
+	interpTransformArr.clear();
 	
 	//NOTE temp reserves before we arena them so their pointers dont change
 	physicsArr.reserve(1024);
@@ -103,12 +103,12 @@ void Admin::Reset(){
 }
 
 void Admin::Cleanup(){
-    //TODO save game
+	//TODO save game
 }
 
 void Admin::ChangeState(GameState new_state){
 	if(state == new_state) return;
-    if(state >= GameState_COUNT) return LogE("Admin attempted to switch to unhandled gamestate: ", new_state);
+	if(state >= GameState_COUNT) return LogE("Admin attempted to switch to unhandled gamestate: ", new_state);
 	
 	const char* from = "ERROR"; const char* to = "ERROR";
 	switch(state){
@@ -543,25 +543,25 @@ Entity* Admin::EntityRaycast(vec3 origin, vec3 direction, f32 maxDistance, Entit
 					Mesh::Triangle* tri = &mc->mesh->triangleArray[tri_idx];
 					vec3 p0 = tri->p[0] * transform;
 					vec3 normal = tri->normal * rotation;
-                    
+					
 					//early out if triangle is not facing us
 					if(normal.dot(p0 - origin) >= 0) continue;
-                    
+					
 					//find where on the plane defined by the triangle our raycast intersects
 					f32 depth = (p0 - origin).dot(normal) / direction.dot(normal);
 					vec3 intersect = origin + (direction * depth);
-                    
+					
 					//early out if intersection is behind us
 					if(depth <= 0) continue;
 					
 					vec3 p1 = tri->p[1] * transform;
 					vec3 p2 = tri->p[2] * transform;
-                    
+					
 					//make vectors perpendicular to each edge of the triangle
 					vec3 perp01 = normal.cross(p1 - p0).normalized();
 					vec3 perp12 = normal.cross(p2 - p1).normalized();
 					vec3 perp20 = normal.cross(p0 - p2).normalized();
-                    
+					
 					//check that the intersection point is within the triangle and its the closest triangle found so far
 					if((perp01.dot(intersect - p0) > 0) && (perp12.dot(intersect - p1) > 0) && (perp20.dot(intersect - p2) > 0)){
 						//if its the closest triangle so far we store its index
@@ -575,7 +575,7 @@ Entity* Admin::EntityRaycast(vec3 origin, vec3 direction, f32 maxDistance, Entit
 			}
 		}
 	}
-    
+	
 	return (result) ? result : 0;
 }
 

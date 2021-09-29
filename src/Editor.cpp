@@ -89,25 +89,25 @@ namespace ImGui {
 		ImGui::PushStyleColor(ImGuiCol_WindowBg, ImGui::ColorToImVec4(color(0, 0, 0, 0)));
 		ImGui::Begin("DebugLayer", 0, ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar);
 	}
-    
+	
 	//not necessary, but I'm adding it for clarity in code
 	void EndDebugLayer(){
 		ImGui::PopStyleColor();
 		ImGui::End();
 	}
-    
+	
 	void DebugDrawText(const char* text, vec2 pos, color color = Color_White){
 		ImGui::SetCursorPos(ImGui::vec2ToImVec2(pos));
-        
+		
 		ImGui::PushStyleColor(ImGuiCol_Text, ImGui::ColorToImVec4(color));
 		ImGui::TextEx(text);
 		ImGui::PopStyleColor();
 	}
-    
+	
 	void DebugDrawText3(const char* text, vec3 pos, color color = Color_White, vec2 twoDoffset = vec2::ZERO){
 		CameraInstance* c = &AtmoAdmin->camera;
 		vec2 windimen = DeshWindow->dimensions;
-        
+		
 		vec3 posc = Math::WorldToCamera3(pos, c->viewMat);
 		if(Math::ClipLineToZPlanes(posc, posc, c->nearZ, c->farZ)){
 			ImGui::SetCursorPos(ImGui::vec2ToImVec2(Math::CameraToScreen2(posc, c->projMat, windimen) + twoDoffset));
@@ -116,7 +116,7 @@ namespace ImGui {
 			ImGui::PopStyleColor();
 		}
 	}
-    
+	
 	void AddPadding(float x){
 		ImGui::SetCursorPosX(ImGui::GetCursorPosX() + x);
 	}
@@ -325,7 +325,7 @@ void MenuBar(){
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0);
 	ImGui::PushStyleColor(ImGuiCol_PopupBg, ImGui::ColorToImVec4(color(20, 20, 20, 255)));
 	ImGui::PushStyleColor(ImGuiCol_MenuBarBg, ImGui::ColorToImVec4(color(20, 20, 20, 255)));
-    
+	
 	if(ImGui::BeginMainMenuBar()){ WinHovCheck;
 		//// level menu options ////
 		if(ImGui::BeginMenu("Level")){ WinHovCheck;
@@ -359,7 +359,7 @@ void MenuBar(){
 			}
 			ImGui::EndMenu();
 		}
-        
+		
 		//// load menu options ////
 		if(ImGui::BeginMenu("Load")){ WinHovCheck;
 			if(ImGui::BeginMenu("Meshes")){ WinHovCheck;
@@ -378,7 +378,7 @@ void MenuBar(){
 				}
 				ImGui::EndMenu();
 			}
-            
+			
 			if(ImGui::BeginMenu("Textures")){ WinHovCheck;
 				dir_textures = Assets::iterateDirectory(Assets::dirTextures());
 				forX(di, dir_textures.count){
@@ -394,7 +394,7 @@ void MenuBar(){
 				}
 				ImGui::EndMenu();
 			}
-            
+			
 			if(ImGui::BeginMenu("Materials")){ WinHovCheck;
 				dir_materials = Assets::iterateDirectory(Assets::dirModels(), ".mat");
 				forX(di, dir_materials.count){
@@ -411,7 +411,7 @@ void MenuBar(){
 				}
 				ImGui::EndMenu();
 			}
-            
+			
 			if(ImGui::BeginMenu("Models")){ WinHovCheck;
 				dir_models = Assets::iterateDirectory(Assets::dirModels(), ".model");
 				forX(di, dir_models.count){
@@ -432,7 +432,7 @@ void MenuBar(){
 				}
 				ImGui::EndMenu();
 			}
-            
+			
 			if(ImGui::BeginMenu("OBJs")){ WinHovCheck;
 				dir_objs = Assets::iterateDirectory(Assets::dirModels(), ".obj");
 				forX(di, dir_objs.count){
@@ -449,10 +449,10 @@ void MenuBar(){
 						}
 						u32 mesh_count = Storage::MeshCount();
 						u32 material_count = Storage::MaterialCount();
-                        
+						
 						u32 id = Storage::CreateModelFromFile(dir_objs[di].str, ModelFlags_NONE, true).first;
 						if(id) saved_models.add(false);
-                        
+						
 						forI(Storage::MeshCount() - mesh_count){ saved_meshes.add(false); }
 						forI(Storage::MaterialCount() - material_count){ saved_materials.add(false); }
 					}
@@ -461,7 +461,7 @@ void MenuBar(){
 			}
 			ImGui::EndMenu();
 		}
-        
+		
 		//// window menu options ////
 		if(ImGui::BeginMenu("Window")){ WinHovCheck;
 			ImGui::Checkbox("Inspector", &showInspector);
@@ -473,7 +473,7 @@ void MenuBar(){
 			ImGui::Checkbox("Popout Inspector", &popoutInspector);
 			ImGui::EndMenu();
 		}
-        
+		
 		//// state menu options ////
 		if(ImGui::BeginMenu("State")){ WinHovCheck;
 			if(ImGui::MenuItem("Play"))   AtmoAdmin->ChangeState(GameState_Play);
@@ -483,7 +483,7 @@ void MenuBar(){
 		}
 		ImGui::EndMainMenuBar();
 	}
-    
+	
 	ImGui::PopStyleColor(2);
 	ImGui::PopStyleVar(2);
 }
@@ -495,7 +495,7 @@ void EntitiesTab(){
 	persist bool rename_ent = false;
 	persist char rename_buffer[DESHI_NAME_SIZE] = {};
 	persist Entity* events_ent = 0;
-    
+	
 	//// selected entity keybinds ////
 	//start renaming first selected entity
 	//TODO(delle) repair this to work with array
@@ -521,7 +521,7 @@ void EntitiesTab(){
 		//TODO(delle) re-enable this with a popup to delete OR with undoing on delete
 		selected_entities.clear();
 	}
-    
+	
 	//// entity list panel ////
 	ImGui::PushStyleColor(ImGuiCol_ChildBg, ImGui::ColorToImVec4(color(25, 25, 25)));
 	ImGui::SetCursorPosX(ImGui::GetWindowWidth() * 0.025);
@@ -536,20 +536,20 @@ void EntitiesTab(){
 				ImGui::TextEx(str1.str+i, str1.str+i+1);
 			}
 		}else{
-            
+			
 			if(ImGui::BeginTable("##entity_list_table", 4, ImGuiTableFlags_BordersInner)){
 				ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed, fontw * 3.5f);  //visible ImGui::Button
 				ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed, fontw * 5.f);  //id
 				ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthStretch);             //name
 				//ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed, fontw * 3.5f); //evenbutton
 				ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed, fontw);        //delete button
-                
+				
 				forX(ent_idx, AtmoAdmin->entities.count){
 					Entity* ent = AtmoAdmin->entities[ent_idx];
 					if(!ent) assert(!"NULL entity when creating entity list table");
 					ImGui::PushID(ent_idx);
 					ImGui::TableNextRow();
-                    
+					
 					//// visible button ////
 					ImGui::TableSetColumnIndex(0);
 					if(ModelInstance* m = ent->model){
@@ -559,7 +559,7 @@ void EntitiesTab(){
 					}else{
 						if(ImGui::Button("(?)", ImVec2(-FLT_MIN, 0.0f))){}
 					}
-                    
+					
 					//// id + label (selectable row) ////
 					ImGui::TableSetColumnIndex(1);
 					char label[16];
@@ -589,7 +589,7 @@ void EntitiesTab(){
 						rename_ent = false;
 						DeshConsole->IMGUI_KEY_CAPTURE = false;
 					}
-                    
+					
 					//// name text ////
 					ImGui::TableSetColumnIndex(2);
 					if(rename_ent && selected_idx == ent_idx){
@@ -600,14 +600,14 @@ void EntitiesTab(){
 					else{
 						ImGui::TextEx(ent->name.str);
 					}
-                    
+					
 					//// events button ////
 					//ImGui::TableSetColumnIndex(3);
 					//if(ImGui::Button("Events", ImVec2(-FLT_MIN, 0.0f))){
 					//	events_ent = (events_ent != ent) ? ent : 0;
 					//}
 					//EventsMenu(events_ent);
-                    
+					
 					//// delete button ////
 					ImGui::TableSetColumnIndex(3);
 					if(ImGui::Button("X", ImVec2(-FLT_MIN, 0.0f))){
@@ -622,13 +622,13 @@ void EntitiesTab(){
 		ImGui::EndChild();
 	}//Entity List Scroll child window
 	ImGui::PopStyleColor();
-    
+	
 	ImGui::Separator();
-    
+	
 	//// create new entity ////
 	persist const char* presets[] = { "Empty", "StaticEntity", "PhysicsEntity", "Player", };
 	persist int current_preset = 0;
-    
+	
 	ImGui::SetCursorPosX(ImGui::GetWindowWidth() * 0.025);
 	if(ImGui::Button("New Entity")){
 		Entity* ent = 0;
@@ -656,12 +656,12 @@ void EntitiesTab(){
 				}
 			}break;
 		}
-        
+		
 		selected_entities.clear();
 		if(ent) selected_entities.add(ent);
 	}
 	ImGui::SameLine(); ImGui::Combo("##preset_combo", &current_preset, presets, ArrayCount(presets));
-    
+	
 	ImGui::Separator();
 	
 	//// selected entity inspector panel ////
@@ -670,18 +670,18 @@ void EntitiesTab(){
 	ImGui::PushStyleVar(ImGuiStyleVar_IndentSpacing, 5.0f);
 	ImGui::SetCursorPosX(ImGui::GetWindowWidth() * 0.025);
 	if(ImGui::BeginChild("##ent_inspector", ImVec2(ImGui::GetWindowWidth() * 0.95f, ImGui::GetWindowHeight() * .9f), true, ImGuiWindowFlags_NoScrollbar)){
-        
+		
 		//// name ////
 		SetPadding; ImGui::TextEx("Name:");
 		ImGui::SameLine(); ImGui::SetNextItemWidth(-FLT_MIN); ImGui::InputText("##ent_name_input", sel->name.str, DESHI_NAME_SIZE,
-                                                                               ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_AutoSelectAll);
+																			   ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_AutoSelectAll);
 		
 		//// transform ////
 		int tree_flags = ImGuiTreeNodeFlags_DefaultOpen;
 		if(ImGui::CollapsingHeader("Transform", 0, tree_flags)){
 		    ImGui::Indent();
 			vec3 oldVec = sel->transform.position;
-            
+			
 			ImGui::TextEx("Position    "); ImGui::SameLine();
 			if(ImGui::Inputvec3("##ent_pos", &sel->transform.position)){
 				if(sel->physics){
@@ -691,7 +691,7 @@ void EntitiesTab(){
 					AddUndoTranslate(&sel->transform, &oldVec, &sel->transform.position);
 				}
 			}ImGui::Separator();
-            
+			
 			oldVec = sel->transform.rotation;
 			ImGui::TextEx("Rotation    "); ImGui::SameLine();
 			if(ImGui::Inputvec3("##ent_rot", &sel->transform.rotation)){
@@ -702,7 +702,7 @@ void EntitiesTab(){
 					AddUndoRotate(&sel->transform, &oldVec, &sel->transform.rotation);
 				}
 			}ImGui::Separator();
-            
+			
 			oldVec = sel->transform.scale;
 			ImGui::TextEx("Scale       "); ImGui::SameLine();
 			if(ImGui::Inputvec3("##ent_scale", &sel->transform.scale)){
@@ -715,23 +715,23 @@ void EntitiesTab(){
 			}ImGui::Separator();
 			ImGui::Unindent();
 		}
-        
+		
 		//// components ////
 		std::vector<Attribute*> comp_deleted_queue;
 		bool delete_button = 1;
 		//ImGui::PushID(c);
-        
-        
+		
+		
 		//mesh
 		if(sel->model){
 			if(ImGui::CollapsingHeader("Model", &delete_button, tree_flags)){
 				ImGui::Indent();
-                
+				
 				ImGui::TextEx("Visible  "); ImGui::SameLine();
 				if(ImGui::Button((sel->model->visible) ? "True" : "False", ImVec2(-FLT_MIN, 0))){
 					sel->model->ToggleVisibility();
 				}
-                
+				
 				ImGui::TextEx("Model     "); ImGui::SameLine(); ImGui::SetNextItemWidth(-1);
 				if(ImGui::BeginCombo("##model_combo", sel->model->model->name)){
 					forI(Storage::ModelCount()){
@@ -741,7 +741,7 @@ void EntitiesTab(){
 					}
 					ImGui::EndCombo();
 				}
-                
+				
 				ImGui::Unindent();
 				ImGui::Separator();
 			}
@@ -755,17 +755,17 @@ void EntitiesTab(){
 				}
 			}
 		}
-        
+		
 		//// add component ////
 		persist int add_comp_index = 0;
-        
+		
 		ImGui::SetCursorPosX(ImGui::GetWindowWidth() * 0.025);
 		if(ImGui::Button("Add Attribute")){
 			LogE("editor","Add Attribute not implemented yet");
 		}
 		ImGui::SameLine(); ImGui::SetNextItemWidth(-1);
 		ImGui::Combo("##add_comp_combo", &add_comp_index, AttributeTypeStrings, ArrayCount(AttributeTypeStrings));
-        
+		
 		ImGui::EndChild(); //CreateMenu
 	}
 	ImGui::PopStyleVar(); //ImGuiStyleVar_IndentSpacing
@@ -783,7 +783,7 @@ void MeshesTab(){
 	persist int sel_face_idx = -1;
 	Mesh* selected = nullptr;
 	if(sel_mesh_idx < Storage::MeshCount()) selected = Storage::MeshAt(sel_mesh_idx);
-    
+	
 	//// selected mesh keybinds ////
 	//start renaming mesh
 	if(selected && DeshInput->KeyPressed(Key::F2)){
@@ -807,7 +807,7 @@ void MeshesTab(){
 		//Storage::DeleteMesh(sel_mesh_idx);
 		//sel_mat_idx = -1;
 	}
-    
+	
 	//// mesh list panel ////
 	SetPadding;
 	if(ImGui::BeginChild("##mesh_list", ImVec2(ImGui::GetWindowWidth() * 0.95, ImGui::GetWindowHeight() * .14f), false)){
@@ -815,11 +815,11 @@ void MeshesTab(){
 			ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed, fonth * 2.5f);
 			ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthStretch);
 			ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed, fonth);
-            
+			
 			forX(mesh_idx, Storage::MeshCount()){
 				ImGui::PushID(Storage::MeshAt(mesh_idx));
 				ImGui::TableNextRow();
-                
+				
 				//// id + label ////
 				ImGui::TableSetColumnIndex(0);
 				char label[8];
@@ -832,7 +832,7 @@ void MeshesTab(){
 					sel_triangle_idx = -1;
 					sel_face_idx = -1;
 				}
-                
+				
 				//// name text ////
 				ImGui::TableSetColumnIndex(1);
 				if(rename_mesh && sel_mesh_idx == mesh_idx){
@@ -843,7 +843,7 @@ void MeshesTab(){
 				else{
 					ImGui::TextEx(Storage::MeshName(mesh_idx));
 				}
-                
+				
 				//// delete button ////
 				ImGui::TableSetColumnIndex(2);
 				if(ImGui::Button("X", ImVec2(-FLT_MIN, 0.0f))){
@@ -864,16 +864,16 @@ void MeshesTab(){
 		}
 		ImGui::EndChild(); //mesh_list
 	}
-    
+	
 	ImGui::Separator();
-    
+	
 	//// create new mesh button ////
 	ImGui::SetCursorPosX(ImGui::GetWindowWidth() * 0.025); //half of 1 - 0.95
 	if(ImGui::Button("Load New Mesh", ImVec2(ImGui::GetWindowWidth() * 0.95, 0.0f))){
 		//!Incomplete
 		ImGui::TextEx("TODO    Editor::FileSelector");
 	}
-    
+	
 	ImGui::Separator();
 	if(selected == nullptr || sel_mesh_idx == -1) return;
 	//// selected mesh inspector panel ////
@@ -916,28 +916,28 @@ void MeshesTab(){
 	persist f32 scale = 1.f;
 	persist f32 normal_scale = .3f; //scale for making normal lines smaller
 	persist f32 sel_vertex_colors[3];
-    
+	
 	SetPadding;
 	if(ImGui::BeginChild("##mesh_inspector", ImVec2(ImGui::GetWindowWidth() * .95f, ImGui::GetWindowHeight() * .8f), false)){
 		//// name ////
 		ImGui::TextEx("Name"); ImGui::SameLine(); ImGui::SetNextItemWidth(-FLT_MIN);
 		ImGui::InputText("##mat_name_input", selected->name, DESHI_NAME_SIZE, ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_AutoSelectAll);
-        
+		
 		ImGui::Separator();
 		//// stats and scale ////
 		ImGui::TextEx("Stats"); ImGui::SameLine();
 		int planar_vertex_count = 0;
 		forI(selected->faceCount){ planar_vertex_count += selected->faces[i].vertexCount; }
 		ImGui::HelpMarker("(+)", TOSTRING("Vertex   Count: ", selected->vertexCount,
-                                          "\nIndex    Count: ", selected->indexCount,
-                                          "\nTriangle Count: ", selected->triangleCount,
-                                          "\nFace     Count: ", selected->faceCount,
-                                          "\nPlanar Vertex Count: ", planar_vertex_count).str);
+										  "\nIndex    Count: ", selected->indexCount,
+										  "\nTriangle Count: ", selected->triangleCount,
+										  "\nFace     Count: ", selected->faceCount,
+										  "\nPlanar Vertex Count: ", planar_vertex_count).str);
 		ImGui::TextEx("Draw Scale"); ImGui::SameLine(); ImGui::SetNextItemWidth(-1);
 		ImGui::InputFloat("##mi_scale", &scale, 0, 0);
 		ImGui::TextEx("Normal Scale"); ImGui::SameLine(); ImGui::SetNextItemWidth(-1);
 		ImGui::InputFloat("##mi_scale_normal", &normal_scale, 0, 0);
-        
+		
 		ImGui::Separator();
 		//// select part ////
 		ImGui::TextEx("Vertex   "); ImGui::SameLine(); ImGui::SetNextItemWidth(-1);
@@ -972,7 +972,7 @@ void MeshesTab(){
 			ImGui::Text("Normal: (%.2f,%.2f,%.2f)", sel_face->normal.x, sel_face->normal.y, sel_face->normal.z);
 			ImGui::Text("Center: (%.2f,%.2f,%.2f)", sel_face->center.x, sel_face->center.y, sel_face->center.z);
 		}
-        
+		
 		ImGui::Separator();
 		//// inspector tabs ////
 		if(ImGui::BeginTabBar("MeshInspectorTabs")){
@@ -1014,10 +1014,10 @@ void MeshesTab(){
 			}
 			ImGui::EndTabBar();
 		}
-        
+		
 		//// draw the stuffs //// //TODO(delle) compress these since they mostly duplicate except color
 		ImGui::BeginDebugLayer();
-        
+		
 		//// vertexes ////
 		if(sel_vertex_idx != -1){
 			Mesh::Vertex* sel_vertex = &selected->vertexes[sel_vertex_idx];
@@ -1034,7 +1034,7 @@ void MeshesTab(){
 				if(vertex_normals) Render::DrawLine(sel_vertex->pos * scale, sel_vertex->pos * scale + sel_vertex->normal * normal_scale, vertex_color);
 			}
 		}
-        
+		
 		//// triangles ////
 		if(sel_triangle_idx != -1){
 			Mesh::Triangle* sel_triangle = &selected->triangles[sel_triangle_idx];
@@ -1063,7 +1063,7 @@ void MeshesTab(){
 				if(triangle_normals) Render::DrawLine(tri_center, tri_center + sel_triangle->normal * normal_scale, triangle_color);
 			}
 		}
-        
+		
 		//// faces ////
 		if(sel_face_idx != -1){
 			Mesh::Face* sel_face = &selected->faces[sel_face_idx];
@@ -1121,9 +1121,9 @@ void MeshesTab(){
 				if(face_normals) Render::DrawLine(sel_face->center * scale, sel_face->center * scale + sel_face->normal * normal_scale, face_color);
 			}
 		}
-        
+		
 		ImGui::EndDebugLayer();
-        
+		
 		ImGui::EndChild(); //mesh_inspector
 	}
 } //MeshesTab
@@ -1135,7 +1135,7 @@ void TexturesTab(){
 	persist u32 sel_tex_idx = -1;
 	Texture* selected = nullptr;
 	if(sel_tex_idx < Storage::TextureCount()) selected = Storage::TextureAt(sel_tex_idx);
-    
+	
 	//// selected material keybinds ////
 	//delete material
 	if(selected && DeshInput->KeyPressed(Key::DELETE)){
@@ -1143,7 +1143,7 @@ void TexturesTab(){
 		//Storage::DeleteTexture(sel_tex_idx);
 		//sel_tex_idx = -1;
 	}
-    
+	
 	//// material list panel ////
 	SetPadding;
 	if(ImGui::BeginChild("##tex_list", ImVec2(ImGui::GetWindowWidth() * 0.95, ImGui::GetWindowHeight() * .14f), false)){
@@ -1151,11 +1151,11 @@ void TexturesTab(){
 			ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed, fonth * 2.5f);
 			ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthStretch);
 			ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed, fonth);
-            
+			
 			forX(tex_idx, Storage::TextureCount()){
 				ImGui::PushID(tex_idx);
 				ImGui::TableNextRow();
-                
+				
 				//// id + label ////
 				ImGui::TableSetColumnIndex(0);
 				char label[8];
@@ -1163,11 +1163,11 @@ void TexturesTab(){
 				if(ImGui::Selectable(label, sel_tex_idx == tex_idx, ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowItemOverlap)){
 					sel_tex_idx = (ImGui::GetIO().KeyCtrl) ? -1 : tex_idx; //deselect if CTRL held
 				}
-                
+				
 				//// name text ////
 				ImGui::TableSetColumnIndex(1);
 				ImGui::TextEx(Storage::TextureName(tex_idx));
-                
+				
 				//// delete button ////
 				ImGui::TableSetColumnIndex(2);
 				if(ImGui::Button("X", ImVec2(-FLT_MIN, 0.0f))){
@@ -1185,18 +1185,18 @@ void TexturesTab(){
 		}
 		ImGui::EndChild(); //tex_list
 	}
-    
+	
 	ImGui::Separator();
-    
+	
 	//// create new texture button ////
 	ImGui::SetCursorPosX(ImGui::GetWindowWidth() * 0.025); //half of 1 - 0.95
 	if(ImGui::Button("Load New Texture", ImVec2(ImGui::GetWindowWidth() * 0.95, 0.0f))){
 		//!Incomplete
 		ImGui::TextEx("TODO    Editor::FileSelector");
 	}
-    
+	
 	ImGui::Separator();
-    
+	
 	//// selected material inspector panel ////
 	if(selected == nullptr) return;
 	SetPadding;
@@ -1205,7 +1205,7 @@ void TexturesTab(){
 		ImGui::TextCentered("Image Preview");
 		//!Incomplete
 		ImGui::TextEx("TODO    Render::DrawImage");
-        
+		
 		ImGui::EndChild(); //tex_inspector
 	}
 } //TexturesTab
@@ -1219,7 +1219,7 @@ void MaterialsTab(){
 	persist char rename_buffer[DESHI_NAME_SIZE] = {};
 	Material* selected = nullptr;
 	if(sel_mat_idx < Storage::MaterialCount()) selected = Storage::MaterialAt(sel_mat_idx);
-    
+	
 	//// selected material keybinds ////
 	//start renaming material
 	if(selected && DeshInput->KeyPressed(Key::F2)){
@@ -1244,7 +1244,7 @@ void MaterialsTab(){
 		//Storage::DeleteMaterial(sel_mat_idx);
 		//sel_mat_idx = -1;
 	}
-    
+	
 	//// material list panel ////
 	SetPadding;
 	if(ImGui::BeginChild("##mat_list", ImVec2(ImGui::GetWindowWidth() * 0.95, ImGui::GetWindowHeight() * .14f), false)){
@@ -1252,11 +1252,11 @@ void MaterialsTab(){
 			ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed, fonth * 2.5f);
 			ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthStretch);
 			ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed, fonth);
-            
+			
 			forX(mat_idx, Storage::MaterialCount()){
 				ImGui::PushID(mat_idx);
 				ImGui::TableNextRow();
-                
+				
 				//// id + label ////
 				ImGui::TableSetColumnIndex(0);
 				char label[8];
@@ -1266,7 +1266,7 @@ void MaterialsTab(){
 					rename_mat = false;
 					DeshConsole->IMGUI_KEY_CAPTURE = false;
 				}
-                
+				
 				//// name text ////
 				ImGui::TableSetColumnIndex(1);
 				if(rename_mat && sel_mat_idx == mat_idx){
@@ -1277,7 +1277,7 @@ void MaterialsTab(){
 				else{
 					ImGui::TextEx(Storage::MaterialName(mat_idx));
 				}
-                
+				
 				//// delete button ////
 				ImGui::TableSetColumnIndex(2);
 				if(ImGui::Button("X", ImVec2(-FLT_MIN, 0.0f))){
@@ -1295,9 +1295,9 @@ void MaterialsTab(){
 		}
 		ImGui::EndChild(); //mat_list
 	}
-    
+	
 	ImGui::Separator();
-    
+	
 	//// create new material button ////
 	ImGui::SetCursorPosX(ImGui::GetWindowWidth() * 0.025); //half of 1 - 0.95
 	if(ImGui::Button("Create New Material", ImVec2(ImGui::GetWindowWidth() * 0.95, 0.0f))){
@@ -1305,9 +1305,9 @@ void MaterialsTab(){
 		sel_mat_idx = new_mat.first;
 		selected = new_mat.second;
 	}
-    
+	
 	ImGui::Separator();
-    
+	
 	//// selected material inspector panel ////
 	if(selected == nullptr) return;
 	SetPadding;
@@ -1315,7 +1315,7 @@ void MaterialsTab(){
 		//// name ////
 		ImGui::TextEx("Name   "); ImGui::SameLine(); ImGui::SetNextItemWidth(-FLT_MIN);
 		ImGui::InputText("##mat_name_input", selected->name, DESHI_NAME_SIZE, ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_AutoSelectAll);
-        
+		
 		//// shader selection ////
 		ImGui::TextEx("Shader "); ImGui::SameLine(); ImGui::SetNextItemWidth(-1);
 		if(ImGui::BeginCombo("##mat_shader_combo", ShaderStrings[selected->shader])){
@@ -1327,41 +1327,41 @@ void MaterialsTab(){
 			}
 			ImGui::EndCombo(); //mat_shader_combo
 		}
-        
+		
 		ImGui::Separator();
-        
+		
 		//// material properties ////
 		//TODO(delle) setup material editing other than PBR once we have material parameters
 		switch (selected->shader){
 			//// flat shader ////
-            case Shader_Flat: {
-                
-            }break;
-            
+			case Shader_Flat: {
+				
+			}break;
+			
 			//// PBR shader ////
 			//TODO(Ui) add texture image previews
-            case Shader_PBR:default: {
-                forX(mti, selected->textures.count){
-                    ImGui::TextEx(TOSTRING("Texture ", mti).str); ImGui::SameLine(); ImGui::SetNextItemWidth(-1);
-                    if(ImGui::BeginCombo(TOSTRING("##mat_texture_combo", mti).str, Storage::TextureName(selected->textures[mti]))){
-                        dir_textures = Assets::iterateDirectory(Assets::dirTextures());
-                        forX(ti, dir_textures.count){
-                            if(ImGui::Selectable(dir_textures[ti].str, strcmp(Storage::TextureName(selected->textures[mti]), dir_textures[ti].str) == 0)){
-                                selected->textures[mti] = Storage::CreateTextureFromFile(dir_textures[ti].str).first;
-                                Render::UpdateMaterial(selected);
-                            }
-                        }
-                        ImGui::EndCombo();
-                    }
-                }
-            }break;
+			case Shader_PBR:default: {
+				forX(mti, selected->textures.count){
+					ImGui::TextEx(TOSTRING("Texture ", mti).str); ImGui::SameLine(); ImGui::SetNextItemWidth(-1);
+					if(ImGui::BeginCombo(TOSTRING("##mat_texture_combo", mti).str, Storage::TextureName(selected->textures[mti]))){
+						dir_textures = Assets::iterateDirectory(Assets::dirTextures());
+						forX(ti, dir_textures.count){
+							if(ImGui::Selectable(dir_textures[ti].str, strcmp(Storage::TextureName(selected->textures[mti]), dir_textures[ti].str) == 0)){
+								selected->textures[mti] = Storage::CreateTextureFromFile(dir_textures[ti].str).first;
+								Render::UpdateMaterial(selected);
+							}
+						}
+						ImGui::EndCombo();
+					}
+				}
+			}break;
 		}
-        
+		
 		if(ImGui::Button("Add Texture", ImVec2(-1, 0))){
 			selected->textures.add(0);
 			Render::UpdateMaterial(selected);
 		}
-        
+		
 		ImGui::EndChild(); //mat_inspector
 	}
 } //MaterialsTab
@@ -1376,7 +1376,7 @@ void ModelsTab(){
 	persist char rename_buffer[DESHI_NAME_SIZE] = {};
 	Model* selected = nullptr;
 	if(sel_model_idx < Storage::ModelCount()) selected = Storage::ModelAt(sel_model_idx);
-    
+	
 	//// selected model keybinds ////
 	//start renaming model
 	if(selected && DeshInput->KeyPressed(Key::F2)){
@@ -1401,7 +1401,7 @@ void ModelsTab(){
 		//Storage::DeleteModel(sel_model_idx);
 		//sel_model_idx = -1;
 	}
-    
+	
 	//// model list panel ////
 	SetPadding;
 	if(ImGui::BeginChild("##model_list", ImVec2(ImGui::GetWindowWidth() * 0.95, ImGui::GetWindowHeight() * .14f), false)){
@@ -1409,11 +1409,11 @@ void ModelsTab(){
 			ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed, fonth * 2.5f);
 			ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthStretch);
 			ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed, fonth);
-            
+			
 			forX(model_idx, Storage::ModelCount()){
 				ImGui::PushID(Storage::ModelAt(model_idx));
 				ImGui::TableNextRow();
-                
+				
 				//// id + label ////
 				ImGui::TableSetColumnIndex(0);
 				char label[8];
@@ -1423,7 +1423,7 @@ void ModelsTab(){
 					rename_model = false;
 					DeshConsole->IMGUI_KEY_CAPTURE = false;
 				}
-                
+				
 				//// name text ////
 				ImGui::TableSetColumnIndex(1);
 				if(rename_model && sel_model_idx == model_idx){
@@ -1434,7 +1434,7 @@ void ModelsTab(){
 				else{
 					ImGui::TextEx(Storage::ModelName(model_idx));
 				}
-                
+				
 				//// delete button ////
 				ImGui::TableSetColumnIndex(2);
 				//!BUG -FLT_MIN aligns this button improperly
@@ -1453,9 +1453,9 @@ void ModelsTab(){
 		}
 		ImGui::EndChild(); //model_list
 	}
-    
+	
 	ImGui::Separator();
-    
+	
 	//// create new model button ////
 	ImGui::SetCursorPosX(ImGui::GetWindowWidth() * 0.025); //half of 1 - 0.95
 	if(ImGui::Button("Create New Model", ImVec2(ImGui::GetWindowWidth() * 0.95, 0.0f))){
@@ -1464,17 +1464,17 @@ void ModelsTab(){
 		selected = new_model.second;
 		sel_batch_idx = -1;
 	}
-    
+	
 	ImGui::Separator();
 	if(selected == nullptr) return;
-    
+	
 	//// selected model inspector panel ////
 	SetPadding;
 	if(ImGui::BeginChild("##model_inspector", ImVec2(ImGui::GetWindowWidth() * .95f, ImGui::GetWindowHeight() * .8f), false)){
 		//// name ////
 		ImGui::TextEx("Name  "); ImGui::SameLine(); ImGui::SetNextItemWidth(-FLT_MIN);
 		ImGui::InputText("##model_name_input", selected->name, DESHI_NAME_SIZE, ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_AutoSelectAll);
-        
+		
 		//// mesh selection ////
 		ImGui::TextEx("Mesh  "); ImGui::SameLine(); ImGui::SetNextItemWidth(-1);
 		if(ImGui::BeginCombo("##model_mesh_combo", selected->mesh->name)){
@@ -1489,20 +1489,20 @@ void ModelsTab(){
 			}
 			ImGui::EndCombo(); //model_mesh_combo
 		}
-        
+		
 		ImGui::Separator();
-        
+		
 		//// batch selection ////
 		ImGui::TextCentered("Batches");
 		if(ImGui::BeginTable("##batch_table", 3, ImGuiTableFlags_None, ImVec2(-FLT_MIN, ImGui::GetWindowHeight() * .10f))){
 			ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed, fonth * 2.5f);
 			ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthStretch);
 			ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed, fonth);
-            
+			
 			forX(batch_idx, selected->batches.count){
 				ImGui::PushID(&selected->batches[batch_idx]);
 				ImGui::TableNextRow();
-                
+				
 				//// id + label ////
 				ImGui::TableSetColumnIndex(0);
 				char label[8];
@@ -1512,11 +1512,11 @@ void ModelsTab(){
 					rename_model = false;
 					DeshConsole->IMGUI_KEY_CAPTURE = false;
 				}
-                
+				
 				//// name text ////
 				ImGui::TableSetColumnIndex(1);
 				ImGui::Text("Batch %d", batch_idx);
-                
+				
 				//// delete button ////
 				ImGui::TableSetColumnIndex(2); //NOTE there must be at least 1 batch on a model
 				if(ImGui::Button("X", ImVec2(-FLT_MIN, 0.0f)) && selected->batches.count > 1){
@@ -1535,7 +1535,7 @@ void ModelsTab(){
 		if(ImGui::Button("Add Batch", ImVec2(-1, 0))){
 			selected->batches.add(Model::Batch{});
 		}
-        
+		
 		ImGui::Separator();
 		//// batch properties ////
 		if(sel_batch_idx != -1){
@@ -1545,19 +1545,19 @@ void ModelsTab(){
 				//!Incomplete
 				ImGui::TextEx("TODO    Render::FillTriangle");
 			}
-            
+			
 			ImGui::TextEx("Index Offset "); ImGui::SameLine(); ImGui::SetNextItemWidth(-1);
 			if(ImGui::InputInt("##batch_index_offset_input", (int*)&selected->batches[sel_batch_idx].indexOffset, 0, 0)){
 				selected->batches[sel_batch_idx].indexOffset =
 					Clamp(selected->batches[sel_batch_idx].indexOffset, 0, selected->mesh->indexCount - 1);
 			}
-            
+			
 			ImGui::TextEx("Index Count  "); ImGui::SameLine(); ImGui::SetNextItemWidth(-1);
 			if(ImGui::InputInt("##batch_index_count_input", (int*)&selected->batches[sel_batch_idx].indexCount, 0, 0)){
 				selected->batches[sel_batch_idx].indexCount =
 					Clamp(selected->batches[sel_batch_idx].indexCount, 0, selected->mesh->indexCount);
 			}
-            
+			
 			ImGui::TextEx("Material     "); ImGui::SameLine(); ImGui::SetNextItemWidth(-1);
 			if(ImGui::BeginCombo("##batch_mat_combo", Storage::MaterialName(selected->batches[sel_batch_idx].material))){
 				forI(Storage::MaterialCount()){
@@ -1568,7 +1568,7 @@ void ModelsTab(){
 				ImGui::EndCombo(); //batch_mat_combo
 			}
 		}
-        
+		
 		ImGui::EndChild(); //model_inspector
 	}
 } //ModelsTab
@@ -1598,12 +1598,12 @@ void SettingsTab(){
 				AtmoAdmin->simulateInEditor = !AtmoAdmin->simulateInEditor;
 			}
 			//ImGui::TextEx("Gravity       "); ImGui::SameLine(); ImGui::InputFloat("##phys_gravity", &AtmoAdmin->physics.gravity);
-            
+			
 			//ImGui::TextEx("Phys TPS      "); ImGui::SameLine(); ImGui::InputFloat("##phys_tps", );
-            
+			
 			ImGui::Separator();
 		}
-        
+		
 		//// camera properties ////
 		if(ImGui::CollapsingHeader("Camera", 0)){
 			if(ImGui::Button("Zero", ImVec2(ImGui::GetWindowWidth() * .45f, 0))){
@@ -1612,7 +1612,7 @@ void SettingsTab(){
 			if(ImGui::Button("Reset", ImVec2(ImGui::GetWindowWidth() * .45f, 0))){
 				AtmoAdmin->camera.position = { 4.f,3.f,-4.f }; AtmoAdmin->camera.rotation = { 28.f,-45.f,0.f };
 			}
-            
+			
 			ImGui::TextEx("Position  "); ImGui::SameLine(); ImGui::Inputvec3("##cam_pos", &AtmoAdmin->camera.position);
 			ImGui::TextEx("Rotation  "); ImGui::SameLine(); ImGui::Inputvec3("##cam_rot", &AtmoAdmin->camera.rotation);
 			ImGui::TextEx("Near Clip "); ImGui::SameLine();
@@ -1627,10 +1627,10 @@ void SettingsTab(){
 			if(ImGui::InputFloat("##cam_fov", &AtmoAdmin->camera.fov)){
 				AtmoAdmin->camera.UpdateProjectionMatrix();
 			};
-            
+			
 			ImGui::Separator();
 		}
-        
+		
 		//// render settings ////
 		if(ImGui::CollapsingHeader("Rendering", 0)){
 			local RenderSettings* settings = Render::GetSettings();
@@ -1642,7 +1642,7 @@ void SettingsTab(){
 			local vec3 clear_color = settings->clearColor;
 			local vec4 selected_color = settings->selectedColor;
 			local vec4 collider_color = settings->colliderColor;
-            
+			
 			ImGui::Checkbox("Debugging", (bool*)&settings->debugging);
 			ImGui::Checkbox("Shader printf", (bool*)&settings->printf);
 			ImGui::Checkbox("Recompile all shaders", (bool*)&settings->recompileAllShaders);
@@ -1697,10 +1697,10 @@ void SettingsTab(){
 			ImGui::Checkbox("Draw mesh normals", (bool*)&settings->meshNormals);
 			ImGui::Checkbox("Draw light frustrums", (bool*)&settings->lightFrustrums);
 			ImGui::Checkbox("Draw temp meshes on top", (bool*)&settings->tempMeshOnTop);
-            
+			
 			ImGui::Separator();
 		}
-        
+		
 		ImGui::EndChild();
 	}
 }//settings tab
@@ -1719,7 +1719,7 @@ void Inspector(){
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowTitleAlign, ImVec2(1, 0));
 	ImGui::PushStyleVar(ImGuiStyleVar_TabRounding, 0);
-    
+	
 	ImGui::PushStyleColor(ImGuiCol_Border, Color_Black);
 	ImGui::PushStyleColor(ImGuiCol_Button, PackColorU32(40,40,40,255));
 	ImGui::PushStyleColor(ImGuiCol_ButtonActive, PackColorU32(48,48,48,255));
@@ -1744,7 +1744,7 @@ void Inspector(){
 	ImGui::PushStyleColor(ImGuiCol_TabHovered, Color_DarkCyan);
 	ImGui::PushStyleColor(ImGuiCol_Tab, 0xff0d2b45);
 	ImGui::PushStyleColor(ImGuiCol_Separator, Color_VeryDarkCyan);
-    
+	
 	ImGuiWindowFlags window_flags;
 	if(popoutInspector){
 		window_flags = ImGuiWindowFlags_None;
@@ -1757,13 +1757,13 @@ void Inspector(){
 			| ImGuiWindowFlags_NoScrollWithMouse;
 	}
 	ImGui::Begin("Inspector", (bool*)1, window_flags);
-    
+	
 	//capture mouse if hovering over this window
 	WinHovCheck;
 	if(DeshInput->mouseX < ImGui::GetWindowPos().x + ImGui::GetWindowWidth()){
 		WinHovFlag = true;
 	}
-    
+	
 	if(ImGui::BeginTabBar("MajorTabs")){
 		if(ImGui::BeginTabItem("Entities")){
 			EntitiesTab();
@@ -1787,7 +1787,7 @@ void Inspector(){
 		}
 		ImGui::EndTabBar();
 	}
-    
+	
 	ImGui::PopStyleVar(8);
 	ImGui::PopStyleColor(24);
 	ImGui::End();
@@ -1797,151 +1797,151 @@ void Inspector(){
 //// @debugbar ////
 ///////////////////
 void DebugBar(){
-    //for getting fps
-    ImGuiIO& io = ImGui::GetIO();
-    
-    //num of active columns
-    int activecols = 0;
-    
-    //font size for centering ImGui::TextEx
-    fontsize = ImGui::GetFontSize();
-    
-    //flags for showing different things
-    persist bool show_fps = true;
-    persist bool show_fps_graph = true;
-    persist bool show_time = true;
-    
-    //window styling
-    ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(0, 2));
-    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 0));
-    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
-    ImGui::PushStyleColor(ImGuiCol_Border, ImGui::ColorToImVec4(color(0, 0, 0, 255)));
-    ImGui::PushStyleColor(ImGuiCol_WindowBg, ImGui::ColorToImVec4(color(20, 20, 20, 255)));
-    ImGui::PushStyleColor(ImGuiCol_TableBorderLight, ImGui::ColorToImVec4(color(45, 45, 45, 255)));
-    ImGui::SetNextWindowSize(ImVec2(DeshWindow->width, 20));
-    ImGui::SetNextWindowPos(ImVec2(0, DeshWindow->height - 20));
-    ImGui::Begin("DebugBar", (bool*)1, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize);
-    debugbarheight = 20;
-    //capture mouse if hovering over this window
-    WinHovCheck;
-    
-    activecols = show_fps + show_fps_graph + show_time + 1;
-    if(ImGui::BeginTable("DebugBarTable", activecols, ImGuiTableFlags_BordersV | ImGuiTableFlags_NoPadInnerX | ImGuiTableFlags_NoPadOuterX | ImGuiTableFlags_ContextMenuInBody | ImGuiTableFlags_SizingFixedFit)){
-        ImGui::TableSetupColumn("FPS",            ImGuiTableColumnFlags_WidthFixed, 64);
-        ImGui::TableSetupColumn("FPSGraphInline", ImGuiTableColumnFlags_WidthFixed, 64);
-        ImGui::TableSetupColumn("MiddleSep",      ImGuiTableColumnFlags_WidthStretch, 0);
-        ImGui::TableSetupColumn("Time",           ImGuiTableColumnFlags_WidthFixed, 64);
-        
-        //FPS
-        int FPS = floor(io.Framerate);
-        if(ImGui::TableNextColumn() && show_fps){
-            ImGui::Text("FPS:%4d", FPS);
-        }
-        
-        //FPS graph inline
-        if(ImGui::TableNextColumn() && show_fps_graph){
-            //how much data we store
-            persist int prevstoresize = 100;
-            persist int storesize = 100;
-            
-            //how often we update
-            persist int fupdate = 20;
-            persist int frame_count = 0;
-            
-            //maximum FPS
-            persist int maxval = 0;
-            
-            //real values and printed values
-            persist std::vector<float> values(storesize);
-            persist std::vector<float> pvalues(storesize);
-            
-            //dynamic resizing that may get removed later if it sucks
-            //if FPS finds itself as less than half of what the max used to be we lower the max
-            if(FPS > maxval || FPS < maxval / 2){
-                maxval = FPS;
-            }
-            
-            //if changing the amount of data we're storing we have to reverse
-            //each data set twice to ensure the data stays in the right place when we move it
-            if(prevstoresize != storesize){
-                std::reverse(values.begin(), values.end());    values.resize(storesize);  std::reverse(values.begin(), values.end());
-                std::reverse(pvalues.begin(), pvalues.end());  pvalues.resize(storesize); std::reverse(pvalues.begin(), pvalues.end());
-                prevstoresize = storesize;
-            }
-            
-            std::rotate(values.begin(), values.begin() + 1, values.end());
-            
-            //update real set if we're not updating yet or update the graph if we are
-            if(frame_count < fupdate){
-                values[values.size() - 1] = FPS;
-                frame_count++;
-            }
-            else{
-                float avg = Math::average(values.begin(), values.end(), storesize);
-                std::rotate(pvalues.begin(), pvalues.begin() + 1, pvalues.end());
-                pvalues[pvalues.size() - 1] = std::floorf(avg);
-                
-                frame_count = 0;
-            }
-            
-            ImGui::PushStyleColor(ImGuiCol_PlotLines, ImGui::ColorToImVec4(color(0, 255, 200, 255)));
-            ImGui::PushStyleColor(ImGuiCol_FrameBg, ImGui::ColorToImVec4(color(20, 20, 20, 255)));
-            
-            ImGui::PlotLines("", &pvalues[0], pvalues.size(), 0, 0, 0, maxval, ImVec2(64, 20));
-            
-            ImGui::PopStyleColor();
-            ImGui::PopStyleColor();
-        }
-        
-        //Middle Empty ImGui::Separator (alert box)
-        if(ImGui::TableNextColumn()){
-            if(DeshConsole->show_alert){
-                f32 flicker = (sinf(M_2PI * DeshTotalTime + cosf(M_2PI * DeshTotalTime)) + 1) / 2;
-                color col_bg = DeshConsole->alert_color * flicker;    col_bg.a = 255;
-                color col_text = DeshConsole->alert_color * -flicker; col_text.a = 255;
-                
-                ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, ImGui::GetColorU32(ImGui::ColorToImVec4(col_bg)));
-                
-                string str6;
-                if(DeshConsole->alert_count > 1){
-                    str6 = TOSTRING("(", DeshConsole->alert_count, ") ", string(DeshConsole->alert_message.c_str()));
-                }else{
-                    str6 = string(DeshConsole->alert_message.c_str());
-                }
-                float strlen6 = (fontw) * str6.count;
-                ImGui::SameLine((ImGui::GetColumnWidth() - strlen6) / 2); ImGui::PushItemWidth(-1);
-                ImGui::PushStyleColor(ImGuiCol_Text, ImGui::ColorToImVec4(color(col_text)));
-                ImGui::TextEx(str6.str);
-                ImGui::PopStyleColor();
-            }
-        }
-        
-        //Show Time
-        if(ImGui::TableNextColumn()){
-            string str7 = DeshTime->FormatDateTime("{h}:{m}:{s}").c_str();
-            float strlen7 = fontw * str7.count;
-            ImGui::SameLine(32 - (strlen7 / 2));
-            ImGui::TextEx(str7.str);
-        }
-        
-        //Context menu for toggling parts of the bar
-        if(ImGui::IsMouseReleased(1) && ImGui::IsWindowHovered()) ImGui::OpenPopup("Context");
-        if(ImGui::BeginPopup("Context")){
-            DeshConsole->IMGUI_MOUSE_CAPTURE = true;
-            ImGui::Separator();
-            if(ImGui::Button("Open Debug Menu")){
-                //showDebugTools = true;
-                ImGui::CloseCurrentPopup();
-            }
-            
-            ImGui::EndPopup();
-        }
-        ImGui::EndTable();
-    }
-    
-    ImGui::PopStyleVar(3);
-    ImGui::PopStyleColor(3);
-    ImGui::End();
+	//for getting fps
+	ImGuiIO& io = ImGui::GetIO();
+	
+	//num of active columns
+	int activecols = 0;
+	
+	//font size for centering ImGui::TextEx
+	fontsize = ImGui::GetFontSize();
+	
+	//flags for showing different things
+	persist bool show_fps = true;
+	persist bool show_fps_graph = true;
+	persist bool show_time = true;
+	
+	//window styling
+	ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(0, 2));
+	ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 0));
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+	ImGui::PushStyleColor(ImGuiCol_Border, ImGui::ColorToImVec4(color(0, 0, 0, 255)));
+	ImGui::PushStyleColor(ImGuiCol_WindowBg, ImGui::ColorToImVec4(color(20, 20, 20, 255)));
+	ImGui::PushStyleColor(ImGuiCol_TableBorderLight, ImGui::ColorToImVec4(color(45, 45, 45, 255)));
+	ImGui::SetNextWindowSize(ImVec2(DeshWindow->width, 20));
+	ImGui::SetNextWindowPos(ImVec2(0, DeshWindow->height - 20));
+	ImGui::Begin("DebugBar", (bool*)1, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize);
+	debugbarheight = 20;
+	//capture mouse if hovering over this window
+	WinHovCheck;
+	
+	activecols = show_fps + show_fps_graph + show_time + 1;
+	if(ImGui::BeginTable("DebugBarTable", activecols, ImGuiTableFlags_BordersV | ImGuiTableFlags_NoPadInnerX | ImGuiTableFlags_NoPadOuterX | ImGuiTableFlags_ContextMenuInBody | ImGuiTableFlags_SizingFixedFit)){
+		ImGui::TableSetupColumn("FPS",            ImGuiTableColumnFlags_WidthFixed, 64);
+		ImGui::TableSetupColumn("FPSGraphInline", ImGuiTableColumnFlags_WidthFixed, 64);
+		ImGui::TableSetupColumn("MiddleSep",      ImGuiTableColumnFlags_WidthStretch, 0);
+		ImGui::TableSetupColumn("Time",           ImGuiTableColumnFlags_WidthFixed, 64);
+		
+		//FPS
+		int FPS = floor(io.Framerate);
+		if(ImGui::TableNextColumn() && show_fps){
+			ImGui::Text("FPS:%4d", FPS);
+		}
+		
+		//FPS graph inline
+		if(ImGui::TableNextColumn() && show_fps_graph){
+			//how much data we store
+			persist int prevstoresize = 100;
+			persist int storesize = 100;
+			
+			//how often we update
+			persist int fupdate = 20;
+			persist int frame_count = 0;
+			
+			//maximum FPS
+			persist int maxval = 0;
+			
+			//real values and printed values
+			persist std::vector<float> values(storesize);
+			persist std::vector<float> pvalues(storesize);
+			
+			//dynamic resizing that may get removed later if it sucks
+			//if FPS finds itself as less than half of what the max used to be we lower the max
+			if(FPS > maxval || FPS < maxval / 2){
+				maxval = FPS;
+			}
+			
+			//if changing the amount of data we're storing we have to reverse
+			//each data set twice to ensure the data stays in the right place when we move it
+			if(prevstoresize != storesize){
+				std::reverse(values.begin(), values.end());    values.resize(storesize);  std::reverse(values.begin(), values.end());
+				std::reverse(pvalues.begin(), pvalues.end());  pvalues.resize(storesize); std::reverse(pvalues.begin(), pvalues.end());
+				prevstoresize = storesize;
+			}
+			
+			std::rotate(values.begin(), values.begin() + 1, values.end());
+			
+			//update real set if we're not updating yet or update the graph if we are
+			if(frame_count < fupdate){
+				values[values.size() - 1] = FPS;
+				frame_count++;
+			}
+			else{
+				float avg = Math::average(values.begin(), values.end(), storesize);
+				std::rotate(pvalues.begin(), pvalues.begin() + 1, pvalues.end());
+				pvalues[pvalues.size() - 1] = std::floorf(avg);
+				
+				frame_count = 0;
+			}
+			
+			ImGui::PushStyleColor(ImGuiCol_PlotLines, ImGui::ColorToImVec4(color(0, 255, 200, 255)));
+			ImGui::PushStyleColor(ImGuiCol_FrameBg, ImGui::ColorToImVec4(color(20, 20, 20, 255)));
+			
+			ImGui::PlotLines("", &pvalues[0], pvalues.size(), 0, 0, 0, maxval, ImVec2(64, 20));
+			
+			ImGui::PopStyleColor();
+			ImGui::PopStyleColor();
+		}
+		
+		//Middle Empty ImGui::Separator (alert box)
+		if(ImGui::TableNextColumn()){
+			if(DeshConsole->show_alert){
+				f32 flicker = (sinf(M_2PI * DeshTotalTime + cosf(M_2PI * DeshTotalTime)) + 1) / 2;
+				color col_bg = DeshConsole->alert_color * flicker;    col_bg.a = 255;
+				color col_text = DeshConsole->alert_color * -flicker; col_text.a = 255;
+				
+				ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, ImGui::GetColorU32(ImGui::ColorToImVec4(col_bg)));
+				
+				string str6;
+				if(DeshConsole->alert_count > 1){
+					str6 = TOSTRING("(", DeshConsole->alert_count, ") ", string(DeshConsole->alert_message.c_str()));
+				}else{
+					str6 = string(DeshConsole->alert_message.c_str());
+				}
+				float strlen6 = (fontw) * str6.count;
+				ImGui::SameLine((ImGui::GetColumnWidth() - strlen6) / 2); ImGui::PushItemWidth(-1);
+				ImGui::PushStyleColor(ImGuiCol_Text, ImGui::ColorToImVec4(color(col_text)));
+				ImGui::TextEx(str6.str);
+				ImGui::PopStyleColor();
+			}
+		}
+		
+		//Show Time
+		if(ImGui::TableNextColumn()){
+			string str7 = DeshTime->FormatDateTime("{h}:{m}:{s}").c_str();
+			float strlen7 = fontw * str7.count;
+			ImGui::SameLine(32 - (strlen7 / 2));
+			ImGui::TextEx(str7.str);
+		}
+		
+		//Context menu for toggling parts of the bar
+		if(ImGui::IsMouseReleased(1) && ImGui::IsWindowHovered()) ImGui::OpenPopup("Context");
+		if(ImGui::BeginPopup("Context")){
+			DeshConsole->IMGUI_MOUSE_CAPTURE = true;
+			ImGui::Separator();
+			if(ImGui::Button("Open Debug Menu")){
+				//showDebugTools = true;
+				ImGui::CloseCurrentPopup();
+			}
+			
+			ImGui::EndPopup();
+		}
+		ImGui::EndTable();
+	}
+	
+	ImGui::PopStyleVar(3);
+	ImGui::PopStyleColor(3);
+	ImGui::End();
 }
 
 
@@ -1981,18 +1981,18 @@ void WorldGrid(){
 	f32 xn = floor(AtmoAdmin->camera.position.x) - lines;
 	f32 zp = floor(AtmoAdmin->camera.position.z) + lines;
 	f32 zn = floor(AtmoAdmin->camera.position.z) - lines;
-    
+	
 	color color(50, 50, 50);
 	for(int i = 0; i < lines * 2 + 1; i++){
 		vec3 v1 = vec3(xn + i, 0, zn);
 		vec3 v2 = vec3(xn + i, 0, zp);
 		vec3 v3 = vec3(xn, 0, zn + i);
 		vec3 v4 = vec3(xp, 0, zn + i);
-        
+		
 		if(xn + i != 0) Render::DrawLine(v1, v2, color);
 		if(zn + i != 0) Render::DrawLine(v3, v4, color);
 	}
-    
+	
 	Render::DrawLine(vec3{ -1000,0,0 }, vec3{ 1000,0,0 }, Color_Red);
 	Render::DrawLine(vec3{ 0,-1000,0 }, vec3{ 0,1000,0 }, Color_Green);
 	Render::DrawLine(vec3{ 0,0,-1000 }, vec3{ 0,0,1000 }, Color_Blue);
@@ -2003,17 +2003,17 @@ void WorldGrid(){
 ///////////////
 void ShowWorldAxis(){
 	vec3
-        x = AtmoAdmin->camera.position + AtmoAdmin->camera.forward + vec3::RIGHT * 0.1,
+		x = AtmoAdmin->camera.position + AtmoAdmin->camera.forward + vec3::RIGHT * 0.1,
 	y = AtmoAdmin->camera.position + AtmoAdmin->camera.forward + vec3::UP * 0.1,
 	z = AtmoAdmin->camera.position + AtmoAdmin->camera.forward + vec3::FORWARD * 0.1;
-    
+	
 	vec2
-        spx = Math::WorldToScreen2(x, AtmoAdmin->camera.projMat, AtmoAdmin->camera.viewMat, DeshWindow->dimensions) - DeshWindow->dimensions / 2,
+		spx = Math::WorldToScreen2(x, AtmoAdmin->camera.projMat, AtmoAdmin->camera.viewMat, DeshWindow->dimensions) - DeshWindow->dimensions / 2,
 	spy = Math::WorldToScreen2(y, AtmoAdmin->camera.projMat, AtmoAdmin->camera.viewMat, DeshWindow->dimensions) - DeshWindow->dimensions / 2,
 	spz = Math::WorldToScreen2(z, AtmoAdmin->camera.projMat, AtmoAdmin->camera.viewMat, DeshWindow->dimensions) - DeshWindow->dimensions / 2;
-    
+	
 	vec2 offset = vec2(DeshWindow->width - 50, DeshWindow->height - debugbarheight - 50);
-    
+	
 	Render::DrawLineUI(offset, spx + offset, 1, Color_Red);
 	Render::DrawLineUI(offset, spy + offset, 1, Color_Green);
 	Render::DrawLineUI(offset, spz + offset, 1, Color_Blue);
@@ -2021,8 +2021,8 @@ void ShowWorldAxis(){
 
 void Editor::Init(){
 	selected_entities.reserve(8);
-    
-    popoutInspector = false;
+	
+	popoutInspector = false;
 	showInspector = true;
 	showTimes = true;
 	showDebugBar = true;
@@ -2030,7 +2030,7 @@ void Editor::Init(){
 	showImGuiDemoWindow = false;
 	showDebugLayer = true;
 	showWorldGrid = true;
-    
+	
 	dir_levels   = Assets::iterateDirectory(Assets::dirLevels());
 	dir_meshes   = Assets::iterateDirectory(Assets::dirModels(), ".mesh");
 	dir_textures = Assets::iterateDirectory(Assets::dirTextures());
@@ -2046,9 +2046,9 @@ void Editor::Update(){
 	///////////////
 	//// input ////
 	///////////////
-    //// simulate physics in editor ////
-    if(DeshInput->KeyPressed(Key::P | InputMod_Lctrl)) AtmoAdmin->simulateInEditor = !AtmoAdmin->simulateInEditor;
-    
+	//// simulate physics in editor ////
+	if(DeshInput->KeyPressed(Key::P | InputMod_Lctrl)) AtmoAdmin->simulateInEditor = !AtmoAdmin->simulateInEditor;
+	
 	//// select ////
 	if(!WinHovFlag && DeshInput->KeyPressed(MouseButton::LEFT)){
 		//NOTE adjusting the projection matrix so the nearZ is at least .1, produces bad results if less
@@ -2075,7 +2075,7 @@ void Editor::Update(){
 			selected_entities.clear();
 		}
 	}
-    
+	
 	//// render ////
 	if(DeshInput->KeyPressed(Key::F5)) Render::ReloadAllShaders();
 	
@@ -2086,7 +2086,7 @@ void Editor::Update(){
 		else 
 			DeshWindow->UpdateDisplayMode(DisplayMode_Windowed);
 	}
-    
+	
 	//// camera ////
 	//uncomment once ortho has been implemented again
 	//persist vec3 ogpos;
@@ -2132,11 +2132,11 @@ void Editor::Update(){
 	if(DeshInput->KeyPressed(AtmoAdmin->controller.cut))   CutEntities();
 	if(DeshInput->KeyPressed(AtmoAdmin->controller.copy))  CopyEntities();
 	if(DeshInput->KeyPressed(AtmoAdmin->controller.paste)) PasteEntities();
-    
+	
 	//// undo/redo ////
 	if(DeshInput->KeyPressed(AtmoAdmin->controller.undo)) Undo();
 	if(DeshInput->KeyPressed(AtmoAdmin->controller.redo)) Redo();
-    
+	
 	
 	///////////////////
 	//// interface ////
@@ -2144,7 +2144,7 @@ void Editor::Update(){
 	//program crashes somewhere in Inpector() if minimized
 	if(!DeshWindow->minimized){
 		WinHovFlag = 0;
-        
+		
 		//if(showDebugLayer) DebugLayer();
 		//if(showTimes)      DrawTimes();
 		if(showInspector)  Inspector();
@@ -2154,7 +2154,7 @@ void Editor::Update(){
 		ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0, 0, 0, 1)); {
 			if(showImGuiDemoWindow) ImGui::ShowDemoWindow();
 		}ImGui::PopStyleColor();
-        
+		
 		ShowWorldAxis();
 		if(!showMenuBar)   menubarheight = 0;
 		if(!showDebugBar)  debugbarheight = 0;
@@ -2168,5 +2168,5 @@ void Editor::Reset(){
 }
 
 void Editor::Cleanup(){
-    
+	
 }

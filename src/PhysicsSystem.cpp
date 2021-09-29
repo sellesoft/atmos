@@ -11,62 +11,62 @@ bool AABBAABBCollision(Physics* p1, AABBCollider* c1, Physics* p2, AABBCollider*
 	vec3 max1 = (p1->position + (c1->halfDims * p1->scale)) + c1->offset;
 	vec3 min2 = (p2->position - (c2->halfDims * p2->scale)) + c2->offset;
 	vec3 max2 = (p2->position + (c2->halfDims * p2->scale)) + c2->offset;
-    
+	
 	if((min1.x <= max2.x && max1.x >= min2.x) && //check if overlapping
-       (min1.y <= max2.y && max1.y >= min2.y) &&
-       (min1.z <= max2.z && max1.z >= min2.z)){
+	   (min1.y <= max2.y && max1.y >= min2.y) &&
+	   (min1.z <= max2.z && max1.z >= min2.z)){
 		
 		//TODO(sushi) implement keeping track of contacts
-        
-        //early out if no collision or both are static
+		
+		//early out if no collision or both are static
 		if(c1->noCollide || c2->noCollide) return true;
-        if(p1->staticPosition && p2->staticPosition) return true;
-        
+		if(p1->staticPosition && p2->staticPosition) return true;
+		
 		vec3 norm;
-        
+		
 		//// static resolution ////
-        f32 xover = (max1.x < max2.x) ? max1.x - min2.x : max2.x - min1.x; //we need to know which box is in front 
-        f32 yover = (max1.y < max2.y) ? max1.y - min2.y : max2.y - min1.y; //over each axis so the overlap is correct
-        f32 zover = (max1.z < max2.z) ? max1.z - min2.z : max2.z - min1.z;
+		f32 xover = (max1.x < max2.x) ? max1.x - min2.x : max2.x - min1.x; //we need to know which box is in front 
+		f32 yover = (max1.y < max2.y) ? max1.y - min2.y : max2.y - min1.y; //over each axis so the overlap is correct
+		f32 zover = (max1.z < max2.z) ? max1.z - min2.z : max2.z - min1.z;
 		if      (xover < yover && xover < zover){
 			if     (p1->staticPosition){ p2->position.x -= xover; }
 			else if(p2->staticPosition){ p1->position.x += xover; }
-            else                       { p1->position.x += xover/2.f; p2->position.x -= xover/2.f; }
-            norm = vec3::LEFT;
+			else                       { p1->position.x += xover/2.f; p2->position.x -= xover/2.f; }
+			norm = vec3::LEFT;
 		}else if(yover < xover && yover < zover){
 			if     (p1->staticPosition){ p2->position.y -= yover; }
 			else if(p2->staticPosition){ p1->position.y += yover; }
-            else                       { p1->position.y += yover/2.f; p2->position.y -= yover/2.f; }
+			else                       { p1->position.y += yover/2.f; p2->position.y -= yover/2.f; }
 			norm = vec3::DOWN;
 		}else if(zover < yover && zover < xover){
 			if     (p1->staticPosition){ p2->position.z -= zover; }
 			else if(p2->staticPosition){ p1->position.z += zover; }
-            else                       { p1->position.z += zover/2.f; p2->position.z -= zover/2.f; }
+			else                       { p1->position.z += zover/2.f; p2->position.z -= zover/2.f; }
 			norm = vec3::BACK;
 		}
 		
 		//TODO(sushi) create manifolds
-        
+		
 		//// dynamic resolution ////
 		//get relative velocity between both objects with p1 as the F.O.R
 		vec3 rv = p2->velocity - p1->velocity;
-        
+		
 		//find the velocity along the normal and dynamically resolve
 		f32 vAlongNorm = rv.dot(norm);
 		if(vAlongNorm < 0){
 			float j = -(1 + (p1->elasticity + p2->elasticity) / 2) * vAlongNorm;
 			j /= 1.f/p1->mass + 1.f/p2->mass;
-            
+			
 			vec3 impulse = j * norm;
 			p1->velocity -= impulse / p1->mass;
 			p2->velocity += impulse / p2->mass;
-            
+			
 			//TODO(sushi) set contact state here
 		}
-        return true;
+		return true;
 	}else{
-        return false;
-    }
+		return false;
+	}
 }
 
 void PhysicsSystem::Init(f32 fixedUpdatesPerSecond){
@@ -76,23 +76,23 @@ void PhysicsSystem::Init(f32 fixedUpdatesPerSecond){
 	maxVelocity    = 100.f;
 	minRotVelocity = 1.f;
 	maxRotVelocity = 360.f;
-    
-    fixedTimeStep    = fixedUpdatesPerSecond;
+	
+	fixedTimeStep    = fixedUpdatesPerSecond;
 	fixedDeltaTime   = 1.f / fixedUpdatesPerSecond;
-    fixedTotalTime   = 0;
-    fixedUpdateCount = 0;
-    fixedAccumulator = 0;
-    
-    paused = false;
+	fixedTotalTime   = 0;
+	fixedUpdateCount = 0;
+	fixedAccumulator = 0;
+	
+	paused = false;
 }
 
 void PhysicsSystem::Update(){
-    if(paused) return;
-    
-    fixedAccumulator += DeshTime->deltaTime;
-    while(fixedAccumulator >= fixedDeltaTime){
+	if(paused) return;
+	
+	fixedAccumulator += DeshTime->deltaTime;
+	while(fixedAccumulator >= fixedDeltaTime){
 		AtmoAdmin->player->Update();
-        for(Physics* p1 = AtmoAdmin->physicsArr.begin(); p1 != AtmoAdmin->physicsArr.end(); ++p1){
+		for(Physics* p1 = AtmoAdmin->physicsArr.begin(); p1 != AtmoAdmin->physicsArr.end(); ++p1){
 			if(p1->attribute.entity != AtmoAdmin->player){
 				//TODO contact states
 				
@@ -129,39 +129,39 @@ void PhysicsSystem::Update(){
 				}
 			}
 			
-            //collision check
-            if(p1->collider && p1->collider->shape != ColliderShape_NONE){
-                for(Physics* p2 = AtmoAdmin->physicsArr.begin(); p2 != AtmoAdmin->physicsArr.end(); ++p2){
-                    //check if able to collide
+			//collision check
+			if(p1->collider && p1->collider->shape != ColliderShape_NONE){
+				for(Physics* p2 = AtmoAdmin->physicsArr.begin(); p2 != AtmoAdmin->physicsArr.end(); ++p2){
+					//check if able to collide
 					if((p1 != p2) && (p2->collider != 0) && (p2->collider->shape != ColliderShape_NONE) 
 					   && (p1->collider->layer == p2->collider->layer)){
 						//find collision type and check for it
 						bool collision = false;
-                        switch(p1->collider->shape){
-                            case ColliderShape_AABB:
-                            switch(p2->collider->shape){
-                                case ColliderShape_AABB:{ collision = AABBAABBCollision(p1, (AABBCollider*)p1->collider, 
+						switch(p1->collider->shape){
+							case ColliderShape_AABB:
+							switch(p2->collider->shape){
+								case ColliderShape_AABB:{ collision = AABBAABBCollision(p1, (AABBCollider*)p1->collider, 
 																						p2, (AABBCollider*)p2->collider); }break;
-                                default: Assert(!"not implemented"); break;
-                            }break;
+								default: Assert(!"not implemented"); break;
+							}break;
 							default: Assert(!"not implemented"); break;
-                        }
+						}
 						//set triggers as active
 						if(collision){
 							if(p1->collider->isTrigger) p1->collider->triggerActive = true;
 							if(p2->collider->isTrigger) p2->collider->triggerActive = true;
 						}
-                    }
-                }
-                //TODO fill manifolds
-                //TODO solve manifolds
-            }
-        }
+					}
+				}
+				//TODO fill manifolds
+				//TODO solve manifolds
+			}
+		}
 		AtmoAdmin->player->PostCollisionUpdate();
-        
-        //// update fixed time ////
-        fixedAccumulator -= fixedDeltaTime;
+		
+		//// update fixed time ////
+		fixedAccumulator -= fixedDeltaTime;
 		fixedTotalTime += fixedDeltaTime;
-    }
+	}
 	fixedAlpha = fixedAccumulator / fixedDeltaTime;
 }
