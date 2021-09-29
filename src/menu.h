@@ -64,7 +64,7 @@ void UpdateMenu(){
 	UIStyle& style = UI::GetStyle();
 	Font* restore_font = style.font;
 	UI::PushColor(UIStyleCol_WindowBg, PackColorU32(128,128,255,64));
-	UI::BeginWindow("atmos_menu", vec2::ZERO, DeshWindow->dimensions, UIWindowFlags_NoMove | UIWindowFlags_NoTitleBar | UIWindowFlags_NoResize);
+	UI::Begin("atmos_menu", vec2::ZERO, DeshWindow->dimensions, UIWindowFlags_NoMove|UIWindowFlags_NoTitleBar|UIWindowFlags_NoResize);
 	
 	f32 center_x = DeshWindow->centerX;
 	cstring text;
@@ -90,7 +90,7 @@ void UpdateMenu(){
 			 (active_option == MenuOption_Quit) ? selected_color : regular_color);
 	cursor_y += stride;
 	
-	UI::EndWindow();
+	UI::End();
 	UI::PopColor();
 	style.font = restore_font;
 }

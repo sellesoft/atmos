@@ -19,7 +19,7 @@ struct PlayerEntity : public Entity {
 	f32 walkSpeed      = 5.0;
 	f32 runMult        = 2.0;
 	f32 crouchMult     = 0.5;
-	f32 jumpImpulse    = 1.0;
+	f32 jumpHeight     = 2.0;
 	f32 groundAccel    = 10.0;
 	f32 airAccel       = 10.0;
 	f32 minSpeed       = 0.12;
@@ -72,8 +72,8 @@ struct PlayerEntity : public Entity {
 		}
 		
 		//check if in air or on ground
-		vec3 ray_start = physics->position; ray_start.y += .1f;
-		Entity* below = AtmoAdmin->EntityRaycast(ray_start, vec3::DOWN, .4f);
+		vec3 ray_down = physics->position; ray_down.y += .1f;
+		Entity* below = AtmoAdmin->EntityRaycast(ray_down, vec3::DOWN, .4f);
 		bool inAir = (below == 0);
 		
 		//apply gravity to velocity
@@ -81,12 +81,16 @@ struct PlayerEntity : public Entity {
 		
 		if(inAir){
 			physics->velocity += inputs * airAccel * dt; //TODO(delle) dont keep adding forward speed
+			vec3 horiz_clamp = physics->velocity; horiz_clamp.y = 0; horiz_clamp.clampMag(0, max_speed);
+			physics->velocity = vec3(horiz_clamp.x, physics->velocity.y, horiz_clamp.z);
 		}else{
 			physics->velocity += inputs * groundAccel * dt;
-			physics->velocity.clampMag(0, max_speed);
 			
 			//ground friction
 			if(inputs != vec3::ZERO){
+				vec3 horiz_clamp = physics->velocity; horiz_clamp.y = 0; horiz_clamp.clampMag(0, max_speed);
+				physics->velocity = vec3(horiz_clamp.x, physics->velocity.y, horiz_clamp.z);
+				
 				if(physics->velocity.mag() > minSpeed){
 					//TODO get normal from collision
 					vec3 vPerpNorm = physics->velocity - (vec3::UP * physics->velocity.dot(vec3::UP));
@@ -98,7 +102,7 @@ struct PlayerEntity : public Entity {
 			}
 			
 			if(isJumping){
-				physics->AddImpulse(vec3(0,jumpImpulse,0)); //TODO(delle) this is boosted when sprinting?
+				physics->velocity.y = sqrt(2.f*gravity*jumpHeight); //TODO(delle) this is boosted when sprinting?
 				inAir = true;
 			}
 		}

@@ -27,6 +27,7 @@ struct TriggerEntity;
 typedef u32 EntityType;
 struct Admin{
 	string dataPath;
+	string levelName;
 	
     GameState      state;
 	Controller     controller;

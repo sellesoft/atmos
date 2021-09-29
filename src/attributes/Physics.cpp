@@ -90,9 +90,6 @@ void Physics::SaveText(Physics* p, string& level){
 			case ColliderShape_Sphere:{
 				level += TOSTRING("\ncollider_radius    ",((SphereCollider*)p->collider)->radius);
 			}break;
-			case ColliderShape_Complex:{
-				Assert(!"not implemented");
-			}break;
 		}
 	}
 }

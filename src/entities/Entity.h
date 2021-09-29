@@ -48,13 +48,10 @@ struct Entity {
 	string name;
 	Transform transform;
     
-	Player*          player = 0;
-	Movement*      movement = 0;
+	array<Entity*> connections;
 	ModelInstance*    model = 0;
 	Physics*        physics = 0;
 	InterpTransform* interp = 0;
-    
-	array<Entity*> connections;
 	
 	virtual void SendEvent(Event event){
 		for(Entity* e : connections) e->ReceiveEvent(event);

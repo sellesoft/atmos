@@ -49,15 +49,3 @@ void SphereCollider::RecalculateTensor(f32 mass){
 	Assert(mass > 0);
 	tensor = InertiaTensors::SolidSphere(radius,mass);
 }
-
-
-/////////
-// 
-//    Complex
-// 
-/////////
-ComplexCollider::ComplexCollider(Mesh* mesh, f32 mass){
-	Assert(mesh && mass > 0);
-	//!!Incomplete
-    Assert(!"not implemented");
-}

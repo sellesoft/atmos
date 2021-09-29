@@ -1,10 +1,15 @@
 #include "Editor.h"
 #include "admin.h"
 #include "camerainstance.h"
-#include "attributes/ModelInstance.h"
-#include "entities/PlayerEntity.h"
 #include "entities/Entity.h"
+#include "entities/PlayerEntity.h"
+#include "entities/PhysicsEntity.h"
+#include "entities/TriggerEntity.h"
+#include "entities/SceneryEntity.h"
+#include "entities/DoorEntity.h"
+#include "attributes/ModelInstance.h"
 #include "core/imgui.h"
+#include "core/io.h"
 #include "core/logging.h"
 #include "core/assets.h"
 #include "core/console.h"
@@ -18,17 +23,14 @@
 #include "geometry/geometry.h"
 #include "geometry/Edge.h"
 
-///////////////////////
-//// @undo structs ////
-///////////////////////
+/////////////////////////
+//// @editor structs ////
+/////////////////////////
 enum EditActionType_{
 	EditActionType_NONE, 
-	EditActionType_Select, 
 	EditActionType_Translate, 
 	EditActionType_Rotate, 
 	EditActionType_Scale, 
-	EditActionType_Create, 
-	EditActionType_Delete,
 	EditActionType_COUNT,
 }; typedef u32 EditActionType;
 
@@ -37,44 +39,93 @@ struct EditAction{ //48 bytes
 	u32 data[11];
 };
 
-////////////////////
-//// @undo vars ////
-////////////////////
-//TODO(delle) handle going over MEMORY_LIMIT
-//TODO(delle,Op) maybe use a vector with fixed size and store redos at back and use swap rather than construction/deletion
-local u64 MEMORY_LIMIT = Megabytes(8); //8MB = ~1 million undos
+//////////////////////
+//// @editor vars ////
+//////////////////////
 #include <deque>
-local std::deque<EditAction> undos = std::deque<EditAction>();
-local std::deque<EditAction> redos = std::deque<EditAction>();
+local std::deque<EditAction> undos = std::deque<EditAction>(); //TODO(delle,Op) maybe use a vector with fixed size and store 
+local std::deque<EditAction> redos = std::deque<EditAction>(); //redos at back and use swap rather than construction/deletion
+
+local array<Entity*> selected_entities;
+local array<string> dir_levels;
+local array<string> dir_meshes;
+local array<string> dir_textures;
+local array<string> dir_materials;
+local array<string> dir_models;
+local array<string> dir_fonts;
+local array<string> dir_objs;
+
+local array<bool> saved_meshes({ true });
+local array<bool> saved_materials({ true });
+local array<bool> saved_models({ true });
+
+local array<Entity*> copied_entities;
+
+local bool popoutInspector;
+local bool showInspector;
+local bool showTimes;
+local bool showDebugBar;
+local bool showMenuBar;
+local bool showImGuiDemoWindow;
+local bool showDebugLayer;
+local bool showWorldGrid;
+
+local bool  WinHovFlag = false;
+local float menubarheight = 0;
+local float debugbarheight = 0;
+local float padding = 0.95f;
+local float fontw = 0;
+local float fonth = 0;
+local f32 fontsize = 0;
+
+#define WinHovCheck if(ImGui::IsWindowHovered()) WinHovFlag = true 
+#define SetPadding ImGui::SetCursorPosX((ImGui::GetWindowWidth() - (ImGui::GetWindowWidth() * padding)) / 2)
+
+//functions to simplify the usage of our DebugLayer
+namespace ImGui {
+	void BeginDebugLayer(){
+		//ImGui::SetNextWindowSize(ImVec2(DeshWindow->width, DeshWindow->height));
+		ImGui::SetNextWindowPos(ImVec2(0, 0));
+		ImGui::PushStyleColor(ImGuiCol_WindowBg, ImGui::ColorToImVec4(color(0, 0, 0, 0)));
+		ImGui::Begin("DebugLayer", 0, ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar);
+	}
+    
+	//not necessary, but I'm adding it for clarity in code
+	void EndDebugLayer(){
+		ImGui::PopStyleColor();
+		ImGui::End();
+	}
+    
+	void DebugDrawText(const char* text, vec2 pos, color color = Color_White){
+		ImGui::SetCursorPos(ImGui::vec2ToImVec2(pos));
+        
+		ImGui::PushStyleColor(ImGuiCol_Text, ImGui::ColorToImVec4(color));
+		ImGui::TextEx(text);
+		ImGui::PopStyleColor();
+	}
+    
+	void DebugDrawText3(const char* text, vec3 pos, color color = Color_White, vec2 twoDoffset = vec2::ZERO){
+		CameraInstance* c = &AtmoAdmin->camera;
+		vec2 windimen = DeshWindow->dimensions;
+        
+		vec3 posc = Math::WorldToCamera3(pos, c->viewMat);
+		if(Math::ClipLineToZPlanes(posc, posc, c->nearZ, c->farZ)){
+			ImGui::SetCursorPos(ImGui::vec2ToImVec2(Math::CameraToScreen2(posc, c->projMat, windimen) + twoDoffset));
+			ImGui::PushStyleColor(ImGuiCol_Text, ImGui::ColorToImVec4(color));
+			ImGui::TextEx(text);
+			ImGui::PopStyleColor();
+		}
+	}
+    
+	void AddPadding(float x){
+		ImGui::SetCursorPosX(ImGui::GetCursorPosX() + x);
+	}
+} //namespace ImGui
 
 
-/////////////////////
-//// @undo funcs ////
-/////////////////////
-//select data layout:
-//0x00  void*      | selected entity pointer
-//0x08  void*      | old selection
-//0x10  void*      | new selection
-void AddUndoSelect(void** sel, void* oldEnt, void* newEnt){
-	Assert(sizeof(u32)*2 == sizeof(void*), "assume ptr is 8 bytes");
-	EditAction edit; edit.type = EditActionType_Select;
-	memcpy(edit.data + 0, &sel,    sizeof(u32)*2);
-	memcpy(edit.data + 2, &oldEnt, sizeof(u32)*2);
-	memcpy(edit.data + 4, &newEnt, sizeof(u32)*2);
-	undos.push_back(edit);
-	redos.clear();
-}
-void UndoSelect(EditAction* edit){
-	void** sel;
-	memcpy(&sel, ((u32*)edit->data) + 0, sizeof(u32)*2);
-	memcpy( sel, ((u32*)edit->data) + 2, sizeof(u32)*2);
-}
-void RedoSelect(EditAction* edit){
-	void** sel;
-	memcpy(&sel, ((u32*)edit->data) + 0, sizeof(u32)*2);
-	memcpy( sel, ((u32*)edit->data) + 4, sizeof(u32)*2);
-}
-
+///////////////
+//// @undo ////
+///////////////
 //translate data layout:
 //0x00  Transform* | transform
 //0x08  vec3       | old position
@@ -141,38 +192,13 @@ void RedoScale(EditAction* edit){
 	t->scale = vec3(((f32*)edit->data) + 5);
 }
 
-//create data layout:
-void AddUndoCreate(){
-	
-}
-void UndoCreate(EditAction* edit){
-	
-}
-void RedoCreate(EditAction* edit){
-	
-}
-
-//delete data layout:
-void AddUndoDelete(){
-	
-}
-void UndoDelete(EditAction* edit){
-	
-}
-void RedoDelete(EditAction* edit){
-	
-}
-
 void Undo(u32 count = 1){
 	forI((count < undos.size()) ? count : undos.size()){
 		u32 n = undos.size()-i-1;
 		switch(undos[n].type){
-			case(EditActionType_Select):   { UndoSelect(&undos[n]);    }break;
 			case(EditActionType_Translate):{ UndoTranslate(&undos[n]); }break;
 			case(EditActionType_Rotate):   { UndoRotate(&undos[n]);    }break;
 			case(EditActionType_Scale):    { UndoScale(&undos[n]);     }break;
-			case(EditActionType_Create):   { UndoCreate(&undos[n]);    }break;
-			case(EditActionType_Delete):   { UndoDelete(&undos[n]);    }break;
 		}
 		redos.push_back(undos.back());
 		undos.pop_back();
@@ -183,282 +209,150 @@ void Redo(u32 count = 1){
 	forI((count < redos.size()) ? count : redos.size()){
 		u32 n = redos.size()-i-1;
 		switch(redos[n].type){
-			case(EditActionType_Select):   { RedoSelect(&redos[n]);    }break;
 			case(EditActionType_Translate):{ RedoTranslate(&redos[n]); }break;
 			case(EditActionType_Rotate):   { RedoRotate(&redos[n]);    }break;
 			case(EditActionType_Scale):    { RedoScale(&redos[n]);     }break;
-			case(EditActionType_Create):   { RedoCreate(&redos[n]);    }break;
-			case(EditActionType_Delete):   { RedoDelete(&redos[n]);    }break;
 		}
 		undos.push_back(redos.back());
 		redos.pop_back();
 	}
 }
 
-//////////////////////
-//// @editor vars ////
-//////////////////////
-local array<Entity*> selected_entities;
-local CameraInstance* editor_camera;
-local string level_name;
 
-local array<string> dir_levels;
-local array<string> dir_meshes;
-local array<string> dir_textures;
-local array<string> dir_materials;
-local array<string> dir_models;
-local array<string> dir_fonts;
-local array<string> dir_objs;
+/////////////////////
+//// @copy/paste ////
+/////////////////////
+local void CutEntities(){
+	//!Incomplete
+	Assert(!"not implemented");
+	copied_entities.clear();
+}
 
-local array<bool> saved_meshes({ true });
-local array<bool> saved_materials({ true });
-local array<bool> saved_models({ true });
+local void CopyEntities(){
+	copied_entities.clear();
+	copied_entities.add(selected_entities);
+}
 
-local bool popoutInspector;
-local bool showInspector;
-local bool showTimes;
-local bool showDebugBar;
-local bool showMenuBar;
-local bool showImGuiDemoWindow;
-local bool showDebugLayer;
-local bool showWorldGrid;
-
-//current palette:
-//https://lospec.com/palette-list/slso8
-//TODO(sushi, Ui) implement menu style file loading sort of stuff yeah
-//TODO(sushi, Ui) standardize what UI element each color belongs to
-local struct {
-	color c1 = color(0x0d2b45); //midnight blue
-	color c2 = color(0x203c56); //dark gray blue
-	color c3 = color(0x544e68); //purple gray
-	color c4 = color(0x8d697a); //pink gray
-	color c5 = color(0xd08159); //bleached orange
-	color c6 = color(0xffaa5e); //above but brighter
-	color c7 = color(0xffd4a3); //skin white
-	color c8 = color(0xffecd6); //even whiter skin
-	color c9 = color(0x141414); //almost black
-}colors_;
-
-local bool  WinHovFlag = false;
-
-local float menubarheight = 0;
-local float debugbarheight = 0;
-
-local float padding = 0.95f;
-local float fontw = 0;
-local float fonth = 0;
-local f32 fontsize = 0;
-
-#define WinHovCheck if(ImGui::IsWindowHovered()) WinHovFlag = true 
-#define SetPadding ImGui::SetCursorPosX((ImGui::GetWindowWidth() - (ImGui::GetWindowWidth() * padding)) / 2)
-
-//functions to simplify the usage of our DebugLayer
-namespace ImGui {
-	void BeginDebugLayer(){
-		//ImGui::SetNextWindowSize(ImVec2(DeshWindow->width, DeshWindow->height));
-		ImGui::SetNextWindowPos(ImVec2(0, 0));
-		ImGui::PushStyleColor(ImGuiCol_WindowBg, ImGui::ColorToImVec4(color(0, 0, 0, 0)));
-		ImGui::Begin("DebugLayer", 0, ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar);
-	}
-    
-	//not necessary, but I'm adding it for clarity in code
-	void EndDebugLayer(){
-		ImGui::PopStyleColor();
-		ImGui::End();
-	}
-    
-	void DebugDrawCircle(vec2 pos, float radius, color color = Color_White){
-		ImGui::GetBackgroundDrawList()->AddCircle(ImVec2(pos.x, pos.y), radius, ImGui::GetColorU32(ImGui::ColorToImVec4(color)));
-	}
-    
-	void DebugDrawCircle3(vec3 pos, float radius, color color = Color_White){
-		CameraInstance* c = &AtmoAdmin->camera;
-		vec2 windimen = DeshWindow->dimensions;
-		vec2 pos2 = Math::WorldToScreen2(pos, c->projMat, c->viewMat, windimen);
-		ImGui::GetBackgroundDrawList()->AddCircle(ImGui::vec2ToImVec2(pos2), radius, ImGui::GetColorU32(ImGui::ColorToImVec4(color)));
-	}
-    
-	void DebugDrawCircleFilled3(vec3 pos, float radius, color color = Color_White){
-		CameraInstance* c = &AtmoAdmin->camera;
-		vec2 windimen = DeshWindow->dimensions;
-		vec2 pos2 = Math::WorldToScreen2(pos, c->projMat, c->viewMat, windimen);
-		ImGui::GetBackgroundDrawList()->AddCircleFilled(ImGui::vec2ToImVec2(pos2), radius, ImGui::GetColorU32(ImGui::ColorToImVec4(color)));
-	}
-    
-	void DebugDrawLine(vec2 pos1, vec2 pos2, color color = Color_White){
-		Math::ClipLineToBorderPlanes(pos1, pos2, DeshWindow->dimensions);
-		ImGui::GetBackgroundDrawList()->AddLine(ImGui::vec2ToImVec2(pos1), ImGui::vec2ToImVec2(pos2), ImGui::GetColorU32(ImGui::ColorToImVec4(color)));
-	}
-    
-	void DebugDrawLine3(vec3 pos1, vec3 pos2, color color = Color_White){
-		CameraInstance* c = &AtmoAdmin->camera;
-		vec2 windimen = DeshWindow->dimensions;
-        
-		vec3 pos1n = Math::WorldToCamera3(pos1, c->viewMat);
-		vec3 pos2n = Math::WorldToCamera3(pos2, c->viewMat);
-        
-		if(Math::ClipLineToZPlanes(pos1n, pos2n, c->nearZ, c->farZ)){
-			ImGui::GetBackgroundDrawList()->AddLine(ImGui::vec2ToImVec2(Math::CameraToScreen2(pos1n, c->projMat, windimen)),
-                                                    ImGui::vec2ToImVec2(Math::CameraToScreen2(pos2n, c->projMat, windimen)),
-                                                    ImGui::GetColorU32(ImGui::ColorToImVec4(color)));
+local void PasteEntities(){
+	selected_entities.clear();
+	for(Entity* src : copied_entities){
+		Entity* dst = 0;
+		switch(src->type){
+			case EntityType_Player:{
+				LogE("editor","There can only be one player entity.");
+				continue;
+			}break;
+			case EntityType_Physics:{
+				dst = new PhysicsEntity;
+			}break;
+			case EntityType_Scenery:{
+				dst = new SceneryEntity;
+			}break;
+			case EntityType_Trigger:{
+				TriggerEntity* e = new TriggerEntity;
+				e->events = ((TriggerEntity*)src)->events;
+				dst = e;
+			}break;
+			case EntityType_Door:{
+				dst = new DoorEntity;
+			}break;
+			default:{
+				LogfE("editor","Unhandled entity type '%d' when pasting copied entities.",src->type);
+				continue;
+			}break;
 		}
-	}
-    
-	void DebugDrawText(const char* text, vec2 pos, color color = Color_White){
-		ImGui::SetCursorPos(ImGui::vec2ToImVec2(pos));
-        
-		ImGui::PushStyleColor(ImGuiCol_Text, ImGui::ColorToImVec4(color));
-		ImGui::TextEx(text);
-		ImGui::PopStyleColor();
-	}
-    
-	void DebugDrawText3(const char* text, vec3 pos, color color = Color_White, vec2 twoDoffset = vec2::ZERO){
-		CameraInstance* c = &AtmoAdmin->camera;
-		vec2 windimen = DeshWindow->dimensions;
-        
-		vec3 posc = Math::WorldToCamera3(pos, c->viewMat);
-		if(Math::ClipLineToZPlanes(posc, posc, c->nearZ, c->farZ)){
-			ImGui::SetCursorPos(ImGui::vec2ToImVec2(Math::CameraToScreen2(posc, c->projMat, windimen) + twoDoffset));
-			ImGui::PushStyleColor(ImGuiCol_Text, ImGui::ColorToImVec4(color));
-			ImGui::TextEx(text);
-			ImGui::PopStyleColor();
+		
+		dst->id = AtmoAdmin->entities.count;
+		dst->type = src->type;
+		dst->name = src->name;
+		memcpy(&dst->transform, &src->transform, sizeof(Transform));
+		dst->connections = src->connections;
+		if(src->model){
+			AtmoAdmin->modelArr.add(ModelInstance(src->model->model));
+			dst->model = AtmoAdmin->modelArr.last;
+			dst->model->attribute.entity = dst;
+			dst->model->visible = src->model->visible;
 		}
-	}
-    
-	void DebugDrawTriangle(vec2 p1, vec2 p2, vec2 p3, color color = Color_White){
-		DebugDrawLine(p1, p2);
-		DebugDrawLine(p2, p3);
-		DebugDrawLine(p3, p1);
-	}
-    
-	void DebugFillTriangle(vec2 p1, vec2 p2, vec2 p3, color color = Color_White){
-		ImGui::GetBackgroundDrawList()->AddTriangleFilled(ImGui::vec2ToImVec2(p1), ImGui::vec2ToImVec2(p2), ImGui::vec2ToImVec2(p3),
-                                                          ImGui::GetColorU32(ImGui::ColorToImVec4(color)));
-	}
-    
-	void DebugDrawTriangle3(vec3 p1, vec3 p2, vec3 p3, color color = Color_White){
-		DebugDrawLine3(p1, p2, color);
-		DebugDrawLine3(p2, p3, color);
-		DebugDrawLine3(p3, p1, color);
-	}
-    
-	//TODO(sushi, Ui) add triangle clipping to this function
-	void DebugFillTriangle3(vec3 p1, vec3 p2, vec3 p3, color color = Color_White){
-		vec2 p1n = Math::WorldToScreen(p1, AtmoAdmin->camera.projMat, AtmoAdmin->camera.viewMat, DeshWindow->dimensions).toVec2();
-		vec2 p2n = Math::WorldToScreen(p2, AtmoAdmin->camera.projMat, AtmoAdmin->camera.viewMat, DeshWindow->dimensions).toVec2();
-		vec2 p3n = Math::WorldToScreen(p3, AtmoAdmin->camera.projMat, AtmoAdmin->camera.viewMat, DeshWindow->dimensions).toVec2();
-        
-		ImGui::GetBackgroundDrawList()->AddTriangleFilled(ImGui::vec2ToImVec2(p1n), ImGui::vec2ToImVec2(p2n), ImGui::vec2ToImVec2(p3n),
-                                                          ImGui::GetColorU32(ImGui::ColorToImVec4(color)));
-	}
-    
-	void DebugDrawGraphFloat(vec2 pos, float inval, float sizex = 100, float sizey = 100){
-		//display in value
-		ImGui::SetCursorPos(ImVec2(pos.x, pos.y - 10));
-		ImGui::TextEx(TOSTDSTRING(inval).c_str());
-        
-		//how much data we store
-		persist int prevstoresize = 100;
-		persist int storesize = 100;
-        
-		//how often we update
-		persist int fupdate = 1;
-		persist int frame_count = 0;
-        
-		persist float maxval = inval + 5;
-		persist float minval = inval - 5;
-        
-		//if(inval > maxval) maxval = inval;
-		//if(inval < minval) minval = inval;
-        
-		if(inval > maxval || inval < minval){
-			maxval = inval + 5;
-			minval = inval - 5;
+		if(src->physics){
+			AtmoAdmin->physicsArr.add(Physics());
+			dst->physics = AtmoAdmin->physicsArr.last;
+			dst->physics->attribute.entity = dst;
+			memcpy(dst->physics, src->physics, sizeof(Physics));
+			if(src->physics->collider){
+				switch(src->physics->collider->shape){
+					case ColliderShape_AABB:{
+						dst->physics->collider = new AABBCollider(((AABBCollider*)src->physics->collider)->halfDims, src->physics->mass);
+					}break;
+					case ColliderShape_Sphere:{
+						dst->physics->collider = new SphereCollider(((SphereCollider*)src->physics->collider)->radius, src->physics->mass);
+					}break;
+					default:{
+						LogfE("editor","Unhandled collider type '%d' when pasting copied entities.",src->physics->collider->shape);
+					}break;
+				}
+				dst->physics->collider->shape = src->physics->collider->shape;
+				dst->physics->collider->tensor = src->physics->collider->tensor;
+				dst->physics->collider->offset = src->physics->collider->offset;
+				dst->physics->collider->noCollide = src->physics->collider->noCollide;
+				dst->physics->collider->isTrigger = src->physics->collider->isTrigger;
+				dst->physics->collider->triggerActive = src->physics->collider->triggerActive;
+			}
 		}
-		//real values and printed values
-		persist std::vector<float> values(storesize);
-		persist std::vector<float> pvalues(storesize);
-        
-		//if changing the amount of data we're storing we have to reverse
-		//each data set twice to ensure the data stays in the right place when we move it
-		if(prevstoresize != storesize){
-			std::reverse(values.begin(), values.end());    values.resize(storesize);  std::reverse(values.begin(), values.end());
-			std::reverse(pvalues.begin(), pvalues.end());  pvalues.resize(storesize); std::reverse(pvalues.begin(), pvalues.end());
-			prevstoresize = storesize;
+		if(src->interp){
+			AtmoAdmin->interpTransformArr.add(InterpTransform());
+			dst->interp = AtmoAdmin->interpTransformArr.last;
+			dst->interp->attribute.entity = dst;
+			dst->interp->physics = dst->physics;
+			dst->interp->type = src->interp->type;
+			dst->interp->duration = src->interp->duration;
+			dst->interp->current = src->interp->current;
+			dst->interp->active = src->interp->active;
+			dst->interp->reset = src->interp->reset;
+			dst->interp->stages = src->interp->stages;
 		}
-        
-		std::rotate(values.begin(), values.begin() + 1, values.end());
-        
-		//update real set if we're not updating yet or update the graph if we are
-		if(frame_count < fupdate){
-			values[values.size() - 1] = inval;
-			frame_count++;
-		}
-		else{
-			float avg = Math::average(values.begin(), values.end(), storesize);
-			std::rotate(pvalues.begin(), pvalues.begin() + 1, pvalues.end());
-			pvalues[pvalues.size() - 1] = std::floorf(avg);
-            
-			frame_count = 0;
-		}
-        
-		ImGui::PushStyleColor(ImGuiCol_PlotLines, ImGui::ColorToImVec4(color(0, 255, 200, 255)));
-		ImGui::PushStyleColor(ImGuiCol_FrameBg, ImGui::ColorToImVec4(color(20, 20, 20, 255)));
-        
-		ImGui::SetCursorPos(ImGui::vec2ToImVec2(pos));
-		ImGui::PlotLines("", &pvalues[0], pvalues.size(), 0, 0, minval, maxval, ImVec2(sizex, sizey));
-        
-		ImGui::PopStyleColor();
-		ImGui::PopStyleColor();
+		
+		AtmoAdmin->entities.add(dst);
+		selected_entities.add(dst);
 	}
-    
-	void AddPadding(float x){
-		ImGui::SetCursorPosX(ImGui::GetCursorPosX() + x);
-	}
-    
-} //namespace ImGui
+}
 
 
+///////////////
+//// @menu ////
+///////////////
 void MenuBar(){
 	ImGui::PushStyleVar(ImGuiStyleVar_PopupBorderSize, 0);
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0);
 	ImGui::PushStyleColor(ImGuiCol_PopupBg, ImGui::ColorToImVec4(color(20, 20, 20, 255)));
 	ImGui::PushStyleColor(ImGuiCol_MenuBarBg, ImGui::ColorToImVec4(color(20, 20, 20, 255)));
     
-	if(ImGui::BeginMainMenuBar()){
-		WinHovCheck;
-		menubarheight = ImGui::GetWindowHeight();
-        
+	if(ImGui::BeginMainMenuBar()){ WinHovCheck;
 		//// level menu options ////
-		if(ImGui::BeginMenu("Level")){
-			WinHovCheck;
+		if(ImGui::BeginMenu("Level")){ WinHovCheck;
 			if(ImGui::MenuItem("New")){
 				AtmoAdmin->Reset();
 			}
 			if(ImGui::MenuItem("Save")){
-				if(level_name == ""){
+				if(AtmoAdmin->levelName == ""){
 					Log("editor","Level not saved before; Use 'Save As'");
-				}
-				else{
-					//AtmoAdmin->SaveTEXT(level_name);
+				}else{;
+					AtmoAdmin->SaveLevel(cstring{AtmoAdmin->levelName.str,(u64)AtmoAdmin->levelName.count});
 				}
 			}
-			if(ImGui::BeginMenu("Save As")){
-				WinHovCheck;
+			if(ImGui::BeginMenu("Save As")){ WinHovCheck;
 				persist char buff[255] = {};
 				if(ImGui::InputText("##level_saveas_input", buff, 255, ImGuiInputTextFlags_EnterReturnsTrue)){
-					//AtmoAdmin->SaveTEXT(buff);
-					level_name = buff;
+					AtmoAdmin->levelName = string(buff);
+					AtmoAdmin->SaveLevel(cstring{AtmoAdmin->levelName.str,(u64)AtmoAdmin->levelName.count});
 				}
 				ImGui::EndMenu();
 			}
-			if(ImGui::BeginMenu("Load")){
-				WinHovCheck;
-				dir_levels = Assets::iterateDirectory(Assets::dirLevels());
-				forX(di, dir_levels.count){
-					if(ImGui::MenuItem(dir_levels[di].str)){
-						//AtmoAdmin->LoadTEXT(dir_levels[di]);
-						level_name = dir_levels[di];
+			if(ImGui::BeginMenu("Load")){ WinHovCheck;
+				array<File> levels = get_directory_files(Assets::dirLevels().c_str());
+				forE(levels){
+					string name(it->name, it->short_length);
+					if(!it->is_directory && ImGui::MenuItem(name.str)){
+						AtmoAdmin->LoadLevel({it->name,it->short_length});
 					}
 				}
 				ImGui::EndMenu();
@@ -467,10 +361,8 @@ void MenuBar(){
 		}
         
 		//// load menu options ////
-		if(ImGui::BeginMenu("Load")){
-			WinHovCheck;
-			if(ImGui::BeginMenu("Meshes")){
-				WinHovCheck;
+		if(ImGui::BeginMenu("Load")){ WinHovCheck;
+			if(ImGui::BeginMenu("Meshes")){ WinHovCheck;
 				dir_meshes = Assets::iterateDirectory(Assets::dirModels(), ".mesh");
 				forX(di, dir_meshes.count){
 					bool loaded = false;
@@ -479,8 +371,7 @@ void MenuBar(){
 							loaded = true;  break;
 						}
 					}
-					if(!loaded && ImGui::MenuItem(dir_meshes[di].str)){
-						WinHovCheck;
+					if(!loaded && ImGui::MenuItem(dir_meshes[di].str)){ WinHovCheck;
 						u32 id = Storage::CreateMeshFromFile(dir_meshes[di].str).first;
 						if(id) saved_meshes.add(true);
 					}
@@ -488,8 +379,7 @@ void MenuBar(){
 				ImGui::EndMenu();
 			}
             
-			if(ImGui::BeginMenu("Textures")){
-				WinHovCheck;
+			if(ImGui::BeginMenu("Textures")){ WinHovCheck;
 				dir_textures = Assets::iterateDirectory(Assets::dirTextures());
 				forX(di, dir_textures.count){
 					bool loaded = false;
@@ -498,16 +388,14 @@ void MenuBar(){
 							loaded = true;  break;
 						}
 					}
-					if(!loaded && ImGui::MenuItem(dir_textures[di].str)){
-						WinHovCheck;
+					if(!loaded && ImGui::MenuItem(dir_textures[di].str)){ WinHovCheck;
 						Storage::CreateTextureFromFile(dir_textures[di].str);
 					}
 				}
 				ImGui::EndMenu();
 			}
             
-			if(ImGui::BeginMenu("Materials")){
-				WinHovCheck;
+			if(ImGui::BeginMenu("Materials")){ WinHovCheck;
 				dir_materials = Assets::iterateDirectory(Assets::dirModels(), ".mat");
 				forX(di, dir_materials.count){
 					bool loaded = false;
@@ -516,8 +404,7 @@ void MenuBar(){
 							loaded = true;  break;
 						}
 					}
-					if(!loaded && ImGui::MenuItem(dir_materials[di].str)){
-						WinHovCheck;
+					if(!loaded && ImGui::MenuItem(dir_materials[di].str)){ WinHovCheck;
 						u32 id = Storage::CreateMaterialFromFile(dir_materials[di].str).first;
 						if(id) saved_materials.add(true);
 					}
@@ -525,8 +412,7 @@ void MenuBar(){
 				ImGui::EndMenu();
 			}
             
-			if(ImGui::BeginMenu("Models")){
-				WinHovCheck;
+			if(ImGui::BeginMenu("Models")){ WinHovCheck;
 				dir_models = Assets::iterateDirectory(Assets::dirModels(), ".model");
 				forX(di, dir_models.count){
 					bool loaded = false;
@@ -535,8 +421,7 @@ void MenuBar(){
 							loaded = true;  break;
 						}
 					}
-					if(!loaded && ImGui::MenuItem(dir_models[di].str)){
-						WinHovCheck;
+					if(!loaded && ImGui::MenuItem(dir_models[di].str)){ WinHovCheck;
 						u32 mesh_count = Storage::MeshCount();
 						u32 material_count = Storage::MaterialCount();
 						u32 id = Storage::CreateModelFromFile(dir_models[di].str, ModelFlags_NONE, false).first;
@@ -548,8 +433,7 @@ void MenuBar(){
 				ImGui::EndMenu();
 			}
             
-			if(ImGui::BeginMenu("OBJs")){
-				WinHovCheck;
+			if(ImGui::BeginMenu("OBJs")){ WinHovCheck;
 				dir_objs = Assets::iterateDirectory(Assets::dirModels(), ".obj");
 				forX(di, dir_objs.count){
 					u32 loaded_idx = -1;
@@ -558,8 +442,7 @@ void MenuBar(){
 							loaded_idx = li;  break;
 						}
 					}
-					if(ImGui::MenuItem(dir_objs[di].str)){
-						WinHovCheck;
+					if(ImGui::MenuItem(dir_objs[di].str)){ WinHovCheck;
 						if(loaded_idx != -1){
 							Storage::DeleteModel(loaded_idx);
 							saved_models.remove(loaded_idx);
@@ -580,8 +463,7 @@ void MenuBar(){
 		}
         
 		//// window menu options ////
-		if(ImGui::BeginMenu("Window")){
-			WinHovCheck;
+		if(ImGui::BeginMenu("Window")){ WinHovCheck;
 			ImGui::Checkbox("Inspector", &showInspector);
 			ImGui::Checkbox("Debug Bar", &showDebugBar);
 			ImGui::Checkbox("DebugLayer", &showDebugLayer);
@@ -593,13 +475,10 @@ void MenuBar(){
 		}
         
 		//// state menu options ////
-		if(ImGui::BeginMenu("State")){
-			WinHovCheck;
-			ImGui::Text("state not reimpl yet");
-			//if(ImGui::MenuItem("Play"))   AtmoAdmin->ChangeState(GameState_Play);
-			//if(ImGui::MenuItem("Debug"))  AtmoAdmin->ChangeState(GameState_Debug);
-			//if(ImGui::MenuItem("Editor")) AtmoAdmin->ChangeState(GameState_Editor);
-			//if(ImGui::MenuItem("Menu"))   AtmoAdmin->ChangeState(GameState_Menu);
+		if(ImGui::BeginMenu("State")){ WinHovCheck;
+			if(ImGui::MenuItem("Play"))   AtmoAdmin->ChangeState(GameState_Play);
+			if(ImGui::MenuItem("Editor")) AtmoAdmin->ChangeState(GameState_Editor);
+			if(ImGui::MenuItem("Menu"))   AtmoAdmin->ChangeState(GameState_Menu);
 			ImGui::EndMenu();
 		}
 		ImGui::EndMainMenuBar();
@@ -609,6 +488,9 @@ void MenuBar(){
 	ImGui::PopStyleVar(2);
 }
 
+///////////////////
+//// @entities ////
+///////////////////
 void EntitiesTab(){
 	persist bool rename_ent = false;
 	persist char rename_buffer[DESHI_NAME_SIZE] = {};
@@ -744,29 +626,39 @@ void EntitiesTab(){
 	ImGui::Separator();
     
 	//// create new entity ////
-	persist const char* presets[] = { "Empty", "StaticMesh" };
+	persist const char* presets[] = { "Empty", "StaticEntity", "PhysicsEntity", "Player", };
 	persist int current_preset = 0;
     
 	ImGui::SetCursorPosX(ImGui::GetWindowWidth() * 0.025);
 	if(ImGui::Button("New Entity")){
-		//Entity* ent = 0;
-		//std::string ent_name = TOSTDSTRING(presets[current_preset], AtmoAdmin->entities.size);
-		//switch (current_preset){
-		//case(0):default: { //Empty
-		//	ent = AtmoAdmin->CreateEntityNow({}, ent_name.str);
-		//}break;
-		//case(1): { //Static Mesh
-		//	ModelInstance* mc = new ModelInstance();
-		//	Physics* phys = new Physics();
-		//	phys->staticPosition = true;
-		//	Collider* coll = new AABBCollider(vec3{ .5f, .5f, .5f }, phys->mass);
+		Entity* ent = 0;
+		
+		string ent_name = TOSTRING(presets[current_preset], AtmoAdmin->entities.count);
+		switch (current_preset){
+			case(0):default:{ //Empty
+				LogE("editor","Creating empty entities not setup yet.");
+			}break;
+			case(1):        { //StaticEntity
+				PhysicsEntity* e = new PhysicsEntity;
+				e->Init(ent_name.str, Transform(), Storage::NullModel(), new AABBCollider(Storage::NullMesh(),1.0f),1.0f,true);
+				ent = e;
+			}break;
+			case(2):        { //PhysicsEntity
+				PhysicsEntity* e = new PhysicsEntity;
+				e->Init(ent_name.str, Transform(), Storage::NullModel(), new AABBCollider(Storage::NullMesh(),1.0f),1.0f);
+				ent = e;
+			}break;
+			case(3):        { //Player
+				if(!AtmoAdmin->player){
+					AtmoAdmin->player = new PlayerEntity;
+					AtmoAdmin->player->Init();
+					ent = AtmoAdmin->player;
+				}
+			}break;
+		}
         
-		//	ent = AtmoAdmin->CreateEntityNow({ mc, phys, coll }, ent_name.str);
-		//}break;
-		//}
-        
-		//selected_entities.clear();
-		//if(ent) selected_entities.push_back(ent);
+		selected_entities.clear();
+		if(ent) selected_entities.add(ent);
 	}
 	ImGui::SameLine(); ImGui::Combo("##preset_combo", &current_preset, presets, ArrayCount(presets));
     
@@ -792,37 +684,34 @@ void EntitiesTab(){
             
 			ImGui::TextEx("Position    "); ImGui::SameLine();
 			if(ImGui::Inputvec3("##ent_pos", &sel->transform.position)){
-				//if(Physics* p = sel->GetAttribute<Physics>()){
-				//	p->position = sel->transform.position;
-				//	admin->editor.undo_manager.AddUndoTranslate(&sel->transform, &oldVec, &p->position);
-				//}
-				//else{
-				//	admin->editor.undo_manager.AddUndoTranslate(&sel->transform, &oldVec, &sel->transform.position);
-				//}
+				if(sel->physics){
+					sel->physics->position = sel->transform.position;
+					AddUndoTranslate(&sel->transform, &oldVec, &sel->physics->position);
+				}else{
+					AddUndoTranslate(&sel->transform, &oldVec, &sel->transform.position);
+				}
 			}ImGui::Separator();
             
 			oldVec = sel->transform.rotation;
 			ImGui::TextEx("Rotation    "); ImGui::SameLine();
 			if(ImGui::Inputvec3("##ent_rot", &sel->transform.rotation)){
-				//if(Physics* p = sel->GetAttribute<Physics>()){
-				//	p->rotation = sel->transform.rotation;
-				//	admin->editor.undo_manager.AddUndoRotate(&sel->transform, &oldVec, &p->rotation);
-				//}
-				//else{
-				//	admin->editor.undo_manager.AddUndoRotate(&sel->transform, &oldVec, &sel->transform.rotation);
-				//}
+				if(sel->physics){
+					sel->physics->rotation = sel->transform.rotation;
+					AddUndoRotate(&sel->transform, &oldVec, &sel->physics->rotation);
+				}else{
+					AddUndoRotate(&sel->transform, &oldVec, &sel->transform.rotation);
+				}
 			}ImGui::Separator();
             
 			oldVec = sel->transform.scale;
 			ImGui::TextEx("Scale       "); ImGui::SameLine();
 			if(ImGui::Inputvec3("##ent_scale", &sel->transform.scale)){
-				//if(Physics* p = sel->GetAttribute<Physics>()){
-				//	p->scale = sel->transform.scale;
-				//	admin->editor.undo_manager.AddUndoScale(&sel->transform, &oldVec, &p->scale);
-				//}
-				//else{
-				//	admin->editor.undo_manager.AddUndoScale(&sel->transform, &oldVec, &sel->transform.scale);
-				//}
+				if(sel->physics){
+					sel->physics->scale = sel->transform.scale;
+					AddUndoScale(&sel->transform, &oldVec, &sel->physics->scale);
+				}else{
+					AddUndoScale(&sel->transform, &oldVec, &sel->transform.scale);
+				}
 			}ImGui::Separator();
 			ImGui::Unindent();
 		}
@@ -837,18 +726,17 @@ void EntitiesTab(){
 		if(sel->model){
 			if(ImGui::CollapsingHeader("Model", &delete_button, tree_flags)){
 				ImGui::Indent();
-				ModelInstance* mc = sel->model;
                 
 				ImGui::TextEx("Visible  "); ImGui::SameLine();
-				if(ImGui::Button((mc->visible) ? "True" : "False", ImVec2(-FLT_MIN, 0))){
-					mc->ToggleVisibility();
+				if(ImGui::Button((sel->model->visible) ? "True" : "False", ImVec2(-FLT_MIN, 0))){
+					sel->model->ToggleVisibility();
 				}
                 
 				ImGui::TextEx("Model     "); ImGui::SameLine(); ImGui::SetNextItemWidth(-1);
-				if(ImGui::BeginCombo("##model_combo", mc->model->name)){
+				if(ImGui::BeginCombo("##model_combo", sel->model->model->name)){
 					forI(Storage::ModelCount()){
-						if(ImGui::Selectable(Storage::ModelName(i), mc->model == Storage::ModelAt(i))){
-							mc->ChangeModel(Storage::ModelAt(i));
+						if(ImGui::Selectable(Storage::ModelName(i), sel->model->model == Storage::ModelAt(i))){
+							sel->model->ChangeModel(Storage::ModelAt(i));
 						}
 					}
 					ImGui::EndCombo();
@@ -859,6 +747,7 @@ void EntitiesTab(){
 			}
 		}
 		
+		//physics
 		if(sel->physics){
 			if(sel->physics->collider){
 				if(sel->physics->collider->shape == ColliderShape_AABB){
@@ -867,322 +756,12 @@ void EntitiesTab(){
 			}
 		}
         
-        //NOTE we no longer switch here since there is no attributes array on entity so
-        //     all these below will need to be converted
-        
-        //		//physics
-        //	case AttributeType_Physics:
-        //		if(ImGui::CollapsingHeader("Physics", &delete_button, tree_flags)){
-        //			ImGui::Indent();
-        
-        //			Physics* d = dyncast(Physics, c);
-        //			ImGui::TextEx("Velocity     "); ImGui::SameLine(); ImGui::Inputvec3("##phys_vel", &d->velocity);
-        //			ImGui::TextEx("Accelertaion "); ImGui::SameLine(); ImGui::Inputvec3("##phys_accel", &d->acceleration);
-        //			ImGui::TextEx("Rot Velocity "); ImGui::SameLine(); ImGui::Inputvec3("##phys_rotvel", &d->rotVelocity);
-        //			ImGui::TextEx("Rot Accel    "); ImGui::SameLine(); ImGui::Inputvec3("##phys_rotaccel", &d->rotAcceleration);
-        //			ImGui::TextEx("Elasticity   "); ImGui::SameLine();
-        //			ImGui::SetNextItemWidth(-FLT_MIN); ImGui::InputFloat("##phys_elastic", &d->elasticity);
-        //			ImGui::TextEx("Mass         "); ImGui::SameLine();
-        //			ImGui::SetNextItemWidth(-FLT_MIN); ImGui::InputFloat("##phys_mass", &d->mass);
-        //			ImGui::TextEx("Kinetic Fric "); ImGui::SameLine();
-        //			ImGui::SetNextItemWidth(-FLT_MIN); ImGui::InputFloat("##phys_kinfric", &d->kineticFricCoef);
-        //			ImGui::Checkbox("Static Position", &d->staticPosition);
-        //			ImGui::Checkbox("Static Rotation", &d->staticRotation);
-        //			ImGui::Checkbox("2D Physics", &d->twoDphys);
-        
-        //			ImGui::Unindent();
-        //			ImGui::Separator();
-        //		}
-        //		break;
-        
-        //		//colliders
-        //	case AttributeType_Collider: {
-        //		if(ImGui::CollapsingHeader("Collider", &delete_button, tree_flags)){
-        //			ImGui::Indent();
-        
-        //			Collider* coll = dyncast(Collider, c);
-        //			f32 mass = 1.0f;
-        
-        //			ImGui::TextEx("Shape "); ImGui::SameLine(); ImGui::SetNextItemWidth(-1);
-        //			if(ImGui::BeginCombo("##coll_type_combo", ColliderShapeStrings[coll->shape])){
-        //				forI(ArrayCount(ColliderShapeStrings)){
-        //					if(ImGui::Selectable(ColliderShapeStrings[i], coll->shape == i) && (coll->shape != i)){
-        //						if(Physics* p = sel->GetAttribute<Physics>()) mass = p->mass;
-        
-        //						sel->RemoveAttribute(coll);
-        //						coll = 0;
-        //						switch (i){
-        //						case ColliderShape_AABB: {
-        //							coll = new AABBCollider(vec3{ 0.5f, 0.5f, 0.5f }, mass);
-        //						}break;
-        //						case ColliderShape_Box: {
-        //							coll = new BoxCollider(vec3{ 0.5f, 0.5f, 0.5f }, mass);
-        //						}break;
-        //						case ColliderShape_Sphere: {
-        //							coll = new SphereCollider(1.0f, mass);
-        //						}break;
-        //						case ColliderShape_Landscape: {
-        //							//coll = new LandscapeCollider();
-        //							WARNING_LOC("Landscape collider not setup yet");
-        //						}break;
-        //						case ColliderShape_Complex: {
-        //							//coll = new ComplexCollider();
-        //							WARNING_LOC("Complex collider not setup yet");
-        //						}break;
-        //						}
-        
-        //						if(coll){
-        //							sel->AddAttribute(coll);
-        //							admin->AddAttributeToLayers(coll);
-        //						}
-        //					}
-        //				}
-        //				ImGui::EndCombo();
-        //			}
-        
-        //			switch (coll->shape){
-        //			case ColliderShape_Box: {
-        //				BoxCollider* coll_box = dyncast(BoxCollider, coll);
-        //				ImGui::TextEx("Half Dims "); ImGui::SameLine();
-        //				if(ImGui::Inputvec3("##coll_halfdims", &coll_box->halfDims)){
-        //					if(Physics* p = sel->GetAttribute<Physics>()) mass = p->mass;
-        //					coll_box->RecalculateTensor(mass);
-        //				}
-        //			}break;
-        //			case ColliderShape_AABB: {
-        //				AABBCollider* coll_aabb = dyncast(AABBCollider, coll);
-        //				ImGui::TextEx("Half Dims "); ImGui::SameLine();
-        //				if(ImGui::Inputvec3("##coll_halfdims", &coll_aabb->halfDims)){
-        //					if(Physics* p = sel->GetAttribute<Physics>()) mass = p->mass;
-        //					coll_aabb->RecalculateTensor(mass);
-        //				}
-        //			}break;
-        //			case ColliderShape_Sphere: {
-        //				SphereCollider* coll_sphere = dyncast(SphereCollider, coll);
-        //				ImGui::TextEx("Radius    "); ImGui::SameLine(); ImGui::SetNextItemWidth(-FLT_MIN);
-        //				if(ImGui::InputFloat("##coll_sphere", &coll_sphere->radius)){
-        //					if(Physics* p = sel->GetAttribute<Physics>()) mass = p->mass;
-        //					coll_sphere->RecalculateTensor(mass);
-        //				}
-        //			}break;
-        //			case ColliderShape_Landscape: {
-        //				ImGui::TextEx("Landscape collider has no settings yet");
-        //			}break;
-        //			case ColliderShape_Complex: {
-        //				ImGui::TextEx("Complex collider has no settings yet");
-        //			}break;
-        //			}
-        
-        //			ImGui::Checkbox("Don't Resolve Collisions", (bool*)&coll->noCollide);
-        //			ImGui::TextEx("Collision Layer"); ImGui::SameLine(); ImGui::SetNextItemWidth(-1);
-        //			local u32 min = 0, max = 9;
-        //			ImGui::SliderScalar("##coll_layer", ImGuiDataType_U32, &coll->layer, &min, &max, "%d");
-        
-        //			ImGui::Unindent();
-        //			ImGui::Separator();
-        //		}
-        //	}break;
-        
-        //		//audio listener
-        //	case AttributeType_AudioListener: {
-        //		if(ImGui::CollapsingHeader("Audio Listener", &delete_button, tree_flags)){
-        //			ImGui::Indent();
-        
-        //			ImGui::TextEx("TODO implement audio listener component editing");
-        
-        //			ImGui::Unindent();
-        //			ImGui::Separator();
-        //		}
-        //	}break;
-        
-        //		//audio source
-        //	case AttributeType_AudioSource: {
-        //		if(ImGui::CollapsingHeader("Audio Source", &delete_button, tree_flags)){
-        //			ImGui::Indent();
-        
-        //			ImGui::TextEx("TODO implement audio source component editing");
-        
-        //			ImGui::Unindent();
-        //			ImGui::Separator();
-        //		}
-        //	}break;
-        
-        //		//camera
-        //	case AttributeType_Camera: {
-        //		if(ImGui::CollapsingHeader("CameraInstance", &delete_button, tree_flags)){
-        //			ImGui::Indent();
-        
-        //			ImGui::TextEx("TODO implement camera component editing");
-        
-        //			ImGui::Unindent();
-        //			ImGui::Separator();
-        //		}
-        //	}break;
-        
-        //		//light
-        //	case AttributeType_Light: {
-        //		if(ImGui::CollapsingHeader("Light", &delete_button, tree_flags)){
-        //			ImGui::Indent();
-        
-        //			Light* d = dyncast(Light, c);
-        //			ImGui::TextEx("Brightness   "); ImGui::SameLine(); ImGui::SetNextItemWidth(-FLT_MIN);
-        //			ImGui::InputFloat("##light_brightness", &d->brightness);
-        //			ImGui::TextEx("Position     "); ImGui::SameLine();
-        //			ImGui::Inputvec3("##light_position", &d->position);
-        //			ImGui::TextEx("Direction    "); ImGui::SameLine();
-        //			ImGui::Inputvec3("##light_direction", &d->direction);
-        
-        //			ImGui::Unindent();
-        //			ImGui::Separator();
-        //		}
-        //	}break;
-        
-        //		//orb manager
-        //	case AttributeType_OrbManager: {
-        //		if(ImGui::CollapsingHeader("Orbs", &delete_button, tree_flags)){
-        //			ImGui::Indent();
-        
-        //			OrbManager* d = dyncast(OrbManager, c);
-        //			ImGui::TextEx("Orb Count "); ImGui::SameLine(); ImGui::SetNextItemWidth(-FLT_MIN);
-        //			ImGui::InputInt("##orb_orbcount", &d->orbcount);
-        
-        //			ImGui::Unindent();
-        //			ImGui::Separator();
-        //		}
-        //	}break;
-        
-        //		//door
-        //	case AttributeType_Door: {
-        //		if(ImGui::CollapsingHeader("Door", &delete_button, tree_flags)){
-        //			ImGui::Indent();
-        
-        //			ImGui::TextEx("TODO implement door component editing");
-        
-        //			ImGui::Unindent();
-        //			ImGui::Separator();
-        //		}
-        //	}break;
-        
-        //		//player
-        //	case AttributeType_Player: {
-        //		if(ImGui::CollapsingHeader("Player", &delete_button, tree_flags)){
-        //			ImGui::Indent();
-        
-        //			Player* d = dyncast(Player, c);
-        //			ImGui::TextEx("Health "); ImGui::SameLine(); ImGui::SetNextItemWidth(-FLT_MIN);
-        //			ImGui::InputInt("##player_health", &d->health);
-        
-        //			ImGui::Unindent();
-        //			ImGui::Separator();
-        //		}
-        //	}break;
-        
-        //		//movement
-        //	case AttributeType_Movement: {
-        //		if(ImGui::CollapsingHeader("Movement", &delete_button, tree_flags)){
-        //			ImGui::Indent();
-        
-        //			Movement* d = dyncast(Movement, c);
-        //			ImGui::TextEx("Ground Accel    "); ImGui::SameLine(); ImGui::SetNextItemWidth(-FLT_MIN);
-        //			ImGui::InputFloat("##move_gndaccel", &d->gndAccel);
-        //			ImGui::TextEx("Air Accel       "); ImGui::SameLine(); ImGui::SetNextItemWidth(-FLT_MIN);
-        //			ImGui::InputFloat("##move_airaccel", &d->airAccel);
-        //			ImGui::TextEx("Jump Impulse    "); ImGui::SameLine(); ImGui::SetNextItemWidth(-FLT_MIN);
-        //			ImGui::InputFloat("##move_jimp", &d->jumpImpulse);
-        //			ImGui::TextEx("Max Walk Speed  "); ImGui::SameLine(); ImGui::SetNextItemWidth(-FLT_MIN);
-        //			ImGui::InputFloat("##move_maxwalk", &d->maxWalkingSpeed);
-        //			ImGui::TextEx("Max Run Speed   "); ImGui::SameLine(); ImGui::SetNextItemWidth(-FLT_MIN);
-        //			ImGui::InputFloat("##move_maxrun", &d->maxRunningSpeed);
-        //			ImGui::TextEx("Max Crouch Speed"); ImGui::SameLine(); ImGui::SetNextItemWidth(-FLT_MIN);
-        //			ImGui::InputFloat("##move_maxcrouch", &d->maxCrouchingSpeed);
-        
-        //			ImGui::Unindent();
-        //			ImGui::Separator();
-        //		}
-        //	}break;
-        
-        
-		//if(!delete_button) comp_deleted_queue.push_back(c);
-	    //ImGui::PopID();
-		//for(Attribute* c : sel->components)
-		//sel->RemoveAttributes(comp_deleted_queue);
-        
 		//// add component ////
 		persist int add_comp_index = 0;
         
 		ImGui::SetCursorPosX(ImGui::GetWindowWidth() * 0.025);
 		if(ImGui::Button("Add Attribute")){
-			switch (1 << (add_comp_index - 1)){
-				//case AttributeType_ModelInstance: {
-                //switch (sel->type) {
-                //case EntityType_Player: {
-                //PlayerEntity* p = (PlayerEntity*)sel;
-                //p->model = new ModelInstance();
-                //p->modelPtr = p->model;
-                //}break;
-                //
-                //default: {
-                ////do something like say the currently selected type cant add that
-                ////or even better only show the things that can be added to that type
-                //
-                //}break;
-                //}
-                ////admin->AddAttributeToLayers(comp);
-				//}break;
-                //	case AttributeType_Physics: {
-                //		Attribute* comp = new Physics();
-                //		sel->AddAttribute(comp);
-                //		admin->AddAttributeToLayers(comp);
-                //	}break;
-                //	case AttributeType_Collider: {
-                //		Attribute* comp = new AABBCollider(vec3{ .5f, .5f, .5f }, 1.f);
-                //		sel->AddAttribute(comp);
-                //		admin->AddAttributeToLayers(comp);
-                //	}break;
-                //	case AttributeType_AudioListener: {
-                //		Attribute* comp = new AudioListener(sel->transform.position, vec3::ZERO, sel->transform.rotation);
-                //		sel->AddAttribute(comp);
-                //		admin->AddAttributeToLayers(comp);
-                //	}break;
-                //	case AttributeType_AudioSource: { //!Incomplete
-                //		Attribute* comp = new AudioSource();
-                //		sel->AddAttribute(comp);
-                //		admin->AddAttributeToLayers(comp);
-                //	}break;
-                //	case AttributeType_Camera: {
-                //		Attribute* comp = new CameraInstance(90.f);
-                //		sel->AddAttribute(comp);
-                //		admin->AddAttributeToLayers(comp);
-                //	}break;
-                //	case AttributeType_Light: {
-                //		Attribute* comp = new Light(sel->transform.position, sel->transform.rotation);
-                //		sel->AddAttribute(comp);
-                //		admin->AddAttributeToLayers(comp);
-                //	}break;
-                //	case AttributeType_OrbManager: { //!Incomplete
-                //		Attribute* comp = new OrbManager(0);
-                //		sel->AddAttribute(comp);
-                //		admin->AddAttributeToLayers(comp);
-                //	}break;
-                //	case AttributeType_Door: {
-                //		Attribute* comp = new Door();
-                //		sel->AddAttribute(comp);
-                //		admin->AddAttributeToLayers(comp);
-                //	}break;
-                //	case AttributeType_Player: { //!Incomplete
-                //		Attribute* comp = new Player();
-                //		sel->AddAttribute(comp);
-                //		admin->AddAttributeToLayers(comp);
-                //	}break;
-                //	case AttributeType_Movement: { //!Incomplete
-                //		Attribute* comp = new Movement();
-                //		sel->AddAttribute(comp);
-                //		admin->AddAttributeToLayers(comp);
-                //	}break;
-                //	case(0):default: { //None
-                //		//do nothing
-                //	}break;
-			}
+			LogE("editor","Add Attribute not implemented yet");
 		}
 		ImGui::SameLine(); ImGui::SetNextItemWidth(-1);
 		ImGui::Combo("##add_comp_combo", &add_comp_index, AttributeTypeStrings, ArrayCount(AttributeTypeStrings));
@@ -1192,6 +771,9 @@ void EntitiesTab(){
 	ImGui::PopStyleVar(); //ImGuiStyleVar_IndentSpacing
 } //EntitiesTab
 
+/////////////////
+//// @meshes ////
+/////////////////
 void MeshesTab(){
 	persist bool rename_mesh = false;
 	persist char rename_buffer[DESHI_NAME_SIZE] = {};
@@ -1546,6 +1128,9 @@ void MeshesTab(){
 	}
 } //MeshesTab
 
+///////////////////
+//// @textures ////
+///////////////////
 void TexturesTab(){
 	persist u32 sel_tex_idx = -1;
 	Texture* selected = nullptr;
@@ -1625,6 +1210,9 @@ void TexturesTab(){
 	}
 } //TexturesTab
 
+////////////////////
+//// @materials ////
+////////////////////
 void MaterialsTab(){
 	persist u32  sel_mat_idx = -1;
 	persist bool rename_mat = false;
@@ -1778,6 +1366,9 @@ void MaterialsTab(){
 	}
 } //MaterialsTab
 
+/////////////////
+//// @models ////
+/////////////////
 void ModelsTab(){
 	persist u32  sel_model_idx = -1;
 	persist u32  sel_batch_idx = -1;
@@ -1983,17 +1574,20 @@ void ModelsTab(){
 } //ModelsTab
 
 
+////////////////
+//// @fonts ////
+////////////////
 void FontsTab(){
 	persist u32 sel_font_idx = -1;
 	Font* selected = nullptr;
 	//!Incomplete
-	ImGui::TextEx("TODO    Move fonts to storage");
+	ImGui::TextEx("font previews not implemented yet");
 } //FontsTab
 
-enum TwodPresets : u32 {
-	Twod_NONE = 0, Twod_Line, Twod_Triangle, Twod_Square, Twod_NGon, Twod_Image,
-};
 
+///////////////////
+//// @settings ////
+///////////////////
 void SettingsTab(){
 	SetPadding;
 	if(ImGui::BeginChild("##settings_tab", ImVec2(ImGui::GetWindowWidth() * 0.95f, ImGui::GetWindowHeight() * .9f))){
@@ -2013,25 +1607,25 @@ void SettingsTab(){
 		//// camera properties ////
 		if(ImGui::CollapsingHeader("Camera", 0)){
 			if(ImGui::Button("Zero", ImVec2(ImGui::GetWindowWidth() * .45f, 0))){
-				editor_camera->position = vec3::ZERO; editor_camera->rotation = vec3::ZERO;
+				AtmoAdmin->camera.position = vec3::ZERO; AtmoAdmin->camera.rotation = vec3::ZERO;
 			} ImGui::SameLine();
 			if(ImGui::Button("Reset", ImVec2(ImGui::GetWindowWidth() * .45f, 0))){
-				editor_camera->position = { 4.f,3.f,-4.f }; editor_camera->rotation = { 28.f,-45.f,0.f };
+				AtmoAdmin->camera.position = { 4.f,3.f,-4.f }; AtmoAdmin->camera.rotation = { 28.f,-45.f,0.f };
 			}
             
-			ImGui::TextEx("Position  "); ImGui::SameLine(); ImGui::Inputvec3("##cam_pos", &editor_camera->position);
-			ImGui::TextEx("Rotation  "); ImGui::SameLine(); ImGui::Inputvec3("##cam_rot", &editor_camera->rotation);
+			ImGui::TextEx("Position  "); ImGui::SameLine(); ImGui::Inputvec3("##cam_pos", &AtmoAdmin->camera.position);
+			ImGui::TextEx("Rotation  "); ImGui::SameLine(); ImGui::Inputvec3("##cam_rot", &AtmoAdmin->camera.rotation);
 			ImGui::TextEx("Near Clip "); ImGui::SameLine();
-			if(ImGui::InputFloat("##cam_nearz", &editor_camera->nearZ)){
-				editor_camera->UpdateProjectionMatrix();
+			if(ImGui::InputFloat("##cam_nearz", &AtmoAdmin->camera.nearZ)){
+				AtmoAdmin->camera.UpdateProjectionMatrix();
 			}
 			ImGui::TextEx("Far Clip  "); ImGui::SameLine();
-			if(ImGui::InputFloat("##cam_farz", &editor_camera->farZ)){
-				editor_camera->UpdateProjectionMatrix();
+			if(ImGui::InputFloat("##cam_farz", &AtmoAdmin->camera.farZ)){
+				AtmoAdmin->camera.UpdateProjectionMatrix();
 			};
 			ImGui::TextEx("FOV       "); ImGui::SameLine();
-			if(ImGui::InputFloat("##cam_fov", &editor_camera->fov)){
-				editor_camera->UpdateProjectionMatrix();
+			if(ImGui::InputFloat("##cam_fov", &AtmoAdmin->camera.fov)){
+				AtmoAdmin->camera.UpdateProjectionMatrix();
 			};
             
 			ImGui::Separator();
@@ -2111,6 +1705,10 @@ void SettingsTab(){
 	}
 }//settings tab
 
+
+////////////////////
+//// @inspector ////
+////////////////////
 void Inspector(){
 	//window styling
 	ImGui::PushStyleVar(ImGuiStyleVar_ScrollbarSize, 5);
@@ -2195,7 +1793,9 @@ void Inspector(){
 	ImGui::End();
 }//inspector
 
-
+///////////////////
+//// @debugbar ////
+///////////////////
 void DebugBar(){
     //for getting fps
     ImGuiIO& io = ImGui::GetIO();
@@ -2344,6 +1944,10 @@ void DebugBar(){
     ImGui::End();
 }
 
+
+/////////////////////
+//// @debugtimes ////
+/////////////////////
 //void Editor::DrawTimes(){
 //    std::string time1 = DeshTime->FormatTickTime("Time       : {t}\n"
 //        "Window     : {w}\n"
@@ -2368,33 +1972,15 @@ void DebugBar(){
 //}
 
 
-//void DisplayTriggers(Admin* admin){
-//	int i = 0;
-//	for(Entity* e : AtmoAdmin->entities){
-//		if(e->type == EntityType_Trigger){
-//			Trigger* t = dyncast(Trigger, e);
-//			switch (t->collider->shape){
-//			case ColliderShape_AABB: {
-//				Render::DrawBox(e->transform.TransformMatrix(), color::DARK_MAGENTA);
-//			}break;
-//			case ColliderShape_Sphere: {
-//
-//			}break;
-//			case ColliderShape_Complex: {
-//
-//			}break;
-//			}
-//		}
-//		i++;
-//	}
-//}
-
+///////////////
+//// @grid ////
+///////////////
 void WorldGrid(){
 	int lines = 100;
-	f32 xp = floor(editor_camera->position.x) + lines;
-	f32 xn = floor(editor_camera->position.x) - lines;
-	f32 zp = floor(editor_camera->position.z) + lines;
-	f32 zn = floor(editor_camera->position.z) - lines;
+	f32 xp = floor(AtmoAdmin->camera.position.x) + lines;
+	f32 xn = floor(AtmoAdmin->camera.position.x) - lines;
+	f32 zp = floor(AtmoAdmin->camera.position.z) + lines;
+	f32 zn = floor(AtmoAdmin->camera.position.z) - lines;
     
 	color color(50, 50, 50);
 	for(int i = 0; i < lines * 2 + 1; i++){
@@ -2412,16 +1998,19 @@ void WorldGrid(){
 	Render::DrawLine(vec3{ 0,0,-1000 }, vec3{ 0,0,1000 }, Color_Blue);
 }
 
+///////////////
+//// @axis ////
+///////////////
 void ShowWorldAxis(){
 	vec3
-        x = editor_camera->position + editor_camera->forward + vec3::RIGHT * 0.1,
-	y = editor_camera->position + editor_camera->forward + vec3::UP * 0.1,
-	z = editor_camera->position + editor_camera->forward + vec3::FORWARD * 0.1;
+        x = AtmoAdmin->camera.position + AtmoAdmin->camera.forward + vec3::RIGHT * 0.1,
+	y = AtmoAdmin->camera.position + AtmoAdmin->camera.forward + vec3::UP * 0.1,
+	z = AtmoAdmin->camera.position + AtmoAdmin->camera.forward + vec3::FORWARD * 0.1;
     
 	vec2
-        spx = Math::WorldToScreen2(x, editor_camera->projMat, editor_camera->viewMat, DeshWindow->dimensions) - DeshWindow->dimensions / 2,
-	spy = Math::WorldToScreen2(y, editor_camera->projMat, editor_camera->viewMat, DeshWindow->dimensions) - DeshWindow->dimensions / 2,
-	spz = Math::WorldToScreen2(z, editor_camera->projMat, editor_camera->viewMat, DeshWindow->dimensions) - DeshWindow->dimensions / 2;
+        spx = Math::WorldToScreen2(x, AtmoAdmin->camera.projMat, AtmoAdmin->camera.viewMat, DeshWindow->dimensions) - DeshWindow->dimensions / 2,
+	spy = Math::WorldToScreen2(y, AtmoAdmin->camera.projMat, AtmoAdmin->camera.viewMat, DeshWindow->dimensions) - DeshWindow->dimensions / 2,
+	spz = Math::WorldToScreen2(z, AtmoAdmin->camera.projMat, AtmoAdmin->camera.viewMat, DeshWindow->dimensions) - DeshWindow->dimensions / 2;
     
 	vec2 offset = vec2(DeshWindow->width - 50, DeshWindow->height - debugbarheight - 50);
     
@@ -2432,8 +2021,6 @@ void ShowWorldAxis(){
 
 void Editor::Init(){
 	selected_entities.reserve(8);
-	level_name = "";
-    editor_camera = &AtmoAdmin->camera;
     
     popoutInspector = false;
 	showInspector = true;
@@ -2455,78 +2042,105 @@ void Editor::Update(){
 	fonth = ImGui::GetFontSize();
 	fontw = fonth / 2.f;
 	
-    //simulate physics in editor
+	
+	///////////////
+	//// input ////
+	///////////////
+    //// simulate physics in editor ////
     if(DeshInput->KeyPressed(Key::P | InputMod_Lctrl)) AtmoAdmin->simulateInEditor = !AtmoAdmin->simulateInEditor;
     
-	{//select
-        
-	}
-    
-	{//render
-		if(DeshInput->KeyPressed(Key::F5)) Render::ReloadAllShaders();
-        
-		//fullscreen toggle
-		if(DeshInput->KeyPressed(Key::F11)){
-			if(DeshWindow->displayMode == DisplayMode_Windowed || DeshWindow->displayMode == DisplayMode_Borderless)
-				DeshWindow->UpdateDisplayMode(DisplayMode_Fullscreen);
-			else 
-				DeshWindow->UpdateDisplayMode(DisplayMode_Windowed);
+	//// select ////
+	if(!WinHovFlag && DeshInput->KeyPressed(MouseButton::LEFT)){
+		//NOTE adjusting the projection matrix so the nearZ is at least .1, produces bad results if less
+		mat4 adjusted_proj = Camera::MakePerspectiveProjectionMatrix(DeshWindow->width, DeshWindow->height, AtmoAdmin->camera.fov, 
+																	 AtmoAdmin->camera.farZ, Max(.1, AtmoAdmin->camera.nearZ));
+		vec3 direction = (Math::ScreenToWorld(DeshInput->mousePos, adjusted_proj, AtmoAdmin->camera.viewMat, DeshWindow->dimensions) 
+						  - AtmoAdmin->camera.position).normalized();
+		
+		if(Entity* e = AtmoAdmin->EntityRaycast(AtmoAdmin->camera.position, direction, AtmoAdmin->camera.farZ)){
+			if      (DeshInput->ShiftDown()){ //add new selected
+				selected_entities.add(e);
+			}else if(DeshInput->CtrlDown()){  //remove selected
+				forI(selected_entities.count){
+					if(selected_entities[i] == e){
+						selected_entities.remove(i);
+						break;
+					}
+				}
+			}else{                            //clear selected, add selected
+				selected_entities.clear();
+				selected_entities.add(e);
+			}
+		}else{
+			selected_entities.clear();
 		}
 	}
     
-	{//camera
-		//uncomment once ortho has been implemented again
-		//persist vec3 ogpos;
-		//persist vec3 ogrot;
-		//if(DeshInput->KeyPressed(AtmoAdmin->controller.perspectiveToggle)){
-		//	switch (camera->mode){
-		//	case(CameraMode_Perspective): {
-		//		ogpos = camera->position;
-		//		ogrot = camera->rotation;
-		//		camera->mode = CameraMode_Orthographic;
-		//		camera->farZ = 1000000;
-		//	} break;
-		//	case(CameraMode_Orthographic): {
-		//		camera->position = ogpos;
-		//		camera->rotation = ogrot;
-		//		camera->mode = CameraMode_Perspective;
-		//		camera->farZ = 1000;
-		//		camera->UpdateProjectionMatrix();
-		//	} break;
-		//	}
-		//}
-		//
-		////ortho views
-		//if      (DeshInput->KeyPressed(AtmoAdmin->controller.orthoFrontView))    camera->orthoview = OrthoView_Front;
-		//else if(DeshInput->KeyPressed(AtmoAdmin->controller.orthoBackView))     camera->orthoview = OrthoView_Back;
-		//else if(DeshInput->KeyPressed(AtmoAdmin->controller.orthoRightView))    camera->orthoview = OrthoView_Right;
-		//else if(DeshInput->KeyPressed(AtmoAdmin->controller.orthoLeftView))     camera->orthoview = OrthoView_Left;
-		//else if(DeshInput->KeyPressed(AtmoAdmin->controller.orthoTopDownView))  camera->orthoview = OrthoView_Top;
-		//else if(DeshInput->KeyPressed(AtmoAdmin->controller.orthoBottomUpView)) camera->orthoview = OrthoView_Bottom;
-        
-		if(DeshInput->KeyPressed(AtmoAdmin->controller.gotoSelected)){
-			editor_camera->position = selected_entities[0]->transform.position + vec3(4.f, 3.f, -4.f);
-			editor_camera->rotation = { 28.f, -45.f, 0.f };
-		}
+	//// render ////
+	if(DeshInput->KeyPressed(Key::F5)) Render::ReloadAllShaders();
+	
+	//fullscreen toggle
+	if(DeshInput->KeyPressed(Key::F11)){
+		if(DeshWindow->displayMode == DisplayMode_Windowed || DeshWindow->displayMode == DisplayMode_Borderless)
+			DeshWindow->UpdateDisplayMode(DisplayMode_Fullscreen);
+		else 
+			DeshWindow->UpdateDisplayMode(DisplayMode_Windowed);
 	}
     
-    
-	{//interface 
-		if(DeshInput->KeyPressed(AtmoAdmin->controller.toggleConsole))   DeshConsole->dispcon = !DeshConsole->dispcon;
-		if(DeshInput->KeyPressed(AtmoAdmin->controller.toggleDebugMenu)) showInspector = !showInspector;
-		if(DeshInput->KeyPressed(AtmoAdmin->controller.toggleDebugBar))  showDebugBar = !showDebugBar;
-		if(DeshInput->KeyPressed(AtmoAdmin->controller.toggleMenuBar))   showMenuBar = !showMenuBar;
+	//// camera ////
+	//uncomment once ortho has been implemented again
+	//persist vec3 ogpos;
+	//persist vec3 ogrot;
+	//if(DeshInput->KeyPressed(AtmoAdmin->controller.perspectiveToggle)){
+	//	switch (camera->mode){
+	//	case(CameraMode_Perspective): {
+	//		ogpos = camera->position;
+	//		ogrot = camera->rotation;
+	//		camera->mode = CameraMode_Orthographic;
+	//		camera->farZ = 1000000;
+	//	} break;
+	//	case(CameraMode_Orthographic): {
+	//		camera->position = ogpos;
+	//		camera->rotation = ogrot;
+	//		camera->mode = CameraMode_Perspective;
+	//		camera->farZ = 1000;
+	//		camera->UpdateProjectionMatrix();
+	//	} break;
+	//	}
+	//}
+	//
+	////ortho views
+	//if      (DeshInput->KeyPressed(AtmoAdmin->controller.orthoFrontView))    camera->orthoview = OrthoView_Front;
+	//else if(DeshInput->KeyPressed(AtmoAdmin->controller.orthoBackView))     camera->orthoview = OrthoView_Back;
+	//else if(DeshInput->KeyPressed(AtmoAdmin->controller.orthoRightView))    camera->orthoview = OrthoView_Right;
+	//else if(DeshInput->KeyPressed(AtmoAdmin->controller.orthoLeftView))     camera->orthoview = OrthoView_Left;
+	//else if(DeshInput->KeyPressed(AtmoAdmin->controller.orthoTopDownView))  camera->orthoview = OrthoView_Top;
+	//else if(DeshInput->KeyPressed(AtmoAdmin->controller.orthoBottomUpView)) camera->orthoview = OrthoView_Bottom;
+	
+	if(DeshInput->KeyPressed(AtmoAdmin->controller.gotoSelected)){
+		AtmoAdmin->camera.position = selected_entities[0]->transform.position + vec3(4.f, 3.f, -4.f);
+		AtmoAdmin->camera.rotation = { 28.f, -45.f, 0.f };
 	}
+	
+	//// interface ////
+	if(DeshInput->KeyPressed(AtmoAdmin->controller.toggleConsole))   DeshConsole->dispcon = !DeshConsole->dispcon;
+	if(DeshInput->KeyPressed(AtmoAdmin->controller.toggleDebugMenu)) showInspector = !showInspector;
+	if(DeshInput->KeyPressed(AtmoAdmin->controller.toggleDebugBar))  showDebugBar = !showDebugBar;
+	if(DeshInput->KeyPressed(AtmoAdmin->controller.toggleMenuBar))   showMenuBar = !showMenuBar;
+	
+	//// cut/copy/paste ////
+	if(DeshInput->KeyPressed(AtmoAdmin->controller.cut))   CutEntities();
+	if(DeshInput->KeyPressed(AtmoAdmin->controller.copy))  CopyEntities();
+	if(DeshInput->KeyPressed(AtmoAdmin->controller.paste)) PasteEntities();
     
-	{//cut/copy/paste
-		//TODO(sushi) reimpl cut/copy/paste
-	}
+	//// undo/redo ////
+	if(DeshInput->KeyPressed(AtmoAdmin->controller.undo)) Undo();
+	if(DeshInput->KeyPressed(AtmoAdmin->controller.redo)) Redo();
     
-    
-	///////////////////////////////
-	//// render user interface ////
-	///////////////////////////////
-    
+	
+	///////////////////
+	//// interface ////
+	///////////////////
 	//program crashes somewhere in Inpector() if minimized
 	if(!DeshWindow->minimized){
 		WinHovFlag = 0;
@@ -2551,7 +2165,6 @@ void Editor::Reset(){
 	selected_entities.clear();
 	undos.clear();
 	redos.clear();
-    
 }
 
 void Editor::Cleanup(){

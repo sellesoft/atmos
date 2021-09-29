@@ -16,6 +16,7 @@ struct SceneryEntity : public Entity {
 		Assert(_model);
 		AtmoAdmin->modelArr.add(ModelInstance(_model));
 		model = AtmoAdmin->modelArr.last;
+		model->attribute.entity = this;
 		
 		id = AtmoAdmin->entities.count;
 		AtmoAdmin->entities.add(this);

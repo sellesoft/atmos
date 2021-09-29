@@ -21,11 +21,10 @@ enum ColliderShapeBits {
 	ColliderShape_NONE,
 	ColliderShape_AABB,
 	ColliderShape_Sphere,
-	ColliderShape_Complex,
 	ColliderShape_COUNT,
 }; typedef u32 ColliderShape;
 global_ const char* ColliderShapeStrings[] = {
-	"None", "AABB", "Sphere", "Complex"
+	"None", "AABB", "Sphere"
 };
 
 struct Contact{
@@ -72,14 +71,6 @@ struct SphereCollider : public Collider{
     
 	SphereCollider(f32 radius, f32 mass);
 	void RecalculateTensor(f32 mass) override;
-};
-
-struct ComplexCollider : public Collider{
-	Mesh* mesh;
-    
-	ComplexCollider(Mesh* mesh, f32 mass);
-	//TODO(sushi) implement tensor generation from an arbitrary mesh
-	void RecalculateTensor(f32 mass) override {};
 };
 
 #endif //ATMOS_COLLIDER_H

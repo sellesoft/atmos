@@ -14,6 +14,7 @@ void Admin::Init(string _dataPath){
 	dataPath = _dataPath;
     state = GameState_Editor;
     simulateInEditor = false;
+	levelName = "";
     
 	camera = CameraInstance(90);
 	InitMenu();
@@ -26,11 +27,21 @@ void Admin::Init(string _dataPath){
 	modelArr.reserve(1024);
 	interpTransformArr.reserve(1024);
 	
-	/*
     {//sandbox
-		
+		/*
+PhysicsEntity* floor1 = new PhysicsEntity;
+		floor1->Init("floor1", Transform(vec3(20,2,20),vec3::ZERO,vec3(5,1,5)), flat_box, new AABBCollider(box_mesh,1.0f),1.0f,true);
+		interpTransformArr.add(InterpTransform());
+		floor1->interp = interpTransformArr.last;
+		floor1->interp->attribute.entity = floor1;
+		floor1->interp->physics  = floor1->physics;
+		floor1->interp->type     = InterpTransformType_Bounce;
+		floor1->interp->duration = 2;
+		floor1->interp->active   = true;
+		floor1->interp->stages.add(Transform(vec3( 20,2, 20),vec3::ZERO,vec3(5,1,5)));
+		floor1->interp->stages.add(Transform(vec3( 20,2,-20),vec3::ZERO,vec3(5,1,5)));
+*/
     }
-	*/
 }
 
 void Admin::Update(){
@@ -169,8 +180,6 @@ void Admin::SaveLevel(cstring level_name){
 						  "\nrotation ",entities[ent_idx]->transform.rotation,
 						  "\nscale    ",entities[ent_idx]->transform.scale);
 		level += "\nattributes";
-		if(entities[ent_idx]->player)   level += TOSTRING(" ",AttributeType_Player);
-		if(entities[ent_idx]->movement) level += TOSTRING(" ",AttributeType_Movement);
 		if(entities[ent_idx]->model)    level += TOSTRING(" ",AttributeType_ModelInstance);
 		if(entities[ent_idx]->physics)  level += TOSTRING(" ",AttributeType_Physics);
 		if(entities[ent_idx]->interp)   level += TOSTRING(" ",AttributeType_InterpTransform);
@@ -232,6 +241,7 @@ void Admin::LoadLevel(cstring level_name){
 	
 	//reset current level
 	Reset();
+	levelName = to_string(level_name);
 	
 	//parsing vars
 	enum{PARSE_INVALID, PARSE_LEVEL, PARSE_ENTITIES, PARSE_ENTITY, PARSE_ATTRIBUTE};
@@ -455,7 +465,6 @@ void Admin::LoadLevel(cstring level_name){
 							switch(Type(b10tou64(value))){
 								case ColliderShape_AABB:   { entity->physics->collider = new AABBCollider(vec3::ONE, entity->physics->mass); }break;
 								case ColliderShape_Sphere: { entity->physics->collider = new SphereCollider(1.f, entity->physics->mass); }break;
-								case ColliderShape_Complex:{ Assert(!"not implemented"); }break;
 								default:{ ParseError("Unhandled Collider shape: ",value); }break;
 							}
 						}else if(key == cstr_lit("collider_offset")){
@@ -524,47 +533,37 @@ Entity* Admin::EntityRaycast(vec3 origin, vec3 direction, f32 maxDistance, Entit
 	
 	Entity* result = 0;
 	f32 min_depth = maxDistance;
-	f32 depth;
-	vec3 p0, p1, p2, normal;
-	vec3 intersect;
-	vec3 perp01, perp12, perp20;
-	mat4 transform, rotation;
-	Mesh::Triangle* tri;
 	for(Entity* e : entities){
 		if(!(filter & e->type)){
-			transform = e->transform.Matrix();
-			rotation = mat4::RotationMatrix(e->transform.rotation);
+			mat4 transform = e->transform.Matrix();
+			mat4 rotation = mat4::RotationMatrix(e->transform.rotation);
 			if(ModelInstance* mc = e->model){
 				if(!mc->visible) continue;
 				forX(tri_idx, mc->mesh->triangleCount){
-					tri = &mc->mesh->triangleArray[tri_idx];
-					p0 = tri->p[0] * transform;
-					normal = tri->normal * rotation;
+					Mesh::Triangle* tri = &mc->mesh->triangleArray[tri_idx];
+					vec3 p0 = tri->p[0] * transform;
+					vec3 normal = tri->normal * rotation;
                     
 					//early out if triangle is not facing us
 					if(normal.dot(p0 - origin) >= 0) continue;
                     
 					//find where on the plane defined by the triangle our raycast intersects
-					depth = (p0 - origin).dot(normal) / direction.dot(normal);
-					intersect = origin + (direction * depth);
+					f32 depth = (p0 - origin).dot(normal) / direction.dot(normal);
+					vec3 intersect = origin + (direction * depth);
                     
 					//early out if intersection is behind us
 					if(depth <= 0) continue;
 					
-					p1 = tri->p[1] * transform;
-					p2 = tri->p[2] * transform;
+					vec3 p1 = tri->p[1] * transform;
+					vec3 p2 = tri->p[2] * transform;
                     
 					//make vectors perpendicular to each edge of the triangle
-					perp01 = normal.cross(p1 - p0).normalized();
-					perp12 = normal.cross(p2 - p1).normalized();
-					perp20 = normal.cross(p0 - p2).normalized();
+					vec3 perp01 = normal.cross(p1 - p0).normalized();
+					vec3 perp12 = normal.cross(p2 - p1).normalized();
+					vec3 perp20 = normal.cross(p0 - p2).normalized();
                     
 					//check that the intersection point is within the triangle and its the closest triangle found so far
-					if(perp01.dot(intersect - p0) > 0 &&
-					   perp12.dot(intersect - p1) > 0 &&
-					   perp20.dot(intersect - p2) > 0){
-						//Log("raycast",origin," ",intersect," ",depth);
-                        
+					if((perp01.dot(intersect - p0) > 0) && (perp12.dot(intersect - p1) > 0) && (perp20.dot(intersect - p2) > 0)){
 						//if its the closest triangle so far we store its index
 						if(depth < min_depth){
 							result = e;
