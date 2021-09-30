@@ -9,7 +9,7 @@
 /////////
 AABBCollider::AABBCollider(Mesh* mesh, f32 mass){
 	Assert(mesh && mesh->vertexCount && mass > 0);
-	shape = ColliderShape_AABB;
+	type     = ColliderType_AABB;
 	
 	vec3 min = mesh->aabbMin.absV();
 	vec3 max = mesh->aabbMax.absV();
@@ -22,7 +22,7 @@ AABBCollider::AABBCollider(Mesh* mesh, f32 mass){
 
 AABBCollider::AABBCollider(vec3 _halfDims, f32 mass){
 	Assert(_halfDims.x > 0 && _halfDims.y > 0 && _halfDims.z > 0 && mass > 0);
-	shape    = ColliderShape_AABB;
+	type     = ColliderType_AABB;
 	halfDims = _halfDims;
 	tensor   = InertiaTensors::SolidCuboid(2.f*halfDims.x, 2.f*halfDims.y, 2.f*halfDims.z, mass);
 }
@@ -40,7 +40,7 @@ void AABBCollider::RecalculateTensor(f32 mass){
 /////////
 SphereCollider::SphereCollider(float _radius, f32 mass){
 	Assert(_radius > 0 && mass > 0);
-	shape  = ColliderShape_AABB;
+	type   = ColliderType_AABB;
 	radius = _radius;
 	tensor = InertiaTensors::SolidSphere(radius,mass);
 }

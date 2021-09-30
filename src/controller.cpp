@@ -73,6 +73,7 @@ void Controller::Update(){
 			
 			AtmoAdmin->camera.rotation.y += (DeshInput->mouseX - DeshWindow->centerX) * cameraSensitivity * MOUSE_SENS_FRACTION;
 			AtmoAdmin->camera.rotation.x += (DeshInput->mouseY - DeshWindow->centerY) * cameraSensitivity * MOUSE_SENS_FRACTION;
+			AtmoAdmin->camera.rotation.x = Clamp(AtmoAdmin->camera.rotation.x, -80.f, 80.f);
 			AtmoAdmin->player->inputs = inputs.normalized();
 		}break;
 		
@@ -107,6 +108,7 @@ void Controller::Update(){
 			if(DeshInput->KeyDown(MouseButton::RIGHT)){
 				AtmoAdmin->camera.rotation.y += (DeshInput->mouseX - DeshWindow->centerX) * cameraSensitivity * MOUSE_SENS_FRACTION;
 				AtmoAdmin->camera.rotation.x += (DeshInput->mouseY - DeshWindow->centerY) * cameraSensitivity * MOUSE_SENS_FRACTION;
+				AtmoAdmin->camera.rotation.x = Clamp(AtmoAdmin->camera.rotation.x, -80.f, 80.f);
 			}
 		}break;
 	}

@@ -27,7 +27,7 @@ kinetic_fric 0.3
 static_fric  0.3
 static_pos   false
 static_rot   false
-collider_shape     1 #AABB
+collider_type      1 #AABB
 collider_offset    (0, 1, 0)
 collider_layer     0
 collider_nocollide false
@@ -57,7 +57,7 @@ kinetic_fric 0.3
 static_fric  0.3
 static_pos   true
 static_rot   true
-collider_shape     1 #AABB
+collider_type      1 #AABB
 collider_offset    (0, 0, 0)
 collider_layer     0
 collider_nocollide true
@@ -88,7 +88,7 @@ kinetic_fric 0.3
 static_fric  0.3
 static_pos   true
 static_rot   true
-collider_shape     1 #AABB
+collider_type      1 #AABB
 collider_offset    (0, 0, 0)
 collider_layer     0
 collider_nocollide false
@@ -119,7 +119,7 @@ kinetic_fric 0.3
 static_fric  0.3
 static_pos   true
 static_rot   true
-collider_shape     1 #AABB
+collider_type      1 #AABB
 collider_offset    (0, 0, 0)
 collider_layer     0
 collider_nocollide false
@@ -162,7 +162,7 @@ kinetic_fric 0.3
 static_fric  0.3
 static_pos   true
 static_rot   true
-collider_shape     1 #AABB
+collider_type      1 #AABB
 collider_offset    (0, 0, 0)
 collider_layer     0
 collider_nocollide false
@@ -205,7 +205,7 @@ kinetic_fric 0.3
 static_fric  0.3
 static_pos   true
 static_rot   true
-collider_shape     1 #AABB
+collider_type      1 #AABB
 collider_offset    (0, 0, 0)
 collider_layer     0
 collider_nocollide false
@@ -248,7 +248,7 @@ kinetic_fric 0.3
 static_fric  0.3
 static_pos   true
 static_rot   true
-collider_shape     1 #AABB
+collider_type      1 #AABB
 collider_offset    (0, 0, 0)
 collider_layer     0
 collider_nocollide false
@@ -279,7 +279,7 @@ kinetic_fric 0.3
 static_fric  0.3
 static_pos   true
 static_rot   true
-collider_shape     1 #AABB
+collider_type      1 #AABB
 collider_offset    (0, 0, 0)
 collider_layer     0
 collider_nocollide false
@@ -310,7 +310,7 @@ kinetic_fric 0.3
 static_fric  0.3
 static_pos   true
 static_rot   true
-collider_shape     1 #AABB
+collider_type      1 #AABB
 collider_offset    (0, 0, 0)
 collider_layer     0
 collider_nocollide false
@@ -341,7 +341,7 @@ kinetic_fric 0.3
 static_fric  0.3
 static_pos   true
 static_rot   true
-collider_shape     1 #AABB
+collider_type      1 #AABB
 collider_offset    (0, 0, 0)
 collider_layer     0
 collider_nocollide false
@@ -372,7 +372,7 @@ kinetic_fric 0.3
 static_fric  0.3
 static_pos   true
 static_rot   true
-collider_shape     1 #AABB
+collider_type      1 #AABB
 collider_offset    (0, 0, 0)
 collider_layer     0
 collider_nocollide false
@@ -405,7 +405,7 @@ kinetic_fric 0.3
 static_fric  0.3
 static_pos   true
 static_rot   true
-collider_shape     1 #AABB
+collider_type      1 #AABB
 collider_offset    (0, 0, 0)
 collider_layer     0
 collider_nocollide true

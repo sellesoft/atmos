@@ -13,6 +13,10 @@ enum InterpTransformType{
 	InterpTransformType_Once,
 	InterpTransformType_Bounce,
 	InterpTransformType_Cycle,
+	InterpTransformType_COUNT
+};
+global_ const char* InterpTransformTypeStrings[] = {
+	"Once", "Bounce", "Cycle",
 };
 
 struct InterpTransform{
@@ -26,7 +30,7 @@ struct InterpTransform{
 	array<Transform> stages;
 	
 	void Update(){
-		Assert(physics && stages.count);
+		Assert(physics && stages.count > 1);
 		if(!active) return;
 		if      (type == InterpTransformType_Once){
 			current += DeshTime->deltaTime;

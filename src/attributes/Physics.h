@@ -27,8 +27,6 @@ struct Physics{
 	b32 staticPosition = false;
 	b32 staticRotation = false;
 	
-	vec3 netForce;
-	
 	Physics();
 	Physics(vec3 position, vec3 rotation, vec3 velocity = vec3::ZERO, vec3 acceleration = vec3::ZERO,
 			vec3 rotVeloctiy = vec3::ZERO, vec3 rotAcceleration = vec3::ZERO, float elasticity = .2f,

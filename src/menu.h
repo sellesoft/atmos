@@ -61,8 +61,6 @@ void UpdateMenu(){
 	}
 	
 	//// draw menu ////
-	UIStyle& style = UI::GetStyle();
-	Font* restore_font = style.font;
 	UI::PushColor(UIStyleCol_WindowBg, PackColorU32(128,128,255,64));
 	UI::Begin("atmos_menu", vec2::ZERO, DeshWindow->dimensions, UIWindowFlags_NoMove|UIWindowFlags_NoTitleBar|UIWindowFlags_NoResize);
 	
@@ -70,29 +68,29 @@ void UpdateMenu(){
 	cstring text;
 	
 	//draw title
-	style.font = title_font;
+	UI::PushFont(title_font);
 	text = cstr_lit("Atmos");
-	UI::Text(text.str, {center_x-(UI::GetTextWidth(text.str)/2.f),DeshWindow->height*.2f});
+	UI::Text(text.str, {center_x-(UI::CalcTextSize(text).x/2.f),DeshWindow->height*.2f});
 	
 	//draw options
-	style.font = option_font;
+	UI::PushFont(option_font);
 	f32 cursor_y = DeshWindow->height*.2f + title_font->height*1.5f;
 	f32 stride = option_font->height * 1.5f;
 	
 	text = cstr_lit("Resume");
-	UI::Text(text.str, {center_x-(UI::GetTextWidth(text.str)/2.f),cursor_y}, 
+	UI::Text(text.str, {center_x-(UI::CalcTextSize(text).x/2.f),cursor_y}, 
 			 (active_option == MenuOption_Resume) ? selected_color : regular_color);
 	cursor_y += stride;
 	
 	text = cstr_lit("Quit");
 	if(ask_for_quit_confirmation) text = cstr_lit("Quit? Are you sure?");
-	UI::Text(text.str, {center_x-(UI::GetTextWidth(text.str)/2.f),cursor_y}, 
+	UI::Text(text.str, {center_x-(UI::CalcTextSize(text).x/2.f),cursor_y}, 
 			 (active_option == MenuOption_Quit) ? selected_color : regular_color);
 	cursor_y += stride;
 	
 	UI::End();
 	UI::PopColor();
-	style.font = restore_font;
+	UI::PopFont(2);
 }
 
 #endif //ATMOS_IMPLEMENTATION

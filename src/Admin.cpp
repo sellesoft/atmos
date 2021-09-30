@@ -28,19 +28,7 @@ void Admin::Init(string _dataPath){
 	interpTransformArr.reserve(1024);
 	
 	{//sandbox
-		/*
-PhysicsEntity* floor1 = new PhysicsEntity;
-		floor1->Init("floor1", Transform(vec3(20,2,20),vec3::ZERO,vec3(5,1,5)), flat_box, new AABBCollider(box_mesh,1.0f),1.0f,true);
-		interpTransformArr.add(InterpTransform());
-		floor1->interp = interpTransformArr.last;
-		floor1->interp->attribute.entity = floor1;
-		floor1->interp->physics  = floor1->physics;
-		floor1->interp->type     = InterpTransformType_Bounce;
-		floor1->interp->duration = 2;
-		floor1->interp->active   = true;
-		floor1->interp->stages.add(Transform(vec3( 20,2, 20),vec3::ZERO,vec3(5,1,5)));
-		floor1->interp->stages.add(Transform(vec3( 20,2,-20),vec3::ZERO,vec3(5,1,5)));
-*/
+		
 	}
 }
 
@@ -461,10 +449,10 @@ void Admin::LoadLevel(cstring level_name){
 							entity->physics->staticPosition = parse_b32(value);
 						}else if(key == cstr_lit("static_rot")){
 							entity->physics->staticRotation = parse_b32(value);
-						}else if(key == cstr_lit("collider_shape")){
+						}else if(key == cstr_lit("collider_type")){
 							switch(Type(b10tou64(value))){
-								case ColliderShape_AABB:   { entity->physics->collider = new AABBCollider(vec3::ONE, entity->physics->mass); }break;
-								case ColliderShape_Sphere: { entity->physics->collider = new SphereCollider(1.f, entity->physics->mass); }break;
+								case ColliderType_AABB:   { entity->physics->collider = new AABBCollider(vec3::ONE, entity->physics->mass); }break;
+								case ColliderType_Sphere: { entity->physics->collider = new SphereCollider(1.f, entity->physics->mass); }break;
 								default:{ ParseError("Unhandled Collider shape: ",value); }break;
 							}
 						}else if(key == cstr_lit("collider_offset")){

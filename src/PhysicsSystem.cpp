@@ -98,7 +98,6 @@ void PhysicsSystem::Update(){
 				
 				//linear motion
 				if(!p1->staticPosition){
-					p1->acceleration = p1->netForce / p1->mass;
 					p1->acceleration += vec3(0, -gravity, 0); //add gravity
 					p1->velocity += p1->acceleration * fixedDeltaTime;
 					
@@ -112,7 +111,6 @@ void PhysicsSystem::Update(){
 					}
 					p1->position += p1->velocity * fixedDeltaTime;
 					
-					p1->netForce = vec3::ZERO;
 					p1->acceleration = vec3::ZERO;
 				}
 				
@@ -130,18 +128,18 @@ void PhysicsSystem::Update(){
 			}
 			
 			//collision check
-			if(p1->collider && p1->collider->shape != ColliderShape_NONE){
+			if(p1->collider && p1->collider->type != ColliderType_NONE){
 				for(Physics* p2 = AtmoAdmin->physicsArr.begin(); p2 != AtmoAdmin->physicsArr.end(); ++p2){
 					//check if able to collide
-					if((p1 != p2) && (p2->collider != 0) && (p2->collider->shape != ColliderShape_NONE) 
+					if((p1 != p2) && (p2->collider != 0) && (p2->collider->type != ColliderType_NONE) 
 					   && (p1->collider->layer == p2->collider->layer)){
 						//find collision type and check for it
 						bool collision = false;
-						switch(p1->collider->shape){
-							case ColliderShape_AABB:
-							switch(p2->collider->shape){
-								case ColliderShape_AABB:{ collision = AABBAABBCollision(p1, (AABBCollider*)p1->collider, 
-																						p2, (AABBCollider*)p2->collider); }break;
+						switch(p1->collider->type){
+							case ColliderType_AABB:
+							switch(p2->collider->type){
+								case ColliderType_AABB:{ collision = AABBAABBCollision(p1, (AABBCollider*)p1->collider, 
+																					   p2, (AABBCollider*)p2->collider); }break;
 								default: Assert(!"not implemented"); break;
 							}break;
 							default: Assert(!"not implemented"); break;

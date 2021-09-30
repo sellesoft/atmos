@@ -5,14 +5,14 @@
 #include "utils/string_conversion.h"
 
 ModelInstance::ModelInstance(){
-	model    = Storage::CopyModel(Storage::NullModel()).second;
+	model    = Storage::NullModel();
 	mesh     = model->mesh;
 	armature = model->armature;
 	visible  = true;
 }
 
 ModelInstance::ModelInstance(Model* _model){
-	model    = Storage::CopyModel(_model).second;
+	model    = _model;
 	mesh     = model->mesh;
 	armature = model->armature;
 	visible  = true;
@@ -31,7 +31,7 @@ ModelInstance::~ModelInstance(){
 
 void ModelInstance::ChangeModel(Model* _model){
 	//Storage::DeleteModel(_model); //TODO re-enable once Storage::DeleteModel() is setup
-	model    = Storage::CopyModel(_model).second;
+	model    = _model;
 	mesh     = model->mesh;
 	armature = model->armature;
 }

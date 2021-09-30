@@ -279,18 +279,18 @@ local void PasteEntities(){
 			dst->physics->attribute.entity = dst;
 			memcpy(dst->physics, src->physics, sizeof(Physics));
 			if(src->physics->collider){
-				switch(src->physics->collider->shape){
-					case ColliderShape_AABB:{
+				switch(src->physics->collider->type){
+					case ColliderType_AABB:{
 						dst->physics->collider = new AABBCollider(((AABBCollider*)src->physics->collider)->halfDims, src->physics->mass);
 					}break;
-					case ColliderShape_Sphere:{
+					case ColliderType_Sphere:{
 						dst->physics->collider = new SphereCollider(((SphereCollider*)src->physics->collider)->radius, src->physics->mass);
 					}break;
 					default:{
-						LogfE("editor","Unhandled collider type '%d' when pasting copied entities.",src->physics->collider->shape);
+						LogfE("editor","Unhandled collider type '%d' when pasting copied entities.",src->physics->collider->type);
 					}break;
 				}
-				dst->physics->collider->shape = src->physics->collider->shape;
+				dst->physics->collider->type = src->physics->collider->type;
 				dst->physics->collider->tensor = src->physics->collider->tensor;
 				dst->physics->collider->offset = src->physics->collider->offset;
 				dst->physics->collider->noCollide = src->physics->collider->noCollide;
@@ -327,6 +327,8 @@ void MenuBar(){
 	ImGui::PushStyleColor(ImGuiCol_MenuBarBg, ImGui::ColorToImVec4(color(20, 20, 20, 255)));
 	
 	if(ImGui::BeginMainMenuBar()){ WinHovCheck;
+		menubarheight = ImGui::GetWindowHeight();
+		
 		//// level menu options ////
 		if(ImGui::BeginMenu("Level")){ WinHovCheck;
 			if(ImGui::MenuItem("New")){
@@ -334,7 +336,7 @@ void MenuBar(){
 			}
 			if(ImGui::MenuItem("Save")){
 				if(AtmoAdmin->levelName == ""){
-					Log("editor","Level not saved before; Use 'Save As'");
+					LogW("editor","Level not saved before; Use 'Save As'");
 				}else{;
 					AtmoAdmin->SaveLevel(cstring{AtmoAdmin->levelName.str,(u64)AtmoAdmin->levelName.count});
 				}
@@ -503,7 +505,7 @@ void EntitiesTab(){
 		rename_ent = true;
 		DeshConsole->IMGUI_KEY_CAPTURE = true;
 		//if(selected_entities.size > 1) selected_entities.remove(selected_entities.end());
-		selected_entities[0]->name = string(rename_buffer);
+		memcpy(rename_buffer, selected_entities[0]->name.str, selected_entities[0]->name.count*sizeof(char));
 	}
 	//submit renaming entity
 	if(rename_ent && DeshInput->KeyPressed(Key::ENTER)){
@@ -536,7 +538,6 @@ void EntitiesTab(){
 				ImGui::TextEx(str1.str+i, str1.str+i+1);
 			}
 		}else{
-			
 			if(ImGui::BeginTable("##entity_list_table", 4, ImGuiTableFlags_BordersInner)){
 				ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed, fontw * 3.5f);  //visible ImGui::Button
 				ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed, fontw * 5.f);  //id
@@ -571,17 +572,14 @@ void EntitiesTab(){
 						if(is_selected){
 							if(DeshInput->LCtrlDown()){
 								selected_entities.remove(selected_idx);
-							}
-							else{
+							}else{
 								selected_entities.clear();
 								selected_entities.add(ent);
 							}
-						}
-						else{
+						}else{
 							if(DeshInput->LCtrlDown()){
 								selected_entities.add(ent);
-							}
-							else{
+							}else{
 								selected_entities.clear();
 								selected_entities.add(ent);
 							}
@@ -596,8 +594,7 @@ void EntitiesTab(){
 						ImGui::PushStyleColor(ImGuiCol_FrameBg, ImColor(0xff203c56).Value);
 						ImGui::InputText("##ent_rename_input", rename_buffer, DESHI_NAME_SIZE, ImGuiInputTextFlags_AutoSelectAll | ImGuiInputTextFlags_EnterReturnsTrue);
 						ImGui::PopStyleColor();
-					}
-					else{
+					}else{
 						ImGui::TextEx(ent->name.str);
 					}
 					
@@ -619,14 +616,13 @@ void EntitiesTab(){
 				ImGui::EndTable();
 			}
 		}
-		ImGui::EndChild();
-	}//Entity List Scroll child window
+	}ImGui::EndChild(); //entity_list
 	ImGui::PopStyleColor();
 	
 	ImGui::Separator();
 	
 	//// create new entity ////
-	persist const char* presets[] = { "Empty", "StaticEntity", "PhysicsEntity", "Player", };
+	persist const char* presets[] = { "Empty", "Static", "Physics", "Player", "Visible Trigger", "Invisible Trigger", "Door"};
 	persist int current_preset = 0;
 	
 	ImGui::SetCursorPosX(ImGui::GetWindowWidth() * 0.025);
@@ -655,6 +651,21 @@ void EntitiesTab(){
 					ent = AtmoAdmin->player;
 				}
 			}break;
+			case(4):        { //Visible Trigger
+				TriggerEntity* e = new TriggerEntity;
+				e->Init(ent_name.str, Transform(), new AABBCollider(Storage::NullMesh(),1.0f), Storage::NullModel());
+				ent = e;
+			}break;
+			case(5):        { //Invisible Trigger
+				TriggerEntity* e = new TriggerEntity;
+				e->Init(ent_name.str, Transform(), new AABBCollider(Storage::NullMesh(),1.0f));
+				ent = e;
+			}break;
+			case(6):        { //Door
+				DoorEntity* e = new DoorEntity;
+				e->Init(ent_name.str, new AABBCollider(Storage::NullMesh(),1.0f), Storage::NullModel(), Transform(), Transform(), 1.f);
+				ent = e;
+			}break;
 		}
 		
 		selected_entities.clear();
@@ -668,13 +679,12 @@ void EntitiesTab(){
 	Entity* sel = selected_entities.count ? selected_entities[0] : 0;
 	if(!sel) return;
 	ImGui::PushStyleVar(ImGuiStyleVar_IndentSpacing, 5.0f);
+	ImGui::PushStyleColor(ImGuiCol_ChildBg, ImGui::ColorToImVec4(color(25, 25, 25)));
 	ImGui::SetCursorPosX(ImGui::GetWindowWidth() * 0.025);
-	if(ImGui::BeginChild("##ent_inspector", ImVec2(ImGui::GetWindowWidth() * 0.95f, ImGui::GetWindowHeight() * .9f), true, ImGuiWindowFlags_NoScrollbar)){
-		
+	if(ImGui::BeginChild("##ent_inspector", ImVec2(ImGui::GetWindowWidth() * 0.95f, ImGui::GetWindowHeight()*.9f - 100), true, ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoCollapse)){
 		//// name ////
-		SetPadding; ImGui::TextEx("Name:");
-		ImGui::SameLine(); ImGui::SetNextItemWidth(-FLT_MIN); ImGui::InputText("##ent_name_input", sel->name.str, DESHI_NAME_SIZE,
-																			   ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_AutoSelectAll);
+		SetPadding; ImGui::TextEx("Name:"); ImGui::SameLine(); ImGui::SetNextItemWidth(-FLT_MIN);
+		ImGui::InputText("##ent_name_input", sel->name.str, DESHI_NAME_SIZE, ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_AutoSelectAll);
 		
 		//// transform ////
 		int tree_flags = ImGuiTreeNodeFlags_DefaultOpen;
@@ -716,14 +726,105 @@ void EntitiesTab(){
 			ImGui::Unindent();
 		}
 		
+		//// connections ////
+		if(ImGui::CollapsingHeader("Connections", 0, tree_flags)){
+			ImGui::Indent();
+			
+			if(sel->connections.count){
+				if(ImGui::BeginTable("##ent_conn_table", 3, ImGuiTableFlags_None, ImVec2(-FLT_MIN, ImGui::GetWindowHeight() * .05f))){
+					ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed, fonth * 2.5f);
+					ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthStretch);
+					ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed, fonth);
+					
+					forX(conn_idx, sel->connections.count){
+						ImGui::PushID(&sel->connections[conn_idx]);
+						ImGui::TableNextRow();
+						
+						//// id ////
+						ImGui::TableSetColumnIndex(0);
+						ImGui::Text(" %02d", conn_idx);
+						
+						//// name text ////
+						ImGui::TableSetColumnIndex(1);
+						ImGui::TextEx(sel->connections[conn_idx]->name.str);
+						
+						//// delete button ////
+						ImGui::TableSetColumnIndex(2);
+						if(ImGui::Button("X", ImVec2(-FLT_MIN, 0.0f))){
+							sel->connections.remove(conn_idx);
+							ImGui::PopID();
+							break;
+						}
+						ImGui::PopID();
+					}
+					ImGui::EndTable(); //ent_conn_table
+				}
+			}
+			
+			persist u32 sel_conn_entity = 0;
+			if(ImGui::Button("Add Connection")) sel->connections.add(AtmoAdmin->entities[sel_conn_entity]);
+			ImGui::SameLine(); ImGui::SetNextItemWidth(-1);
+			if(ImGui::BeginCombo("##ent_conn_combo", AtmoAdmin->entities[sel_conn_entity]->name.str)){
+				forI(AtmoAdmin->entities.count){ if(ImGui::Selectable(AtmoAdmin->entities[i]->name.str)){ sel_conn_entity = i; } }
+				ImGui::EndCombo();
+			}
+			
+			ImGui::Unindent();
+			ImGui::Separator();
+		}
+		
+		//// entity specializations ////
+		if(sel->type == EntityType_Trigger && ImGui::CollapsingHeader("Trigger", 0, tree_flags)){
+			ImGui::Indent();
+			
+			TriggerEntity* trigger = (TriggerEntity*)sel;
+			if(sel->connections.count){
+				if(ImGui::BeginTable("##ent_trig_table", 3, ImGuiTableFlags_None, ImVec2(-FLT_MIN, ImGui::GetWindowHeight() * .05f))){
+					ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed, fonth * 2.5f);
+					ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthStretch);
+					ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed, fonth);
+					
+					forX(trig_idx, trigger->events.count){
+						ImGui::PushID(&trigger->events[trig_idx]);
+						ImGui::TableNextRow();
+						
+						//// id ////
+						ImGui::TableSetColumnIndex(0);
+						ImGui::Text(" %02d", trig_idx);
+						
+						//// name text ////
+						ImGui::TableSetColumnIndex(1);
+						ImGui::TextEx(EventStrings[trigger->events[trig_idx]]);
+						
+						//// delete button ////
+						ImGui::TableSetColumnIndex(2);
+						if(ImGui::Button("X", ImVec2(-FLT_MIN, 0.0f))){
+							trigger->events.remove(trig_idx);
+							ImGui::PopID();
+							break;
+						}
+						ImGui::PopID();
+					}
+					ImGui::EndTable(); //ent_conn_table
+				}
+			}
+			
+			persist Type sel_trig_event = 0;
+			if(ImGui::Button("Add Event")) trigger->events.add(sel_trig_event);
+			ImGui::SameLine(); ImGui::SetNextItemWidth(-1);
+			if(ImGui::BeginCombo("##ent_trig_combo", EventStrings[sel_trig_event])){
+				forI(Event_COUNT){ if(ImGui::Selectable(EventStrings[i])){ sel_trig_event = i; } }
+				ImGui::EndCombo();
+			}
+			
+			ImGui::Unindent();
+			ImGui::Separator();
+		}
+		
 		//// components ////
-		std::vector<Attribute*> comp_deleted_queue;
-		bool delete_button = 1;
-		//ImGui::PushID(c);
-		
-		
 		//mesh
 		if(sel->model){
+			bool delete_button = 1;
 			if(ImGui::CollapsingHeader("Model", &delete_button, tree_flags)){
 				ImGui::Indent();
 				
@@ -745,29 +846,174 @@ void EntitiesTab(){
 				ImGui::Unindent();
 				ImGui::Separator();
 			}
+			if(delete_button){
+				
+			}
 		}
 		
 		//physics
 		if(sel->physics){
-			if(sel->physics->collider){
-				if(sel->physics->collider->shape == ColliderShape_AABB){
-					Render::DrawBox(sel->transform.Matrix(), Color_Green);
+			if(sel->physics->collider && (sel->physics->collider->type == ColliderType_AABB)){
+				Render::DrawBox(Transform(sel->transform.position, vec3::ZERO, sel->transform.scale).Matrix(), Color_Green);
+			}
+			
+			bool delete_button = 1;
+			if(ImGui::CollapsingHeader("Physics", &delete_button, tree_flags)){
+				ImGui::Indent();
+				
+				ImGui::TextEx("Velocity    "); ImGui::SameLine();
+				if(ImGui::Inputvec3("##phys_vel", &sel->physics->velocity));
+				ImGui::TextEx("Acceleration"); ImGui::SameLine();
+				if(ImGui::Inputvec3("##phys_accel", &sel->physics->acceleration));
+				ImGui::TextEx("Rot Velocity"); ImGui::SameLine();
+				if(ImGui::Inputvec3("##phys_rotvel", &sel->physics->rotVelocity));
+				ImGui::TextEx("Rot Accel   "); ImGui::SameLine();
+				if(ImGui::Inputvec3("##phys_rotaccel", &sel->physics->rotAcceleration));
+				
+				ImGui::TextEx("Mass            "); ImGui::SameLine(); ImGui::SetNextItemWidth(-FLT_MIN);
+				ImGui::InputFloat("##phys_mass", &sel->physics->mass, 0, 0);
+				ImGui::TextEx("Elasticity      "); ImGui::SameLine(); ImGui::SetNextItemWidth(-FLT_MIN);
+				ImGui::InputFloat("##phys_elas", &sel->physics->elasticity, 0, 0);
+				ImGui::TextEx("Kinetic Friction"); ImGui::SameLine(); ImGui::SetNextItemWidth(-FLT_MIN);
+				ImGui::InputFloat("##phys_kinfric", &sel->physics->kineticFricCoef, 0, 0);
+				ImGui::TextEx("Static Friction "); ImGui::SameLine(); ImGui::SetNextItemWidth(-FLT_MIN);
+				ImGui::InputFloat("##phys_stafric", &sel->physics->staticFricCoef, 0, 0);
+				
+				ImGui::TextEx("Static Position "); ImGui::SameLine();
+				if(ImGui::Button((sel->physics->staticPosition) ? "True" : "False", ImVec2(-FLT_MIN, 0))){
+					sel->physics->staticPosition = !sel->physics->staticPosition;
 				}
+				ImGui::TextEx("Static Rotation "); ImGui::SameLine();
+				if(ImGui::Button((sel->physics->staticRotation) ? "True" : "False", ImVec2(-FLT_MIN, 0))){
+					sel->physics->staticRotation = !sel->physics->staticRotation;
+				}
+				
+				ImGui::Separator();
+				
+				ImGui::TextEx("Collider"); ImGui::SameLine(); ImGui::SetNextItemWidth(-1);
+				if(sel->physics->collider){
+					if(ImGui::BeginCombo("##phys_collider", ColliderTypeStrings[sel->physics->collider->type])){
+						forI(ColliderType_COUNT){
+							if(ImGui::Selectable(ColliderTypeStrings[i], sel->physics->collider->type == i)){
+								delete sel->physics->collider;
+								switch(i){
+									case ColliderType_AABB:{
+										sel->physics->collider = new AABBCollider(vec3{.5f,.5f,.5f},sel->physics->mass);
+									}break;
+									case ColliderType_Sphere:{
+										sel->physics->collider = new SphereCollider(1.f,sel->physics->mass);
+									}break;
+									case ColliderType_NONE:default:{
+										sel->physics->collider = 0;
+									}break;
+								}
+							}
+						}
+						ImGui::EndCombo();
+					}
+					
+					switch(sel->physics->collider->type){
+						case ColliderType_AABB:{
+							ImGui::TextEx("Half Dims"); ImGui::SameLine();
+							if(ImGui::Inputvec3("##phys_halfdims", &((AABBCollider*)sel->physics->collider)->halfDims));
+						}break;
+						case ColliderType_Sphere:{
+							ImGui::TextEx("Radius   "); ImGui::SameLine(); ImGui::SetNextItemWidth(-FLT_MIN);
+							ImGui::InputFloat("##phys_radius", &((SphereCollider*)sel->physics->collider)->radius, 0, 0);
+						}break;
+						default:{
+							ImGui::TextEx("unhandled collider shape");
+						}break;
+					}
+				}else{
+					if(ImGui::BeginCombo("##phys_collider", "None")){
+						forI(ColliderType_COUNT){
+							if(ImGui::Selectable(ColliderTypeStrings[i], false)){
+								switch(i){
+									case ColliderType_AABB:{
+										sel->physics->collider = new AABBCollider(vec3{.5f,.5f,.5f},sel->physics->mass);
+									}break;
+									case ColliderType_Sphere:{
+										sel->physics->collider = new SphereCollider(1.f,sel->physics->mass);
+									}break;
+								}
+							}
+						}
+						ImGui::EndCombo();
+					}
+				}
+				
+				ImGui::Unindent();
+				ImGui::Separator();
+			}
+			if(delete_button){
+				
+			}
+		}
+		
+		//interp transform
+		if(sel->interp){
+			bool delete_button = 1;
+			if(ImGui::CollapsingHeader("InterpTransform", &delete_button, tree_flags)){
+				ImGui::Indent();
+				
+				ImGui::TextEx("Type     "); ImGui::SameLine(); ImGui::SetNextItemWidth(-1);
+				if(ImGui::BeginCombo("##interp_combo", InterpTransformTypeStrings[sel->interp->type])){
+					forI(InterpTransformType_COUNT){
+						if(ImGui::Selectable(InterpTransformTypeStrings[i], sel->interp->type == i)){
+							sel->interp->type = i;
+						}
+					}
+					ImGui::EndCombo();
+				}
+				ImGui::TextEx("Duration "); ImGui::SameLine(); ImGui::SetNextItemWidth(-1);
+				ImGui::InputFloat("##interp_duration", &sel->interp->duration, 0, 0);
+				ImGui::TextEx("Starting "); ImGui::SameLine(); ImGui::SetNextItemWidth(-1);
+				ImGui::InputFloat("##interp_current", &sel->interp->current, 0, 0);
+				ImGui::TextEx("Active   "); ImGui::SameLine();
+				if(ImGui::Button((sel->interp->active) ? "True" : "False", ImVec2(-FLT_MIN, 0))){
+					sel->interp->active = !sel->interp->active;
+				}
+				
+				ImGui::Separator();
+				
+				ImGui::TextEx("Stage Count"); ImGui::SameLine(); ImGui::SetNextItemWidth(-1);
+				int stage_count = sel->interp->stages.count;
+				if(ImGui::DragInt("##interp_stages", &stage_count, 1, 2, INT_MAX, "%d", ImGuiSliderFlags_AlwaysClamp)){
+					if(stage_count > sel->interp->stages.count){
+						sel->interp->stages.add(sel->interp->stages[sel->interp->stages.count-1]);
+					}else{
+						sel->interp->stages.pop(sel->interp->stages.count - stage_count);
+					}
+				}
+				forI(sel->interp->stages.count){
+					ImGui::PushID(&sel->interp->stages[i]);
+					ImGui::Text("Position %d",i); ImGui::SameLine(); if(ImGui::Inputvec3("##interp_pos", &sel->interp->stages[i].position));
+					ImGui::Text("Rotation %d",i); ImGui::SameLine(); if(ImGui::Inputvec3("##interp_rot", &sel->interp->stages[i].rotation));
+					ImGui::Text("Scale    %d",i); ImGui::SameLine(); if(ImGui::Inputvec3("##interp_sca", &sel->interp->stages[i].scale));
+					ImGui::PopID();
+				}
+				
+				ImGui::Unindent();
+				ImGui::Separator();
+			}
+			if(delete_button){
+				
 			}
 		}
 		
 		//// add component ////
-		persist int add_comp_index = 0;
+		persist int add_attr_index = 0;
 		
 		ImGui::SetCursorPosX(ImGui::GetWindowWidth() * 0.025);
 		if(ImGui::Button("Add Attribute")){
 			LogE("editor","Add Attribute not implemented yet");
 		}
 		ImGui::SameLine(); ImGui::SetNextItemWidth(-1);
-		ImGui::Combo("##add_comp_combo", &add_comp_index, AttributeTypeStrings, ArrayCount(AttributeTypeStrings));
+		ImGui::Combo("##add_attr_combo", &add_attr_index, AttributeTypeStrings, ArrayCount(AttributeTypeStrings));
 		
-		ImGui::EndChild(); //CreateMenu
-	}
+	}ImGui::EndChild(); //CreateMenu
+	ImGui::PopStyleColor();
 	ImGui::PopStyleVar(); //ImGuiStyleVar_IndentSpacing
 } //EntitiesTab
 
@@ -1720,30 +1966,30 @@ void Inspector(){
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowTitleAlign, ImVec2(1, 0));
 	ImGui::PushStyleVar(ImGuiStyleVar_TabRounding, 0);
 	
-	ImGui::PushStyleColor(ImGuiCol_Border, Color_Black);
-	ImGui::PushStyleColor(ImGuiCol_Button, PackColorU32(40,40,40,255));
-	ImGui::PushStyleColor(ImGuiCol_ButtonActive, PackColorU32(48,48,48,255));
-	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, PackColorU32(60,60,60,255));
-	ImGui::PushStyleColor(ImGuiCol_WindowBg, 0xff141414);
-	ImGui::PushStyleColor(ImGuiCol_PopupBg, PackColorU32(20,20,20,255));
-	ImGui::PushStyleColor(ImGuiCol_FrameBg, PackColorU32(35,45,50,255));
-	ImGui::PushStyleColor(ImGuiCol_FrameBgActive, PackColorU32(42,54,60,255));
-	ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, PackColorU32(54,68,75,255));
-	ImGui::PushStyleColor(ImGuiCol_TitleBg, Color_Black);
-	ImGui::PushStyleColor(ImGuiCol_TitleBgActive, Color_Black);
-	ImGui::PushStyleColor(ImGuiCol_Header, PackColorU32(35,45,50,255));
-	ImGui::PushStyleColor(ImGuiCol_HeaderActive, PackColorU32(0,74,74,255));
-	ImGui::PushStyleColor(ImGuiCol_HeaderHovered, PackColorU32(0,93,93,255));
-	ImGui::PushStyleColor(ImGuiCol_TableBorderLight, PackColorU32(45,45,45,255));
-	ImGui::PushStyleColor(ImGuiCol_TableHeaderBg, PackColorU32(10,10,10,255));
-	ImGui::PushStyleColor(ImGuiCol_ScrollbarBg, PackColorU32(10,10,10,255));
-	ImGui::PushStyleColor(ImGuiCol_ScrollbarGrab, PackColorU32(55,55,55,255));
-	ImGui::PushStyleColor(ImGuiCol_ScrollbarGrabActive, PackColorU32(75,75,75,255));
-	ImGui::PushStyleColor(ImGuiCol_ScrollbarGrabHovered, PackColorU32(65,65,65,255));
-	ImGui::PushStyleColor(ImGuiCol_TabActive, Color_VeryDarkCyan);
-	ImGui::PushStyleColor(ImGuiCol_TabHovered, Color_DarkCyan);
-	ImGui::PushStyleColor(ImGuiCol_Tab, 0xff0d2b45);
-	ImGui::PushStyleColor(ImGuiCol_Separator, Color_VeryDarkCyan);
+	ImGui::PushStyleColor(ImGuiCol_Border,               0x00000000);
+	ImGui::PushStyleColor(ImGuiCol_Button,               0xff282828);
+	ImGui::PushStyleColor(ImGuiCol_ButtonActive,         0xff303030);
+	ImGui::PushStyleColor(ImGuiCol_ButtonHovered,        0xff3C3C3C);
+	ImGui::PushStyleColor(ImGuiCol_WindowBg,             0xff141414);
+	ImGui::PushStyleColor(ImGuiCol_PopupBg,              0xff141414);
+	ImGui::PushStyleColor(ImGuiCol_FrameBg,              0xff322d23);
+	ImGui::PushStyleColor(ImGuiCol_FrameBgActive,        0xff3c362a);
+	ImGui::PushStyleColor(ImGuiCol_FrameBgHovered,       0xff4b4436);
+	ImGui::PushStyleColor(ImGuiCol_TitleBg,              0xff000000);
+	ImGui::PushStyleColor(ImGuiCol_TitleBgActive,        0xff000000);
+	ImGui::PushStyleColor(ImGuiCol_Header,               0xff322d23);
+	ImGui::PushStyleColor(ImGuiCol_HeaderActive,         0xff4a4A00);
+	ImGui::PushStyleColor(ImGuiCol_HeaderHovered,        0xff5d5D00);
+	ImGui::PushStyleColor(ImGuiCol_TableBorderLight,     0xff2D2D2D);
+	ImGui::PushStyleColor(ImGuiCol_TableHeaderBg,        0xff0A0A0A);
+	ImGui::PushStyleColor(ImGuiCol_ScrollbarBg,          0xff0A0A0A);
+	ImGui::PushStyleColor(ImGuiCol_ScrollbarGrab,        0xff373737);
+	ImGui::PushStyleColor(ImGuiCol_ScrollbarGrabActive,  0xff4B4B4B);
+	ImGui::PushStyleColor(ImGuiCol_ScrollbarGrabHovered, 0xff414141);
+	ImGui::PushStyleColor(ImGuiCol_TabActive,            0xff404000);
+	ImGui::PushStyleColor(ImGuiCol_TabHovered,           0xff808000);
+	ImGui::PushStyleColor(ImGuiCol_Tab,                  0xff452b0d);
+	ImGui::PushStyleColor(ImGuiCol_Separator,            0xff404000);
 	
 	ImGuiWindowFlags window_flags;
 	if(popoutInspector){
@@ -1753,8 +1999,7 @@ void Inspector(){
 		ImGui::SetNextWindowSize(ImVec2(DeshWindow->width / 5, DeshWindow->height - (menubarheight + debugbarheight)));
 		ImGui::SetNextWindowPos(ImVec2(0, menubarheight));
 		window_flags = ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove
-			| ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar
-			| ImGuiWindowFlags_NoScrollWithMouse;
+			| ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar;
 	}
 	ImGui::Begin("Inspector", (bool*)1, window_flags);
 	
@@ -1772,11 +2017,11 @@ void Inspector(){
 		if(ImGui::BeginTabItem("Storage")){
 			SetPadding;
 			if(ImGui::BeginTabBar("StorageTabs")){
-				if(ImGui::BeginTabItem("Meshes"))    { MeshesTab();    ImGui::EndTabItem(); }
-				if(ImGui::BeginTabItem("Textures"))  { TexturesTab();  ImGui::EndTabItem(); }
+				if(ImGui::BeginTabItem("Meshes"))   { MeshesTab();    ImGui::EndTabItem(); }
+				if(ImGui::BeginTabItem("Textures")) { TexturesTab();  ImGui::EndTabItem(); }
 				if(ImGui::BeginTabItem("Materials")){ MaterialsTab(); ImGui::EndTabItem(); }
-				if(ImGui::BeginTabItem("Models"))    { ModelsTab();    ImGui::EndTabItem(); }
-				if(ImGui::BeginTabItem("Fonts"))     { /*FontsTab();*/ ImGui::EndTabItem(); }
+				if(ImGui::BeginTabItem("Models"))   { ModelsTab();    ImGui::EndTabItem(); }
+				if(ImGui::BeginTabItem("Fonts"))    { /*FontsTab();*/ ImGui::EndTabItem(); }
 				ImGui::EndTabBar();
 			}
 			ImGui::EndTabItem();
@@ -1815,12 +2060,12 @@ void DebugBar(){
 	ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(0, 2));
 	ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 0));
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
-	ImGui::PushStyleColor(ImGuiCol_Border, ImGui::ColorToImVec4(color(0, 0, 0, 255)));
-	ImGui::PushStyleColor(ImGuiCol_WindowBg, ImGui::ColorToImVec4(color(20, 20, 20, 255)));
-	ImGui::PushStyleColor(ImGuiCol_TableBorderLight, ImGui::ColorToImVec4(color(45, 45, 45, 255)));
+	ImGui::PushStyleColor(ImGuiCol_Border,           0x00000000);
+	ImGui::PushStyleColor(ImGuiCol_WindowBg,         0xff141414);
+	ImGui::PushStyleColor(ImGuiCol_TableBorderLight, 0xff2d2d2d);
 	ImGui::SetNextWindowSize(ImVec2(DeshWindow->width, 20));
 	ImGui::SetNextWindowPos(ImVec2(0, DeshWindow->height - 20));
-	ImGui::Begin("DebugBar", (bool*)1, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize);
+	ImGui::Begin("DebugBar", (bool*)1, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
 	debugbarheight = 20;
 	//capture mouse if hovering over this window
 	WinHovCheck;
@@ -2137,6 +2382,14 @@ void Editor::Update(){
 	if(DeshInput->KeyPressed(AtmoAdmin->controller.undo)) Undo();
 	if(DeshInput->KeyPressed(AtmoAdmin->controller.redo)) Redo();
 	
+	//// save/load level ////
+	if(DeshInput->KeyPressed(AtmoAdmin->controller.saveLevel) && !DeshInput->KeyDown(MouseButton::RIGHT)){
+		if(AtmoAdmin->levelName){
+			AtmoAdmin->SaveLevel(cstring{AtmoAdmin->levelName.str,(u64)AtmoAdmin->levelName.count});
+		}else{;
+			LogW("editor","Level not saved before; Use 'Save As'");
+		}
+	}
 	
 	///////////////////
 	//// interface ////

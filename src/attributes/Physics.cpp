@@ -47,11 +47,11 @@ void Physics::Update(f32 alpha){
 }
 
 void Physics::AddForce(vec3 force) {
-	netForce += force;
+	acceleration += force / mass;
 }
 
 void Physics::AddFrictionForce(float frictionCoef, float grav) {
-	netForce += -velocity.normalized() * frictionCoef * mass * grav;
+	acceleration += (-velocity.normalized() * frictionCoef * mass * grav) / mass;
 }
 
 void Physics::AddImpulse(vec3 impulse) {
@@ -78,16 +78,16 @@ void Physics::SaveText(Physics* p, string& level){
 					  "\nstatic_pos   ",(p->staticPosition) ? "true" : "false",
 					  "\nstatic_rot   ",(p->staticRotation) ? "true" : "false");
 	if(p->collider){
-		level += TOSTRING("\ncollider_shape     ",p->collider->shape," #",ColliderShapeStrings[p->collider->shape],
+		level += TOSTRING("\ncollider_type      ",p->collider->type," #",ColliderTypeStrings[p->collider->type],
 						  "\ncollider_offset    ",p->collider->offset,
 						  "\ncollider_layer     ",p->collider->layer,
 						  "\ncollider_nocollide ",(p->collider->noCollide) ? "true" : "false",
 						  "\ncollider_trigger   ",(p->collider->isTrigger) ? "true" : "false");
-		switch(p->collider->shape){
-			case ColliderShape_AABB:{
+		switch(p->collider->type){
+			case ColliderType_AABB:{
 				level += TOSTRING("\ncollider_half_dims ",((AABBCollider*)p->collider)->halfDims);
 			}break;
-			case ColliderShape_Sphere:{
+			case ColliderType_Sphere:{
 				level += TOSTRING("\ncollider_radius    ",((SphereCollider*)p->collider)->radius);
 			}break;
 		}

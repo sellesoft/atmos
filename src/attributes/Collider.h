@@ -15,15 +15,15 @@ enum ContactState_{
 	ContactState_NONE,
 	ContactState_Stationary,
 	ContactState_Moving,
-}; typedef u32 ContactState;
+};
 
-enum ColliderShapeBits {
-	ColliderShape_NONE,
-	ColliderShape_AABB,
-	ColliderShape_Sphere,
-	ColliderShape_COUNT,
-}; typedef u32 ColliderShape;
-global_ const char* ColliderShapeStrings[] = {
+enum ColliderType{
+	ColliderType_NONE,
+	ColliderType_AABB,
+	ColliderType_Sphere,
+	ColliderType_COUNT,
+};
+global_ const char* ColliderTypeStrings[] = {
 	"None", "AABB", "Sphere"
 };
 
@@ -40,12 +40,12 @@ struct Manifold{
 	Collider* c1 = 0;
 	Collider* c2 = 0;
 	vec3 normal{};
-	ContactState state = ContactState_NONE;
+	Type state = ContactState_NONE;
 	array<Contact> contacts;
 };
 
 struct Collider{
-	ColliderShape shape = ColliderShape_NONE;
+	Type type = ColliderType_NONE;
 	mat3 tensor{};
 	vec3 offset{};
 	u32  layer = 0;
