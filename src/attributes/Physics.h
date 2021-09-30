@@ -23,6 +23,7 @@ struct Physics{
 	f32 elasticity      = 0.2; //less than 1 in most cases
 	f32 kineticFricCoef = 0.3;
 	f32 staticFricCoef  = 0.3;
+	f32 airFricCoef     = 0.1;
 	
 	b32 staticPosition = false;
 	b32 staticRotation = false;

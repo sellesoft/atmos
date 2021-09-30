@@ -6,7 +6,6 @@
 
 struct PhysicsSystem {
 	f32 gravity;
-	f32 frictionAir;
 	f32 minVelocity;
 	f32 maxVelocity;
 	f32 minRotVelocity;

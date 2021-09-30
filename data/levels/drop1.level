@@ -1,5 +1,5 @@
 >level
-name         "drop0"
+name         "drop1"
 last_updated 0
 
 >entities
@@ -25,6 +25,7 @@ mass         1
 elasticity   0.2
 kinetic_fric 0.3
 static_fric  0.3
+air_fric     0.1
 static_pos   true
 static_rot   true
 collider_type      1 #AABB
@@ -56,6 +57,7 @@ mass         1
 elasticity   0.2
 kinetic_fric 0.3
 static_fric  0.3
+air_fric     0.1
 static_pos   true
 static_rot   true
 collider_type      1 #AABB
@@ -87,6 +89,7 @@ mass         1
 elasticity   0.2
 kinetic_fric 0.3
 static_fric  0.3
+air_fric     0.1
 static_pos   true
 static_rot   true
 collider_type      1 #AABB
@@ -118,6 +121,7 @@ mass         1
 elasticity   0.2
 kinetic_fric 0.3
 static_fric  0.3
+air_fric     0.1
 static_pos   true
 static_rot   true
 collider_type      1 #AABB
@@ -149,6 +153,7 @@ mass         1
 elasticity   0.2
 kinetic_fric 0.3
 static_fric  0.3
+air_fric     0.1
 static_pos   true
 static_rot   true
 collider_type      1 #AABB
@@ -180,6 +185,7 @@ mass         1
 elasticity   0.2
 kinetic_fric 0.3
 static_fric  0.3
+air_fric     0.1
 static_pos   true
 static_rot   true
 collider_type      1 #AABB
@@ -211,6 +217,7 @@ mass         1
 elasticity   0.2
 kinetic_fric 0.3
 static_fric  0.3
+air_fric     0.1
 static_pos   true
 static_rot   true
 collider_type      1 #AABB
@@ -242,6 +249,7 @@ mass         1
 elasticity   0.2
 kinetic_fric 0.3
 static_fric  0.3
+air_fric     0.1
 static_pos   true
 static_rot   true
 collider_type      1 #AABB
@@ -273,6 +281,7 @@ mass         1
 elasticity   0
 kinetic_fric 0.3
 static_fric  0.3
+air_fric     0.1
 static_pos   false
 static_rot   false
 collider_type      1 #AABB
@@ -306,6 +315,7 @@ mass         1
 elasticity   0.2
 kinetic_fric 0.3
 static_fric  0.3
+air_fric     0.1
 static_pos   true
 static_rot   true
 collider_type      1 #AABB
@@ -337,6 +347,7 @@ mass         1
 elasticity   0.2
 kinetic_fric 0.3
 static_fric  0.3
+air_fric     0.1
 static_pos   true
 static_rot   true
 collider_type      1 #AABB
@@ -380,6 +391,7 @@ mass         1
 elasticity   0.2
 kinetic_fric 0.3
 static_fric  0.3
+air_fric     0.1
 static_pos   true
 static_rot   true
 collider_type      1 #AABB
@@ -400,3 +412,1698 @@ stage_scale    (3, 0.5, 7)
 stage_position (-4.6, -0.5, 0)
 stage_rotation (0, 0, 0)
 stage_scale    (3, 0.5, 7)
+
+]12
+type     4 #Trigger
+name     "finish"
+position (0, -250, 0)
+rotation (0, 0, 0)
+scale    (48.9, 1, 48.9)
+attributes 1 2
+connections 8
+events 5
+:1 #ModelInstance
+model   "null"
+visible true
+:2 #Physics
+position     (0, -250, 0)
+rotation     (0, 0, 0)
+scale        (48.9, 1, 48.9)
+velocity     (0, 0, 0)
+accel        (0, 0, 0)
+rot_velocity (0, 0, 0)
+rot_accel    (0, 0, 0)
+mass         1
+elasticity   0.2
+kinetic_fric 0.3
+static_fric  0.3
+air_fric     0.1
+static_pos   true
+static_rot   true
+collider_type      1 #AABB
+collider_offset    (0, 0.2, 0)
+collider_layer     0
+collider_nocollide true
+collider_trigger   true
+collider_half_dims (0.5, 0.5, 0.5)
+
+]13
+type     3 #Scenery
+name     "background"
+position (0, 0, 1000)
+rotation (0, 0, 0)
+scale    (5000, 5000, 1)
+attributes 1
+:1 #ModelInstance
+model   "black_box"
+visible true
+
+]14
+type     3 #Scenery
+name     "background"
+position (1000, 0, 0)
+rotation (0, 90, 0)
+scale    (5000, 5000, 1)
+attributes 1
+:1 #ModelInstance
+model   "black_box"
+visible true
+
+]15
+type     3 #Scenery
+name     "background"
+position (0, 0, -1000)
+rotation (0, 0, 0)
+scale    (5000, 5000, 1)
+attributes 1
+:1 #ModelInstance
+model   "black_box"
+visible true
+
+]16
+type     3 #Scenery
+name     "background"
+position (-1000, 0, 0)
+rotation (0, 90, 0)
+scale    (5000, 5000, 1)
+attributes 1
+:1 #ModelInstance
+model   "black_box"
+visible true
+
+]17
+type     3 #Scenery
+name     "background"
+position (0, 1000, 0)
+rotation (90, 0, 0)
+scale    (5000, 5000, 1)
+attributes 1
+:1 #ModelInstance
+model   "black_box"
+visible true
+
+]18
+type     3 #Scenery
+name     "background"
+position (0, -1000, 0)
+rotation (90, 0, 0)
+scale    (5000, 5000, 1)
+attributes 1
+:1 #ModelInstance
+model   "black_box"
+visible true
+
+]19
+type     2 #Physics
+name     "rotating_cube"
+position (300, 10, 300)
+rotation (30, 15, 75)
+scale    (100, 100, 100)
+attributes 1 2
+:1 #ModelInstance
+model   "drop_hollow_cube"
+visible true
+:2 #Physics
+position     (300, 10, 300)
+rotation     (30, 15, 75)
+scale        (100, 100, 100)
+velocity     (0, 0, 0)
+accel        (0, 0, 0)
+rot_velocity (4, 4, 0)
+rot_accel    (0, 0, 0)
+mass         1
+elasticity   0.2
+kinetic_fric 0.3
+static_fric  0.3
+air_fric     0
+static_pos   true
+static_rot   false
+
+]20
+type     4 #Trigger
+name     "respawn_trigger"
+position (0, -405, 0)
+rotation (0, 0, 0)
+scale    (1000, 1, 1000)
+attributes 2
+connections 8
+events 2
+:2 #Physics
+position     (0, -405, 0)
+rotation     (0, 0, 0)
+scale        (1000, 1, 1000)
+velocity     (0, 0, 0)
+accel        (0, 0, 0)
+rot_velocity (0, 0, 0)
+rot_accel    (0, 0, 0)
+mass         1
+elasticity   0.2
+kinetic_fric 0.3
+static_fric  0.3
+air_fric     0.1
+static_pos   true
+static_rot   true
+collider_type      1 #AABB
+collider_offset    (0, 0, 0)
+collider_layer     0
+collider_nocollide true
+collider_trigger   true
+collider_half_dims (0.5, 0.5, 0.5)
+
+]21
+type     2 #Physics
+name     "rotating_cube"
+position (0, -300, 600)
+rotation (10, 0, 75)
+scale    (50, 50, 50)
+attributes 1 2
+:1 #ModelInstance
+model   "drop_hollow_cube"
+visible true
+:2 #Physics
+position     (0, -300, 600)
+rotation     (10, 0, 75)
+scale        (50, 50, 50)
+velocity     (0, 0, 0)
+accel        (0, 0, 0)
+rot_velocity (8, 4, 3)
+rot_accel    (0, 0, 0)
+mass         1
+elasticity   0.2
+kinetic_fric 0.3
+static_fric  0.3
+air_fric     0
+static_pos   true
+static_rot   false
+
+]22
+type     2 #Physics
+name     "rotating_cube"
+position (-100, 300, -100)
+rotation (100, 0, 35)
+scale    (200, 200, 200)
+attributes 1 2
+:1 #ModelInstance
+model   "drop_hollow_cube"
+visible true
+:2 #Physics
+position     (-100, 300, -100)
+rotation     (100, 0, 35)
+scale        (200, 200, 200)
+velocity     (0, 0, 0)
+accel        (0, 0, 0)
+rot_velocity (3, 0, 3)
+rot_accel    (0, 0, 0)
+mass         1
+elasticity   0.2
+kinetic_fric 0.3
+static_fric  0.3
+air_fric     0
+static_pos   true
+static_rot   false
+
+]23
+type     2 #Physics
+name     "rotating_triocta"
+position (500, -220, -600)
+rotation (30, 15, 75)
+scale    (100, 100, 100)
+attributes 1 2
+:1 #ModelInstance
+model   "drop_hollow_trioctahedron"
+visible true
+:2 #Physics
+position     (500, -220, -600)
+rotation     (30, 15, 75)
+scale        (100, 100, 100)
+velocity     (0, 0, 0)
+accel        (0, 0, 0)
+rot_velocity (4, 4, 0)
+rot_accel    (0, 0, 0)
+mass         1
+elasticity   0.2
+kinetic_fric 0.3
+static_fric  0.3
+air_fric     0
+static_pos   true
+static_rot   false
+
+]24
+type     2 #Physics
+name     "rotating_triocta"
+position (-200, 120, 400)
+rotation (-60, 15, 20)
+scale    (70, 70, 70)
+attributes 1 2
+:1 #ModelInstance
+model   "drop_hollow_trioctahedron"
+visible true
+:2 #Physics
+position     (-200, 120, 400)
+rotation     (-60, 15, 20)
+scale        (70, 70, 70)
+velocity     (0, 0, 0)
+accel        (0, 0, 0)
+rot_velocity (9, 2, 0)
+rot_accel    (0, 0, 0)
+mass         1
+elasticity   0.2
+kinetic_fric 0.3
+static_fric  0.3
+air_fric     0
+static_pos   true
+static_rot   false
+
+]25
+type     2 #Physics
+name     "rotating_triocta"
+position (100, -600, 100)
+rotation (-60, 15, 20)
+scale    (20, 20, 20)
+attributes 1 2
+:1 #ModelInstance
+model   "drop_hollow_trioctahedron"
+visible true
+:2 #Physics
+position     (100, -600, 100)
+rotation     (-60, 15, 20)
+scale        (20, 20, 20)
+velocity     (0, 0, 0)
+accel        (0, 0, 0)
+rot_velocity (2, 2, 7)
+rot_accel    (0, 0, 0)
+mass         1
+elasticity   0.2
+kinetic_fric 0.3
+static_fric  0.3
+air_fric     0
+static_pos   true
+static_rot   false
+
+]26
+type     2 #Physics
+name     "rotating_icosphere"
+position (-300, -400, 100)
+rotation (-60, 15, 20)
+scale    (120, 120, 120)
+attributes 1 2
+:1 #ModelInstance
+model   "drop_hollow_icosphere20"
+visible true
+:2 #Physics
+position     (-300, -400, 100)
+rotation     (-60, 15, 20)
+scale        (120, 120, 120)
+velocity     (0, 0, 0)
+accel        (0, 0, 0)
+rot_velocity (10, 2, 7)
+rot_accel    (0, 0, 0)
+mass         1
+elasticity   0.2
+kinetic_fric 0.3
+static_fric  0.3
+air_fric     0
+static_pos   true
+static_rot   false
+
+]27
+type     2 #Physics
+name     "rotating_icosphere"
+position (200, -800, -600)
+rotation (-60, 15, 20)
+scale    (60, 60, 60)
+attributes 1 2
+:1 #ModelInstance
+model   "drop_hollow_icosphere20"
+visible true
+:2 #Physics
+position     (200, -800, -600)
+rotation     (-60, 15, 20)
+scale        (60, 60, 60)
+velocity     (0, 0, 0)
+accel        (0, 0, 0)
+rot_velocity (1, 2, 7)
+rot_accel    (0, 0, 0)
+mass         1
+elasticity   0.2
+kinetic_fric 0.3
+static_fric  0.3
+air_fric     0
+static_pos   true
+static_rot   false
+
+]28
+type     2 #Physics
+name     "rotating_icosphere"
+position (0, 25, 0)
+rotation (-10, 15, 20)
+scale    (10, 10, 10)
+attributes 1 2
+:1 #ModelInstance
+model   "drop_hollow_icosphere20"
+visible true
+:2 #Physics
+position     (0, 25, 0)
+rotation     (-10, 15, 20)
+scale        (10, 10, 10)
+velocity     (0, 0, 0)
+accel        (0, 0, 0)
+rot_velocity (1, 2.6, 0.3)
+rot_accel    (0, 0, 0)
+mass         1
+elasticity   0.2
+kinetic_fric 0.3
+static_fric  0.3
+air_fric     0
+static_pos   true
+static_rot   false
+
+]29
+type     2 #Physics
+name     "rotating_hexocta"
+position (400, -300, 0)
+rotation (-10, 15, 20)
+scale    (200, 200, 200)
+attributes 1 2
+:1 #ModelInstance
+model   "drop_hollow_hexoctahedron"
+visible true
+:2 #Physics
+position     (400, -300, 0)
+rotation     (-10, 15, 20)
+scale        (200, 200, 200)
+velocity     (0, 0, 0)
+accel        (0, 0, 0)
+rot_velocity (1, 2.6, 0.3)
+rot_accel    (0, 0, 0)
+mass         1
+elasticity   0.2
+kinetic_fric 0.3
+static_fric  0.3
+air_fric     0
+static_pos   true
+static_rot   false
+
+]30
+type     2 #Physics
+name     "rotating_pyra"
+position (-500, -800, -600)
+rotation (-120, 15, 75)
+scale    (300, 300, 300)
+attributes 1 2
+:1 #ModelInstance
+model   "drop_hollow_pyramid"
+visible true
+:2 #Physics
+position     (-500, -800, -600)
+rotation     (-120, 15, 75)
+scale        (300, 300, 300)
+velocity     (0, 0, 0)
+accel        (0, 0, 0)
+rot_velocity (10, 10, 3)
+rot_accel    (0, 0, 0)
+mass         1
+elasticity   0.2
+kinetic_fric 0.3
+static_fric  0.3
+air_fric     0
+static_pos   true
+static_rot   false
+
+]31
+type     2 #Physics
+name     "rotating_pyra"
+position (800, 700, -100)
+rotation (-120, 15, 75)
+scale    (100, 100, 100)
+attributes 1 2
+:1 #ModelInstance
+model   "drop_hollow_pyramid"
+visible true
+:2 #Physics
+position     (800, 700, -100)
+rotation     (-120, 15, 75)
+scale        (100, 100, 100)
+velocity     (0, 0, 0)
+accel        (0, 0, 0)
+rot_velocity (-2, 3, 3)
+rot_accel    (0, 0, 0)
+mass         1
+elasticity   0.2
+kinetic_fric 0.3
+static_fric  0.3
+air_fric     0
+static_pos   true
+static_rot   false
+
+]32
+type     2 #Physics
+name     "rotating_hexocta"
+position (-800, 100, 200)
+rotation (-10, 15, 20)
+scale    (200, 200, 200)
+attributes 1 2
+:1 #ModelInstance
+model   "drop_hollow_hexoctahedron"
+visible true
+:2 #Physics
+position     (-800, 100, 200)
+rotation     (-10, 15, 20)
+scale        (200, 200, 200)
+velocity     (0, 0, 0)
+accel        (0, 0, 0)
+rot_velocity (1, -2.6, 0.3)
+rot_accel    (0, 0, 0)
+mass         1
+elasticity   0.2
+kinetic_fric 0.3
+static_fric  0.3
+air_fric     0
+static_pos   true
+static_rot   false
+
+]33
+type     2 #Physics
+name     "rotating_triocta"
+position (700, -700, 800)
+rotation (-60, 15, 20)
+scale    (200, 200, 200)
+attributes 1 2
+:1 #ModelInstance
+model   "drop_hollow_trioctahedron"
+visible true
+:2 #Physics
+position     (700, -700, 800)
+rotation     (-60, 15, 20)
+scale        (200, 200, 200)
+velocity     (0, 0, 0)
+accel        (0, 0, 0)
+rot_velocity (9, 2, 0)
+rot_accel    (0, 0, 0)
+mass         1
+elasticity   0.2
+kinetic_fric 0.3
+static_fric  0.3
+air_fric     0
+static_pos   true
+static_rot   false
+
+]34
+type     2 #Physics
+name     "rotating_triocta"
+position (-700, 700, -800)
+rotation (-60, 15, 20)
+scale    (200, 200, 200)
+attributes 1 2
+:1 #ModelInstance
+model   "drop_hollow_trioctahedron"
+visible true
+:2 #Physics
+position     (-700, 700, -800)
+rotation     (-60, 15, 20)
+scale        (200, 200, 200)
+velocity     (0, 0, 0)
+accel        (0, 0, 0)
+rot_velocity (9, 2, 0)
+rot_accel    (0, 0, 0)
+mass         1
+elasticity   0.2
+kinetic_fric 0.3
+static_fric  0.3
+air_fric     0
+static_pos   true
+static_rot   false
+
+]35
+type     2 #Physics
+name     "rotating_hexocta"
+position (-200, -100, -600)
+rotation (-10, 15, 20)
+scale    (100, 100, 100)
+attributes 1 2
+:1 #ModelInstance
+model   "drop_hollow_hexoctahedron"
+visible true
+:2 #Physics
+position     (-200, -100, -600)
+rotation     (-10, 15, 20)
+scale        (100, 100, 100)
+velocity     (0, 0, 0)
+accel        (0, 0, 0)
+rot_velocity (1, 2.6, 0.3)
+rot_accel    (0, 0, 0)
+mass         1
+elasticity   0.2
+kinetic_fric 0.3
+static_fric  0.3
+air_fric     0
+static_pos   true
+static_rot   false
+
+]36
+type     2 #Physics
+name     "rotating_icosphere"
+position (700, 700, -700)
+rotation (-60, 15, 20)
+scale    (250, 250, 250)
+attributes 1 2
+:1 #ModelInstance
+model   "drop_hollow_icosphere20"
+visible true
+:2 #Physics
+position     (700, 700, -700)
+rotation     (-60, 15, 20)
+scale        (250, 250, 250)
+velocity     (0, 0, 0)
+accel        (0, 0, 0)
+rot_velocity (0, 2, 7)
+rot_accel    (0, 0, 0)
+mass         1
+elasticity   0.2
+kinetic_fric 0.3
+static_fric  0.3
+air_fric     0
+static_pos   true
+static_rot   false
+
+]37
+type     4 #Trigger
+name     "obstacle0"
+position (0, -30, 15)
+rotation (0, 0, 0)
+scale    (35, 5, 5)
+attributes 1 2
+connections 8
+events 2
+:1 #ModelInstance
+model   "drop0_obstacle"
+visible true
+:2 #Physics
+position     (0, -30, 15)
+rotation     (0, 0, 0)
+scale        (35, 5, 5)
+velocity     (0, 0, 0)
+accel        (0, 0, 0)
+rot_velocity (0, 0, 0)
+rot_accel    (0, 0, 0)
+mass         1
+elasticity   0.2
+kinetic_fric 0.3
+static_fric  0.3
+air_fric     0.1
+static_pos   true
+static_rot   true
+collider_type      1 #AABB
+collider_offset    (0, 0.2, 0)
+collider_layer     0
+collider_nocollide true
+collider_trigger   true
+collider_half_dims (0.5, 0.5, 0.5)
+
+]38
+type     4 #Trigger
+name     "obstacle0"
+position (0, -30, -15)
+rotation (0, 0, 0)
+scale    (35, 5, 5)
+attributes 1 2
+connections 8
+events 2
+:1 #ModelInstance
+model   "drop0_obstacle"
+visible true
+:2 #Physics
+position     (0, -30, -15)
+rotation     (0, 0, 0)
+scale        (35, 5, 5)
+velocity     (0, 0, 0)
+accel        (0, 0, 0)
+rot_velocity (0, 0, 0)
+rot_accel    (0, 0, 0)
+mass         1
+elasticity   0.2
+kinetic_fric 0.3
+static_fric  0.3
+air_fric     0.1
+static_pos   true
+static_rot   true
+collider_type      1 #AABB
+collider_offset    (0, 0.2, 0)
+collider_layer     0
+collider_nocollide true
+collider_trigger   true
+collider_half_dims (0.5, 0.5, 0.5)
+
+]39
+type     4 #Trigger
+name     "obstacle0"
+position (15, -30, 0)
+rotation (0, 0, 0)
+scale    (5, 5, 24.9)
+attributes 1 2
+connections 8
+events 2
+:1 #ModelInstance
+model   "drop0_obstacle"
+visible true
+:2 #Physics
+position     (15, -30, 0)
+rotation     (0, 0, 0)
+scale        (5, 5, 24.9)
+velocity     (0, 0, 0)
+accel        (0, 0, 0)
+rot_velocity (0, 0, 0)
+rot_accel    (0, 0, 0)
+mass         1
+elasticity   0.2
+kinetic_fric 0.3
+static_fric  0.3
+air_fric     0.1
+static_pos   true
+static_rot   true
+collider_type      1 #AABB
+collider_offset    (0, 0.2, 0)
+collider_layer     0
+collider_nocollide true
+collider_trigger   true
+collider_half_dims (0.5, 0.5, 0.5)
+
+]40
+type     4 #Trigger
+name     "obstacle0"
+position (-15, -30, 0)
+rotation (0, 0, 0)
+scale    (5, 5, 24.9)
+attributes 1 2
+connections 8
+events 2
+:1 #ModelInstance
+model   "drop0_obstacle"
+visible true
+:2 #Physics
+position     (-15, -30, 0)
+rotation     (0, 0, 0)
+scale        (5, 5, 24.9)
+velocity     (0, 0, 0)
+accel        (0, 0, 0)
+rot_velocity (0, 0, 0)
+rot_accel    (0, 0, 0)
+mass         1
+elasticity   0.2
+kinetic_fric 0.3
+static_fric  0.3
+air_fric     0.1
+static_pos   true
+static_rot   true
+collider_type      1 #AABB
+collider_offset    (0, 0.2, 0)
+collider_layer     0
+collider_nocollide true
+collider_trigger   true
+collider_half_dims (0.5, 0.5, 0.5)
+
+]41
+type     4 #Trigger
+name     "obstacle1"
+position (-30, -60, 0)
+rotation (0, 0, 0)
+scale    (10, 10, 49.9)
+attributes 1 2
+connections 8
+events 2
+:1 #ModelInstance
+model   "drop0_obstacle"
+visible true
+:2 #Physics
+position     (-30, -60, 0)
+rotation     (0, 0, 0)
+scale        (10, 10, 49.9)
+velocity     (0, 0, 0)
+accel        (0, 0, 0)
+rot_velocity (0, 0, 0)
+rot_accel    (0, 0, 0)
+mass         1
+elasticity   0.2
+kinetic_fric 0.3
+static_fric  0.3
+air_fric     0.1
+static_pos   true
+static_rot   true
+collider_type      1 #AABB
+collider_offset    (0, 0.2, 0)
+collider_layer     0
+collider_nocollide true
+collider_trigger   true
+collider_half_dims (0.5, 0.5, 0.5)
+
+]42
+type     4 #Trigger
+name     "obstacle1"
+position (30, -60, 0)
+rotation (0, 0, 0)
+scale    (10, 10, 49.9)
+attributes 1 2
+connections 8
+events 2
+:1 #ModelInstance
+model   "drop0_obstacle"
+visible true
+:2 #Physics
+position     (30, -60, 0)
+rotation     (0, 0, 0)
+scale        (10, 10, 49.9)
+velocity     (0, 0, 0)
+accel        (0, 0, 0)
+rot_velocity (0, 0, 0)
+rot_accel    (0, 0, 0)
+mass         1
+elasticity   0.2
+kinetic_fric 0.3
+static_fric  0.3
+air_fric     0.1
+static_pos   true
+static_rot   true
+collider_type      1 #AABB
+collider_offset    (0, 0.2, 0)
+collider_layer     0
+collider_nocollide true
+collider_trigger   true
+collider_half_dims (0.5, 0.5, 0.5)
+
+]43
+type     4 #Trigger
+name     "obstacle1"
+position (0, -60, 30)
+rotation (0, 0, 0)
+scale    (70, 10, 10)
+attributes 1 2
+connections 8
+events 2
+:1 #ModelInstance
+model   "drop0_obstacle"
+visible true
+:2 #Physics
+position     (0, -60, 30)
+rotation     (0, 0, 0)
+scale        (70, 10, 10)
+velocity     (0, 0, 0)
+accel        (0, 0, 0)
+rot_velocity (0, 0, 0)
+rot_accel    (0, 0, 0)
+mass         1
+elasticity   0.2
+kinetic_fric 0.3
+static_fric  0.3
+air_fric     0.1
+static_pos   true
+static_rot   true
+collider_type      1 #AABB
+collider_offset    (0, 0.2, 0)
+collider_layer     0
+collider_nocollide true
+collider_trigger   true
+collider_half_dims (0.5, 0.5, 0.5)
+
+]44
+type     4 #Trigger
+name     "obstacle1"
+position (0, -60, -30)
+rotation (0, 0, 0)
+scale    (70, 10, 10)
+attributes 1 2
+connections 8
+events 2
+:1 #ModelInstance
+model   "drop0_obstacle"
+visible true
+:2 #Physics
+position     (0, -60, -30)
+rotation     (0, 0, 0)
+scale        (70, 10, 10)
+velocity     (0, 0, 0)
+accel        (0, 0, 0)
+rot_velocity (0, 0, 0)
+rot_accel    (0, 0, 0)
+mass         1
+elasticity   0.2
+kinetic_fric 0.3
+static_fric  0.3
+air_fric     0.1
+static_pos   true
+static_rot   true
+collider_type      1 #AABB
+collider_offset    (0, 0.2, 0)
+collider_layer     0
+collider_nocollide true
+collider_trigger   true
+collider_half_dims (0.5, 0.5, 0.5)
+
+]45
+type     4 #Trigger
+name     "obstacle2"
+position (0, -90, -60)
+rotation (0, 0, 0)
+scale    (135, 15, 15)
+attributes 1 2
+connections 8
+events 2
+:1 #ModelInstance
+model   "drop0_obstacle"
+visible true
+:2 #Physics
+position     (0, -90, -60)
+rotation     (0, 0, 0)
+scale        (135, 15, 15)
+velocity     (0, 0, 0)
+accel        (0, 0, 0)
+rot_velocity (0, 0, 0)
+rot_accel    (0, 0, 0)
+mass         1
+elasticity   0.2
+kinetic_fric 0.3
+static_fric  0.3
+air_fric     0.1
+static_pos   true
+static_rot   true
+collider_type      1 #AABB
+collider_offset    (0, 0.2, 0)
+collider_layer     0
+collider_nocollide true
+collider_trigger   true
+collider_half_dims (0.5, 0.5, 0.5)
+
+]46
+type     4 #Trigger
+name     "obstacle2"
+position (0, -90, 60)
+rotation (0, 0, 0)
+scale    (135, 15, 15)
+attributes 1 2
+connections 8
+events 2
+:1 #ModelInstance
+model   "drop0_obstacle"
+visible true
+:2 #Physics
+position     (0, -90, 60)
+rotation     (0, 0, 0)
+scale        (135, 15, 15)
+velocity     (0, 0, 0)
+accel        (0, 0, 0)
+rot_velocity (0, 0, 0)
+rot_accel    (0, 0, 0)
+mass         1
+elasticity   0.2
+kinetic_fric 0.3
+static_fric  0.3
+air_fric     0.1
+static_pos   true
+static_rot   true
+collider_type      1 #AABB
+collider_offset    (0, 0.2, 0)
+collider_layer     0
+collider_nocollide true
+collider_trigger   true
+collider_half_dims (0.5, 0.5, 0.5)
+
+]47
+type     4 #Trigger
+name     "obstacle2"
+position (60, -90, 0)
+rotation (0, 0, 0)
+scale    (15, 15, 104.9)
+attributes 1 2
+connections 8
+events 2
+:1 #ModelInstance
+model   "drop0_obstacle"
+visible true
+:2 #Physics
+position     (60, -90, 0)
+rotation     (0, 0, 0)
+scale        (15, 15, 104.9)
+velocity     (0, 0, 0)
+accel        (0, 0, 0)
+rot_velocity (0, 0, 0)
+rot_accel    (0, 0, 0)
+mass         1
+elasticity   0.2
+kinetic_fric 0.3
+static_fric  0.3
+air_fric     0.1
+static_pos   true
+static_rot   true
+collider_type      1 #AABB
+collider_offset    (0, 0.2, 0)
+collider_layer     0
+collider_nocollide true
+collider_trigger   true
+collider_half_dims (0.5, 0.5, 0.5)
+
+]48
+type     4 #Trigger
+name     "obstacle2"
+position (-60, -90, 0)
+rotation (0, 0, 0)
+scale    (15, 15, 104.9)
+attributes 1 2
+connections 8
+events 2
+:1 #ModelInstance
+model   "drop0_obstacle"
+visible true
+:2 #Physics
+position     (-60, -90, 0)
+rotation     (0, 0, 0)
+scale        (15, 15, 104.9)
+velocity     (0, 0, 0)
+accel        (0, 0, 0)
+rot_velocity (0, 0, 0)
+rot_accel    (0, 0, 0)
+mass         1
+elasticity   0.2
+kinetic_fric 0.3
+static_fric  0.3
+air_fric     0.1
+static_pos   true
+static_rot   true
+collider_type      1 #AABB
+collider_offset    (0, 0.2, 0)
+collider_layer     0
+collider_nocollide true
+collider_trigger   true
+collider_half_dims (0.5, 0.5, 0.5)
+
+]49
+type     4 #Trigger
+name     "obstacle3"
+position (0, -97, 0)
+rotation (0, 0, 0)
+scale    (40, 1, 40)
+attributes 1 2
+connections 8
+events 2
+:1 #ModelInstance
+model   "drop0_obstacle"
+visible true
+:2 #Physics
+position     (0, -97, 0)
+rotation     (0, 0, 0)
+scale        (40, 1, 40)
+velocity     (0, 0, 0)
+accel        (0, 0, 0)
+rot_velocity (0, 0, 0)
+rot_accel    (0, 0, 0)
+mass         1
+elasticity   0.2
+kinetic_fric 0.3
+static_fric  0.3
+air_fric     0.1
+static_pos   true
+static_rot   true
+collider_type      1 #AABB
+collider_offset    (0, 0.2, 0)
+collider_layer     0
+collider_nocollide true
+collider_trigger   true
+collider_half_dims (0.5, 0.5, 0.5)
+
+]50
+type     4 #Trigger
+name     "obstacle3"
+position (35, -136, 0)
+rotation (0, 0, 0)
+scale    (10, 80, 10)
+attributes 1 2
+connections 8
+events 2
+:1 #ModelInstance
+model   "drop0_obstacle"
+visible true
+:2 #Physics
+position     (35, -136, 0)
+rotation     (0, 0, 0)
+scale        (10, 80, 10)
+velocity     (0, 0, 0)
+accel        (0, 0, 0)
+rot_velocity (0, 0, 0)
+rot_accel    (0, 0, 0)
+mass         1
+elasticity   0.2
+kinetic_fric 0.3
+static_fric  0.3
+air_fric     0.1
+static_pos   true
+static_rot   true
+collider_type      1 #AABB
+collider_offset    (0, 0.2, 0)
+collider_layer     0
+collider_nocollide true
+collider_trigger   true
+collider_half_dims (0.5, 0.5, 0.5)
+
+]51
+type     4 #Trigger
+name     "obstacle3"
+position (35, -136, 24.5)
+rotation (0, 0, 0)
+scale    (10, 80, 10)
+attributes 1 2
+connections 8
+events 2
+:1 #ModelInstance
+model   "drop0_obstacle"
+visible true
+:2 #Physics
+position     (35, -136, 24.5)
+rotation     (0, 0, 0)
+scale        (10, 80, 10)
+velocity     (0, 0, 0)
+accel        (0, 0, 0)
+rot_velocity (0, 0, 0)
+rot_accel    (0, 0, 0)
+mass         1
+elasticity   0.2
+kinetic_fric 0.3
+static_fric  0.3
+air_fric     0.1
+static_pos   true
+static_rot   true
+collider_type      1 #AABB
+collider_offset    (0, 0.2, 0)
+collider_layer     0
+collider_nocollide true
+collider_trigger   true
+collider_half_dims (0.5, 0.5, 0.5)
+
+]52
+type     4 #Trigger
+name     "obstacle3"
+position (35, -136, -24.5)
+rotation (0, 0, 0)
+scale    (10, 80, 10)
+attributes 1 2
+connections 8
+events 2
+:1 #ModelInstance
+model   "drop0_obstacle"
+visible true
+:2 #Physics
+position     (35, -136, -24.5)
+rotation     (0, 0, 0)
+scale        (10, 80, 10)
+velocity     (0, 0, 0)
+accel        (0, 0, 0)
+rot_velocity (0, 0, 0)
+rot_accel    (0, 0, 0)
+mass         1
+elasticity   0.2
+kinetic_fric 0.3
+static_fric  0.3
+air_fric     0.1
+static_pos   true
+static_rot   true
+collider_type      1 #AABB
+collider_offset    (0, 0.2, 0)
+collider_layer     0
+collider_nocollide true
+collider_trigger   true
+collider_half_dims (0.5, 0.5, 0.5)
+
+]53
+type     4 #Trigger
+name     "obstacle3"
+position (-35, -136, -24.5)
+rotation (0, 0, 0)
+scale    (10, 80, 10)
+attributes 1 2
+connections 8
+events 2
+:1 #ModelInstance
+model   "drop0_obstacle"
+visible true
+:2 #Physics
+position     (-35, -136, -24.5)
+rotation     (0, 0, 0)
+scale        (10, 80, 10)
+velocity     (0, 0, 0)
+accel        (0, 0, 0)
+rot_velocity (0, 0, 0)
+rot_accel    (0, 0, 0)
+mass         1
+elasticity   0.2
+kinetic_fric 0.3
+static_fric  0.3
+air_fric     0.1
+static_pos   true
+static_rot   true
+collider_type      1 #AABB
+collider_offset    (0, 0.2, 0)
+collider_layer     0
+collider_nocollide true
+collider_trigger   true
+collider_half_dims (0.5, 0.5, 0.5)
+
+]54
+type     4 #Trigger
+name     "obstacle3"
+position (-35, -136, 0)
+rotation (0, 0, 0)
+scale    (10, 80, 10)
+attributes 1 2
+connections 8
+events 2
+:1 #ModelInstance
+model   "drop0_obstacle"
+visible true
+:2 #Physics
+position     (-35, -136, 0)
+rotation     (0, 0, 0)
+scale        (10, 80, 10)
+velocity     (0, 0, 0)
+accel        (0, 0, 0)
+rot_velocity (0, 0, 0)
+rot_accel    (0, 0, 0)
+mass         1
+elasticity   0.2
+kinetic_fric 0.3
+static_fric  0.3
+air_fric     0.1
+static_pos   true
+static_rot   true
+collider_type      1 #AABB
+collider_offset    (0, 0.2, 0)
+collider_layer     0
+collider_nocollide true
+collider_trigger   true
+collider_half_dims (0.5, 0.5, 0.5)
+
+]55
+type     4 #Trigger
+name     "obstacle3"
+position (-35, -136, 24.5)
+rotation (0, 0, 0)
+scale    (10, 80, 10)
+attributes 1 2
+connections 8
+events 2
+:1 #ModelInstance
+model   "drop0_obstacle"
+visible true
+:2 #Physics
+position     (-35, -136, 24.5)
+rotation     (0, 0, 0)
+scale        (10, 80, 10)
+velocity     (0, 0, 0)
+accel        (0, 0, 0)
+rot_velocity (0, 0, 0)
+rot_accel    (0, 0, 0)
+mass         1
+elasticity   0.2
+kinetic_fric 0.3
+static_fric  0.3
+air_fric     0.1
+static_pos   true
+static_rot   true
+collider_type      1 #AABB
+collider_offset    (0, 0.2, 0)
+collider_layer     0
+collider_nocollide true
+collider_trigger   true
+collider_half_dims (0.5, 0.5, 0.5)
+
+]56
+type     4 #Trigger
+name     "obstacle3"
+position (0, -136, -35)
+rotation (0, 0, 0)
+scale    (10, 80, 10)
+attributes 1 2
+connections 8
+events 2
+:1 #ModelInstance
+model   "drop0_obstacle"
+visible true
+:2 #Physics
+position     (0, -136, -35)
+rotation     (0, 0, 0)
+scale        (10, 80, 10)
+velocity     (0, 0, 0)
+accel        (0, 0, 0)
+rot_velocity (0, 0, 0)
+rot_accel    (0, 0, 0)
+mass         1
+elasticity   0.2
+kinetic_fric 0.3
+static_fric  0.3
+air_fric     0.1
+static_pos   true
+static_rot   true
+collider_type      1 #AABB
+collider_offset    (0, 0.2, 0)
+collider_layer     0
+collider_nocollide true
+collider_trigger   true
+collider_half_dims (0.5, 0.5, 0.5)
+
+]57
+type     4 #Trigger
+name     "obstacle3"
+position (-24.5, -136, -35)
+rotation (0, 0, 0)
+scale    (10, 80, 10)
+attributes 1 2
+connections 8
+events 2
+:1 #ModelInstance
+model   "drop0_obstacle"
+visible true
+:2 #Physics
+position     (-24.5, -136, -35)
+rotation     (0, 0, 0)
+scale        (10, 80, 10)
+velocity     (0, 0, 0)
+accel        (0, 0, 0)
+rot_velocity (0, 0, 0)
+rot_accel    (0, 0, 0)
+mass         1
+elasticity   0.2
+kinetic_fric 0.3
+static_fric  0.3
+air_fric     0.1
+static_pos   true
+static_rot   true
+collider_type      1 #AABB
+collider_offset    (0, 0.2, 0)
+collider_layer     0
+collider_nocollide true
+collider_trigger   true
+collider_half_dims (0.5, 0.5, 0.5)
+
+]58
+type     4 #Trigger
+name     "obstacle3"
+position (24.5, -136, -35)
+rotation (0, 0, 0)
+scale    (10, 80, 10)
+attributes 1 2
+connections 8
+events 2
+:1 #ModelInstance
+model   "drop0_obstacle"
+visible true
+:2 #Physics
+position     (24.5, -136, -35)
+rotation     (0, 0, 0)
+scale        (10, 80, 10)
+velocity     (0, 0, 0)
+accel        (0, 0, 0)
+rot_velocity (0, 0, 0)
+rot_accel    (0, 0, 0)
+mass         1
+elasticity   0.2
+kinetic_fric 0.3
+static_fric  0.3
+air_fric     0.1
+static_pos   true
+static_rot   true
+collider_type      1 #AABB
+collider_offset    (0, 0.2, 0)
+collider_layer     0
+collider_nocollide true
+collider_trigger   true
+collider_half_dims (0.5, 0.5, 0.5)
+
+]59
+type     4 #Trigger
+name     "obstacle3"
+position (0, -136, 35)
+rotation (0, 0, 0)
+scale    (10, 80, 10)
+attributes 1 2
+connections 8
+events 2
+:1 #ModelInstance
+model   "drop0_obstacle"
+visible true
+:2 #Physics
+position     (0, -136, 35)
+rotation     (0, 0, 0)
+scale        (10, 80, 10)
+velocity     (0, 0, 0)
+accel        (0, 0, 0)
+rot_velocity (0, 0, 0)
+rot_accel    (0, 0, 0)
+mass         1
+elasticity   0.2
+kinetic_fric 0.3
+static_fric  0.3
+air_fric     0.1
+static_pos   true
+static_rot   true
+collider_type      1 #AABB
+collider_offset    (0, 0.2, 0)
+collider_layer     0
+collider_nocollide true
+collider_trigger   true
+collider_half_dims (0.5, 0.5, 0.5)
+
+]60
+type     4 #Trigger
+name     "obstacle3"
+position (24.5, -136, 35)
+rotation (0, 0, 0)
+scale    (10, 80, 10)
+attributes 1 2
+connections 8
+events 2
+:1 #ModelInstance
+model   "drop0_obstacle"
+visible true
+:2 #Physics
+position     (24.5, -136, 35)
+rotation     (0, 0, 0)
+scale        (10, 80, 10)
+velocity     (0, 0, 0)
+accel        (0, 0, 0)
+rot_velocity (0, 0, 0)
+rot_accel    (0, 0, 0)
+mass         1
+elasticity   0.2
+kinetic_fric 0.3
+static_fric  0.3
+air_fric     0.1
+static_pos   true
+static_rot   true
+collider_type      1 #AABB
+collider_offset    (0, 0.2, 0)
+collider_layer     0
+collider_nocollide true
+collider_trigger   true
+collider_half_dims (0.5, 0.5, 0.5)
+
+]61
+type     4 #Trigger
+name     "obstacle3"
+position (-24.5, -136, 35)
+rotation (0, 0, 0)
+scale    (10, 80, 10)
+attributes 1 2
+connections 8
+events 2
+:1 #ModelInstance
+model   "drop0_obstacle"
+visible true
+:2 #Physics
+position     (-24.5, -136, 35)
+rotation     (0, 0, 0)
+scale        (10, 80, 10)
+velocity     (0, 0, 0)
+accel        (0, 0, 0)
+rot_velocity (0, 0, 0)
+rot_accel    (0, 0, 0)
+mass         1
+elasticity   0.2
+kinetic_fric 0.3
+static_fric  0.3
+air_fric     0.1
+static_pos   true
+static_rot   true
+collider_type      1 #AABB
+collider_offset    (0, 0.2, 0)
+collider_layer     0
+collider_nocollide true
+collider_trigger   true
+collider_half_dims (0.5, 0.5, 0.5)
+
+]62
+type     4 #Trigger
+name     "obstacle4"
+position (-50, -120, 0)
+rotation (0, 0, 0)
+scale    (15, 15, 84.9)
+attributes 1 2
+connections 8
+events 2
+:1 #ModelInstance
+model   "drop0_obstacle"
+visible true
+:2 #Physics
+position     (-50, -120, 0)
+rotation     (0, 0, 0)
+scale        (15, 15, 84.9)
+velocity     (0, 0, 0)
+accel        (0, 0, 0)
+rot_velocity (0, 0, 0)
+rot_accel    (0, 0, 0)
+mass         1
+elasticity   0.2
+kinetic_fric 0.3
+static_fric  0.3
+air_fric     0.1
+static_pos   true
+static_rot   true
+collider_type      1 #AABB
+collider_offset    (0, 0.2, 0)
+collider_layer     0
+collider_nocollide true
+collider_trigger   true
+collider_half_dims (0.5, 0.5, 0.5)
+
+]63
+type     4 #Trigger
+name     "obstacle4"
+position (0, -120, 50)
+rotation (0, 0, 0)
+scale    (115, 15, 15)
+attributes 1 2
+connections 8
+events 2
+:1 #ModelInstance
+model   "drop0_obstacle"
+visible true
+:2 #Physics
+position     (0, -120, 50)
+rotation     (0, 0, 0)
+scale        (115, 15, 15)
+velocity     (0, 0, 0)
+accel        (0, 0, 0)
+rot_velocity (0, 0, 0)
+rot_accel    (0, 0, 0)
+mass         1
+elasticity   0.2
+kinetic_fric 0.3
+static_fric  0.3
+air_fric     0.1
+static_pos   true
+static_rot   true
+collider_type      1 #AABB
+collider_offset    (0, 0.2, 0)
+collider_layer     0
+collider_nocollide true
+collider_trigger   true
+collider_half_dims (0.5, 0.5, 0.5)
+
+]64
+type     4 #Trigger
+name     "obstacle4"
+position (50, -120, 0)
+rotation (0, 0, 0)
+scale    (15, 15, 84.9)
+attributes 1 2
+connections 8
+events 2
+:1 #ModelInstance
+model   "drop0_obstacle"
+visible true
+:2 #Physics
+position     (50, -120, 0)
+rotation     (0, 0, 0)
+scale        (15, 15, 84.9)
+velocity     (0, 0, 0)
+accel        (0, 0, 0)
+rot_velocity (0, 0, 0)
+rot_accel    (0, 0, 0)
+mass         1
+elasticity   0.2
+kinetic_fric 0.3
+static_fric  0.3
+air_fric     0.1
+static_pos   true
+static_rot   true
+collider_type      1 #AABB
+collider_offset    (0, 0.2, 0)
+collider_layer     0
+collider_nocollide true
+collider_trigger   true
+collider_half_dims (0.5, 0.5, 0.5)
+
+]65
+type     4 #Trigger
+name     "obstacle4"
+position (0, -120, -50)
+rotation (0, 0, 0)
+scale    (115, 15, 15)
+attributes 1 2
+connections 8
+events 2
+:1 #ModelInstance
+model   "drop0_obstacle"
+visible true
+:2 #Physics
+position     (0, -120, -50)
+rotation     (0, 0, 0)
+scale        (115, 15, 15)
+velocity     (0, 0, 0)
+accel        (0, 0, 0)
+rot_velocity (0, 0, 0)
+rot_accel    (0, 0, 0)
+mass         1
+elasticity   0.2
+kinetic_fric 0.3
+static_fric  0.3
+air_fric     0.1
+static_pos   true
+static_rot   true
+collider_type      1 #AABB
+collider_offset    (0, 0.2, 0)
+collider_layer     0
+collider_nocollide true
+collider_trigger   true
+collider_half_dims (0.5, 0.5, 0.5)
+
+]66
+type     4 #Trigger
+name     "obstacle5"
+position (12.5, -181, 0)
+rotation (0, 0, 0)
+scale    (10, 10, 80)
+attributes 1 2
+connections 8
+events 2
+:1 #ModelInstance
+model   "drop0_obstacle"
+visible true
+:2 #Physics
+position     (12.5, -181, 0)
+rotation     (0, 0, 0)
+scale        (10, 10, 80)
+velocity     (0, 0, 0)
+accel        (0, 0, 0)
+rot_velocity (0, 0, 0)
+rot_accel    (0, 0, 0)
+mass         1
+elasticity   0.2
+kinetic_fric 0.3
+static_fric  0.3
+air_fric     0.1
+static_pos   true
+static_rot   true
+collider_type      1 #AABB
+collider_offset    (0, 0.2, 0)
+collider_layer     0
+collider_nocollide true
+collider_trigger   true
+collider_half_dims (0.5, 0.5, 0.5)
+
+]67
+type     4 #Trigger
+name     "obstacle5"
+position (-12.5, -181, 0)
+rotation (0, 0, 0)
+scale    (10, 10, 80)
+attributes 1 2
+connections 8
+events 2
+:1 #ModelInstance
+model   "drop0_obstacle"
+visible true
+:2 #Physics
+position     (-12.5, -181, 0)
+rotation     (0, 0, 0)
+scale        (10, 10, 80)
+velocity     (0, 0, 0)
+accel        (0, 0, 0)
+rot_velocity (0, 0, 0)
+rot_accel    (0, 0, 0)
+mass         1
+elasticity   0.2
+kinetic_fric 0.3
+static_fric  0.3
+air_fric     0.1
+static_pos   true
+static_rot   true
+collider_type      1 #AABB
+collider_offset    (0, 0.2, 0)
+collider_layer     0
+collider_nocollide true
+collider_trigger   true
+collider_half_dims (0.5, 0.5, 0.5)
+
+]68
+type     4 #Trigger
+name     "obstacle5"
+position (0, -192, 12.5)
+rotation (0, 0, 0)
+scale    (80, 10, 10)
+attributes 1 2
+connections 8
+events 2
+:1 #ModelInstance
+model   "drop0_obstacle"
+visible true
+:2 #Physics
+position     (0, -192, 12.5)
+rotation     (0, 0, 0)
+scale        (80, 10, 10)
+velocity     (0, 0, 0)
+accel        (0, 0, 0)
+rot_velocity (0, 0, 0)
+rot_accel    (0, 0, 0)
+mass         1
+elasticity   0.2
+kinetic_fric 0.3
+static_fric  0.3
+air_fric     0.1
+static_pos   true
+static_rot   true
+collider_type      1 #AABB
+collider_offset    (0, 0.2, 0)
+collider_layer     0
+collider_nocollide true
+collider_trigger   true
+collider_half_dims (0.5, 0.5, 0.5)
+
+]69
+type     4 #Trigger
+name     "obstacle5"
+position (0, -192, -12.5)
+rotation (0, 0, 0)
+scale    (80, 10, 10)
+attributes 1 2
+connections 8
+events 2
+:1 #ModelInstance
+model   "drop0_obstacle"
+visible true
+:2 #Physics
+position     (0, -192, -12.5)
+rotation     (0, 0, 0)
+scale        (80, 10, 10)
+velocity     (0, 0, 0)
+accel        (0, 0, 0)
+rot_velocity (0, 0, 0)
+rot_accel    (0, 0, 0)
+mass         1
+elasticity   0.2
+kinetic_fric 0.3
+static_fric  0.3
+air_fric     0.1
+static_pos   true
+static_rot   true
+collider_type      1 #AABB
+collider_offset    (0, 0.2, 0)
+collider_layer     0
+collider_nocollide true
+collider_trigger   true
+collider_half_dims (0.5, 0.5, 0.5)

@@ -71,7 +71,6 @@ bool AABBAABBCollision(Physics* p1, AABBCollider* c1, Physics* p2, AABBCollider*
 
 void PhysicsSystem::Init(f32 fixedUpdatesPerSecond){
 	gravity        = 9.81f;
-	frictionAir    = 0.01f;
 	minVelocity    = 0.005f;
 	maxVelocity    = 100.f;
 	minRotVelocity = 1.f;
@@ -119,7 +118,7 @@ void PhysicsSystem::Update(){
 					if(p1->rotVelocity != vec3::ZERO){ //fake rotational friction
 						p1->rotAcceleration += vec3(p1->rotVelocity.x > 0 ? -1 : 1, 
 													p1->rotVelocity.y > 0 ? -1 : 1, 
-													p1->rotVelocity.z > 0 ? -1 : 1) * frictionAir * p1->mass * 100;
+													p1->rotVelocity.z > 0 ? -1 : 1) * p1->airFricCoef * p1->mass * 100;
 					}
 					
 					p1->rotVelocity += p1->rotAcceleration * fixedDeltaTime;
@@ -148,6 +147,7 @@ void PhysicsSystem::Update(){
 						if(collision){
 							if(p1->collider->isTrigger) p1->collider->triggerActive = true;
 							if(p2->collider->isTrigger) p2->collider->triggerActive = true;
+							//Log("physics","Collision between '",p1->attribute.entity->name,"' and '",p2->attribute.entity->name,"'");
 						}
 					}
 				}

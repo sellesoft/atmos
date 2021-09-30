@@ -454,6 +454,8 @@ void Admin::LoadLevel(cstring level_name){
 							entity->physics->kineticFricCoef = (f32)atof(value_start);
 						}else if(key == cstr_lit("static_fric")){
 							entity->physics->staticFricCoef = (f32)atof(value_start);
+						}else if(key == cstr_lit("air_fric")){
+							entity->physics->airFricCoef = (f32)atof(value_start);
 						}else if(key == cstr_lit("static_pos")){
 							entity->physics->staticPosition = parse_b32(value);
 						}else if(key == cstr_lit("static_rot")){

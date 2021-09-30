@@ -75,6 +75,7 @@ void Physics::SaveText(Physics* p, string& level){
 					  "\nelasticity   ",p->elasticity,
 					  "\nkinetic_fric ",p->kineticFricCoef,
 					  "\nstatic_fric  ",p->staticFricCoef,
+					  "\nair_fric     ",p->airFricCoef,
 					  "\nstatic_pos   ",(p->staticPosition) ? "true" : "false",
 					  "\nstatic_rot   ",(p->staticRotation) ? "true" : "false");
 	if(p->collider){

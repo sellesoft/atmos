@@ -219,104 +219,6 @@ void Redo(u32 count = 1){
 }
 
 
-/////////////////////
-//// @copy/paste ////
-/////////////////////
-local void CutEntities(){
-	//!Incomplete
-	Assert(!"not implemented");
-	copied_entities.clear();
-}
-
-local void CopyEntities(){
-	copied_entities.clear();
-	copied_entities.add(selected_entities);
-}
-
-local void PasteEntities(){
-	selected_entities.clear();
-	for(Entity* src : copied_entities){
-		Entity* dst = 0;
-		switch(src->type){
-			case EntityType_Player:{
-				LogE("editor","There can only be one player entity.");
-				continue;
-			}break;
-			case EntityType_Physics:{
-				dst = new PhysicsEntity;
-			}break;
-			case EntityType_Scenery:{
-				dst = new SceneryEntity;
-			}break;
-			case EntityType_Trigger:{
-				TriggerEntity* e = new TriggerEntity;
-				e->events = ((TriggerEntity*)src)->events;
-				dst = e;
-			}break;
-			case EntityType_Door:{
-				dst = new DoorEntity;
-			}break;
-			default:{
-				LogfE("editor","Unhandled entity type '%d' when pasting copied entities.",src->type);
-				continue;
-			}break;
-		}
-		
-		dst->id = AtmoAdmin->entities.count;
-		dst->type = src->type;
-		dst->name = src->name;
-		memcpy(&dst->transform, &src->transform, sizeof(Transform));
-		dst->connections = src->connections;
-		if(src->model){
-			AtmoAdmin->modelArr.add(ModelInstance(src->model->model));
-			dst->model = AtmoAdmin->modelArr.last;
-			dst->model->attribute.entity = dst;
-			dst->model->visible = src->model->visible;
-		}
-		if(src->physics){
-			AtmoAdmin->physicsArr.add(Physics());
-			dst->physics = AtmoAdmin->physicsArr.last;
-			dst->physics->attribute.entity = dst;
-			memcpy(dst->physics, src->physics, sizeof(Physics));
-			if(src->physics->collider){
-				switch(src->physics->collider->type){
-					case ColliderType_AABB:{
-						dst->physics->collider = new AABBCollider(((AABBCollider*)src->physics->collider)->halfDims, src->physics->mass);
-					}break;
-					case ColliderType_Sphere:{
-						dst->physics->collider = new SphereCollider(((SphereCollider*)src->physics->collider)->radius, src->physics->mass);
-					}break;
-					default:{
-						LogfE("editor","Unhandled collider type '%d' when pasting copied entities.",src->physics->collider->type);
-					}break;
-				}
-				dst->physics->collider->type = src->physics->collider->type;
-				dst->physics->collider->tensor = src->physics->collider->tensor;
-				dst->physics->collider->offset = src->physics->collider->offset;
-				dst->physics->collider->noCollide = src->physics->collider->noCollide;
-				dst->physics->collider->isTrigger = src->physics->collider->isTrigger;
-				dst->physics->collider->triggerActive = src->physics->collider->triggerActive;
-			}
-		}
-		if(src->interp){
-			AtmoAdmin->interpTransformArr.add(InterpTransform());
-			dst->interp = AtmoAdmin->interpTransformArr.last;
-			dst->interp->attribute.entity = dst;
-			dst->interp->physics = dst->physics;
-			dst->interp->type = src->interp->type;
-			dst->interp->duration = src->interp->duration;
-			dst->interp->current = src->interp->current;
-			dst->interp->active = src->interp->active;
-			dst->interp->reset = src->interp->reset;
-			dst->interp->stages = src->interp->stages;
-		}
-		
-		AtmoAdmin->entities.add(dst);
-		selected_entities.add(dst);
-	}
-}
-
-
 ///////////////
 //// @menu ////
 ///////////////
@@ -493,6 +395,100 @@ void MenuBar(){
 ///////////////////
 //// @entities ////
 ///////////////////
+local void CutEntities(){
+	//!Incomplete
+	Assert(!"not implemented");
+	copied_entities.clear();
+}
+
+local void CopyEntities(){
+	copied_entities.clear();
+	copied_entities.add(selected_entities);
+}
+
+local void PasteEntities(){
+	selected_entities.clear();
+	for(Entity* src : copied_entities){
+		Entity* dst = 0;
+		switch(src->type){
+			case EntityType_Player:{
+				LogE("editor","There can only be one player entity.");
+				continue;
+			}break;
+			case EntityType_Physics:{
+				dst = new PhysicsEntity;
+			}break;
+			case EntityType_Scenery:{
+				dst = new SceneryEntity;
+			}break;
+			case EntityType_Trigger:{
+				TriggerEntity* e = new TriggerEntity;
+				e->events = ((TriggerEntity*)src)->events;
+				dst = e;
+			}break;
+			case EntityType_Door:{
+				dst = new DoorEntity;
+			}break;
+			default:{
+				LogfE("editor","Unhandled entity type '%d' when pasting copied entities.",src->type);
+				continue;
+			}break;
+		}
+		
+		dst->id = AtmoAdmin->entities.count;
+		dst->type = src->type;
+		dst->name = src->name.str;
+		memcpy(&dst->transform, &src->transform, sizeof(Transform));
+		dst->connections = src->connections;
+		if(src->model){
+			AtmoAdmin->modelArr.add(ModelInstance(src->model->model));
+			dst->model = AtmoAdmin->modelArr.last;
+			dst->model->attribute.entity = dst;
+			dst->model->visible = src->model->visible;
+		}
+		if(src->physics){
+			AtmoAdmin->physicsArr.add(Physics());
+			dst->physics = AtmoAdmin->physicsArr.last;
+			memcpy(dst->physics, src->physics, sizeof(Physics));
+			dst->physics->attribute.entity = dst;
+			if(src->physics->collider){
+				switch(src->physics->collider->type){
+					case ColliderType_AABB:{
+						dst->physics->collider = new AABBCollider(((AABBCollider*)src->physics->collider)->halfDims, src->physics->mass);
+					}break;
+					case ColliderType_Sphere:{
+						dst->physics->collider = new SphereCollider(((SphereCollider*)src->physics->collider)->radius, src->physics->mass);
+					}break;
+					default:{
+						LogfE("editor","Unhandled collider type '%d' when pasting copied entities.",src->physics->collider->type);
+					}break;
+				}
+				dst->physics->collider->type = src->physics->collider->type;
+				dst->physics->collider->tensor = src->physics->collider->tensor;
+				dst->physics->collider->offset = src->physics->collider->offset;
+				dst->physics->collider->noCollide = src->physics->collider->noCollide;
+				dst->physics->collider->isTrigger = src->physics->collider->isTrigger;
+				dst->physics->collider->triggerActive = src->physics->collider->triggerActive;
+			}
+		}
+		if(src->interp){
+			AtmoAdmin->interpTransformArr.add(InterpTransform());
+			dst->interp = AtmoAdmin->interpTransformArr.last;
+			dst->interp->attribute.entity = dst;
+			dst->interp->physics = dst->physics;
+			dst->interp->type = src->interp->type;
+			dst->interp->duration = src->interp->duration;
+			dst->interp->current = src->interp->current;
+			dst->interp->active = src->interp->active;
+			dst->interp->reset = src->interp->reset;
+			dst->interp->stages = src->interp->stages;
+		}
+		
+		AtmoAdmin->entities.add(dst);
+		selected_entities.add(dst);
+	}
+}
+
 void EntitiesTab(){
 	persist bool rename_ent = false;
 	persist char rename_buffer[DESHI_NAME_SIZE] = {};
@@ -511,7 +507,7 @@ void EntitiesTab(){
 	if(rename_ent && DeshInput->KeyPressed(Key::ENTER)){
 		rename_ent = false;
 		DeshConsole->IMGUI_KEY_CAPTURE = false;
-		selected_entities[0]->name = string(rename_buffer);
+		selected_entities[0]->name = rename_buffer;
 	}
 	//stop renaming entity
 	if(rename_ent && DeshInput->KeyPressed(Key::ESCAPE)){
@@ -614,7 +610,7 @@ void EntitiesTab(){
 	ImGui::Separator();
 	
 	//// create new entity ////
-	persist const char* presets[] = { "Empty", "Static", "Physics", "Player", "Visible Trigger", "Invisible Trigger", "Door"};
+	persist const char* presets[] = { "Empty", "Static", "Physics", "Player", "Visible Trigger", "Invisible Trigger", "Door", "Scenery"};
 	persist int current_preset = 0;
 	
 	ImGui::SetCursorPosX(ImGui::GetWindowWidth() * 0.025);
@@ -656,6 +652,11 @@ void EntitiesTab(){
 			case(6):        { //Door
 				DoorEntity* e = new DoorEntity;
 				e->Init(ent_name.str, new AABBCollider(Storage::NullMesh(),1.0f), Storage::NullModel(), Transform(), Transform(), 1.f);
+				ent = e;
+			}break;
+			case(7):        { //Scenery
+				SceneryEntity* e = new SceneryEntity;
+				e->Init(ent_name.str, Transform(), Storage::NullModel());
 				ent = e;
 			}break;
 		}
@@ -846,8 +847,8 @@ void EntitiesTab(){
 		//physics
 		if(sel->physics){
 			if(sel->physics->collider && (sel->physics->collider->type == ColliderType_AABB)){
-				Render::DrawBox(Transform(sel->transform.position+sel->physics->collider->offset, 
-										  vec3::ZERO, sel->transform.scale).Matrix(), Color_Green);
+				Render::DrawBox(Transform(sel->transform.position+sel->physics->collider->offset, vec3::ZERO,
+										  sel->transform.scale*(((AABBCollider*)sel->physics->collider)->halfDims*2)).Matrix(), Color_Green);
 			}
 			
 			bool delete_button = 1;
@@ -871,6 +872,8 @@ void EntitiesTab(){
 				ImGui::InputFloat("##phys_kinfric", &sel->physics->kineticFricCoef, 0, 0);
 				ImGui::TextEx("Static Friction "); ImGui::SameLine(); ImGui::SetNextItemWidth(-FLT_MIN);
 				ImGui::InputFloat("##phys_stafric", &sel->physics->staticFricCoef, 0, 0);
+				ImGui::TextEx("Air Friction    "); ImGui::SameLine(); ImGui::SetNextItemWidth(-FLT_MIN);
+				ImGui::InputFloat("##phys_airfric", &sel->physics->airFricCoef, 0, 0);
 				
 				ImGui::TextEx("Static Position "); ImGui::SameLine();
 				if(ImGui::Button((sel->physics->staticPosition) ? "True" : "False", ImVec2(-FLT_MIN, 0))){
@@ -900,36 +903,39 @@ void EntitiesTab(){
 										sel->physics->collider = 0;
 									}break;
 								}
+								break;
 							}
 						}
 						ImGui::EndCombo();
 					}
 					
-					ImGui::TextEx("Offset    "); ImGui::SameLine();
-					if(ImGui::Inputvec3("##phys_offset", &sel->physics->collider->offset));
-					ImGui::TextEx("Layer     "); ImGui::SameLine(); ImGui::SetNextItemWidth(-1);
-					if(ImGui::DragInt("##phys_layer", (int*)&sel->physics->collider->layer, 1, 0, INT_MAX));
-					ImGui::TextEx("No Collide"); ImGui::SameLine();
-					if(ImGui::Button((sel->physics->collider->noCollide) ? "True" : "False", ImVec2(-FLT_MIN, 0))){
-						sel->physics->collider->noCollide = !sel->physics->collider->noCollide;
-					}
-					ImGui::TextEx("Is Trigger"); ImGui::SameLine();
-					if(ImGui::Button((sel->physics->collider->isTrigger) ? "True" : "False", ImVec2(-FLT_MIN, 0))){
-						sel->physics->collider->isTrigger = !sel->physics->collider->isTrigger;
-					}
-					
-					switch(sel->physics->collider->type){
-						case ColliderType_AABB:{
-							ImGui::TextEx("Half Dims "); ImGui::SameLine();
-							if(ImGui::Inputvec3("##phys_halfdims", &((AABBCollider*)sel->physics->collider)->halfDims));
-						}break;
-						case ColliderType_Sphere:{
-							ImGui::TextEx("Radius    "); ImGui::SameLine(); ImGui::SetNextItemWidth(-FLT_MIN);
-							ImGui::InputFloat("##phys_radius", &((SphereCollider*)sel->physics->collider)->radius, 0, 0);
-						}break;
-						default:{
-							ImGui::TextEx("unhandled collider shape");
-						}break;
+					if(sel->physics->collider){
+						ImGui::TextEx("Offset    "); ImGui::SameLine();
+						if(ImGui::Inputvec3("##phys_offset", &sel->physics->collider->offset));
+						ImGui::TextEx("Layer     "); ImGui::SameLine(); ImGui::SetNextItemWidth(-1);
+						if(ImGui::DragInt("##phys_layer", (int*)&sel->physics->collider->layer, 1, 0, INT_MAX));
+						ImGui::TextEx("No Collide"); ImGui::SameLine();
+						if(ImGui::Button((sel->physics->collider->noCollide) ? "True" : "False", ImVec2(-FLT_MIN, 0))){
+							sel->physics->collider->noCollide = !sel->physics->collider->noCollide;
+						}
+						ImGui::TextEx("Is Trigger"); ImGui::SameLine();
+						if(ImGui::Button((sel->physics->collider->isTrigger) ? "True" : "False", ImVec2(-FLT_MIN, 0))){
+							sel->physics->collider->isTrigger = !sel->physics->collider->isTrigger;
+						}
+						
+						switch(sel->physics->collider->type){
+							case ColliderType_AABB:{
+								ImGui::TextEx("Half Dims "); ImGui::SameLine();
+								if(ImGui::Inputvec3("##phys_halfdims", &((AABBCollider*)sel->physics->collider)->halfDims));
+							}break;
+							case ColliderType_Sphere:{
+								ImGui::TextEx("Radius    "); ImGui::SameLine(); ImGui::SetNextItemWidth(-FLT_MIN);
+								ImGui::InputFloat("##phys_radius", &((SphereCollider*)sel->physics->collider)->radius, 0, 0);
+							}break;
+							default:{
+								ImGui::TextEx("unhandled collider shape");
+							}break;
+						}
 					}
 				}else{
 					if(ImGui::BeginCombo("##phys_collider", "None")){
