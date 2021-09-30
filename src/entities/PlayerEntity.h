@@ -135,6 +135,9 @@ struct PlayerEntity : public Entity {
 			physics->position = spawnpoint.position;
 			physics->rotation = spawnpoint.rotation;
 			physics->scale    = spawnpoint.scale;
+			physics->velocity = vec3::ZERO;
+		}else if(event == Event_NextLevel){
+			AtmoAdmin->loadNextLevel = true;
 		}
 	};
 };

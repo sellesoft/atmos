@@ -23,10 +23,11 @@ enum Event_ {
 	Event_PlayerRespawn,
 	Event_ToggleTriggerActive,
 	Event_ToggleDoor,
+	Event_NextLevel,
 	Event_COUNT
 }; typedef u32 Event;
 global_ const char* EventStrings[] = {
-	"NONE", "ModelVisibleToggle", "PlayerRespawn", "ToggleTriggerActive", "ToggleDoor",
+	"NONE", "ModelVisibleToggle", "PlayerRespawn", "ToggleTriggerActive", "ToggleDoor", "NextLevel",
 };
 
 enum EntityTypeBits {

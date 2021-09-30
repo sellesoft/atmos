@@ -539,15 +539,14 @@ void EntitiesTab(){
 			}
 		}else{
 			if(ImGui::BeginTable("##entity_list_table", 4, ImGuiTableFlags_BordersInner)){
-				ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed, fontw * 3.5f);  //visible ImGui::Button
+				ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed, fontw * 3.5f); //visible button
 				ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed, fontw * 5.f);  //id
 				ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthStretch);             //name
-				//ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed, fontw * 3.5f); //evenbutton
 				ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed, fontw);        //delete button
 				
 				forX(ent_idx, AtmoAdmin->entities.count){
 					Entity* ent = AtmoAdmin->entities[ent_idx];
-					if(!ent) assert(!"NULL entity when creating entity list table");
+					if(!ent) Assert(!"NULL entity when creating entity list table");
 					ImGui::PushID(ent_idx);
 					ImGui::TableNextRow();
 					
@@ -597,13 +596,6 @@ void EntitiesTab(){
 					}else{
 						ImGui::TextEx(ent->name.str);
 					}
-					
-					//// events button ////
-					//ImGui::TableSetColumnIndex(3);
-					//if(ImGui::Button("Events", ImVec2(-FLT_MIN, 0.0f))){
-					//	events_ent = (events_ent != ent) ? ent : 0;
-					//}
-					//EventsMenu(events_ent);
 					
 					//// delete button ////
 					ImGui::TableSetColumnIndex(3);
@@ -778,7 +770,7 @@ void EntitiesTab(){
 			ImGui::Indent();
 			
 			TriggerEntity* trigger = (TriggerEntity*)sel;
-			if(sel->connections.count){
+			if(trigger->events.count){
 				if(ImGui::BeginTable("##ent_trig_table", 3, ImGuiTableFlags_None, ImVec2(-FLT_MIN, ImGui::GetWindowHeight() * .05f))){
 					ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed, fonth * 2.5f);
 					ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthStretch);
@@ -854,7 +846,8 @@ void EntitiesTab(){
 		//physics
 		if(sel->physics){
 			if(sel->physics->collider && (sel->physics->collider->type == ColliderType_AABB)){
-				Render::DrawBox(Transform(sel->transform.position, vec3::ZERO, sel->transform.scale).Matrix(), Color_Green);
+				Render::DrawBox(Transform(sel->transform.position+sel->physics->collider->offset, 
+										  vec3::ZERO, sel->transform.scale).Matrix(), Color_Green);
 			}
 			
 			bool delete_button = 1;
@@ -912,13 +905,26 @@ void EntitiesTab(){
 						ImGui::EndCombo();
 					}
 					
+					ImGui::TextEx("Offset    "); ImGui::SameLine();
+					if(ImGui::Inputvec3("##phys_offset", &sel->physics->collider->offset));
+					ImGui::TextEx("Layer     "); ImGui::SameLine(); ImGui::SetNextItemWidth(-1);
+					if(ImGui::DragInt("##phys_layer", (int*)&sel->physics->collider->layer, 1, 0, INT_MAX));
+					ImGui::TextEx("No Collide"); ImGui::SameLine();
+					if(ImGui::Button((sel->physics->collider->noCollide) ? "True" : "False", ImVec2(-FLT_MIN, 0))){
+						sel->physics->collider->noCollide = !sel->physics->collider->noCollide;
+					}
+					ImGui::TextEx("Is Trigger"); ImGui::SameLine();
+					if(ImGui::Button((sel->physics->collider->isTrigger) ? "True" : "False", ImVec2(-FLT_MIN, 0))){
+						sel->physics->collider->isTrigger = !sel->physics->collider->isTrigger;
+					}
+					
 					switch(sel->physics->collider->type){
 						case ColliderType_AABB:{
-							ImGui::TextEx("Half Dims"); ImGui::SameLine();
+							ImGui::TextEx("Half Dims "); ImGui::SameLine();
 							if(ImGui::Inputvec3("##phys_halfdims", &((AABBCollider*)sel->physics->collider)->halfDims));
 						}break;
 						case ColliderType_Sphere:{
-							ImGui::TextEx("Radius   "); ImGui::SameLine(); ImGui::SetNextItemWidth(-FLT_MIN);
+							ImGui::TextEx("Radius    "); ImGui::SameLine(); ImGui::SetNextItemWidth(-FLT_MIN);
 							ImGui::InputFloat("##phys_radius", &((SphereCollider*)sel->physics->collider)->radius, 0, 0);
 						}break;
 						default:{

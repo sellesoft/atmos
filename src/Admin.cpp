@@ -35,7 +35,6 @@ void Admin::Init(string _dataPath){
 void Admin::Update(){
 	Assert(physicsArr.count <= 1024 && modelArr.count <= 1024 && interpTransformArr.count <= 1024,
 		   "temp max limit before we arena them so their pointers dont change");
-	
 	switch(state){
 		case GameState_Play:{
 			controller.Update();
@@ -65,6 +64,14 @@ void Admin::Update(){
 			camera.Update();
 			forE(modelArr) it->Update();
 		}break;
+	}
+	
+	if(loadNextLevel){
+		ChangeState(GameState_Editor);
+		AtmoAdmin->levelListIdx = (AtmoAdmin->levelListIdx+1) % ArrayCount(AtmoAdmin->levelList);
+		AtmoAdmin->LoadLevel(AtmoAdmin->levelList[AtmoAdmin->levelListIdx]);
+		ChangeState(GameState_Play);
+		loadNextLevel = false;
 	}
 }
 
@@ -133,11 +140,13 @@ void Admin::ChangeState(GameState new_state){
 			case GameState_Play:{   to = "PLAY";
 				DeshWindow->UpdateCursorMode(CursorMode_FirstPerson);
 				player->model->visible = false;
+				AtmoAdmin->player->spawnpoint = AtmoAdmin->player->transform;
 				//TODO save level
 			}break;
 			case GameState_Menu:{   to = "MENU";
 				DeshWindow->UpdateCursorMode(CursorMode_Default);
 				player->model->visible = true;
+				AtmoAdmin->player->spawnpoint = AtmoAdmin->player->transform;
 				//TODO save level
 			}break;
 		}break;

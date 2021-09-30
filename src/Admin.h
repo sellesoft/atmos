@@ -37,6 +37,10 @@ struct Admin{
 	Editor editor;
 	b32    simulateInEditor;
 	
+	b32 loadNextLevel = false;
+	u32 levelListIdx = 0;
+	cstring levelList[5] = { cstr_lit("drop0"), cstr_lit("drop1"), cstr_lit("drop2"), cstr_lit("drop3"), cstr_lit("drop4") };
+	
 	PlayerEntity* player = 0; //store player separate so we can access it directly
 	array<Entity*> entities;
 	array<TriggerEntity*> triggers;

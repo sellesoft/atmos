@@ -40,8 +40,7 @@ struct TriggerEntity : public Entity {
 	}
 	
 	void Update(){
-		if(physics->collider->triggerActive) 
-			forI(events.count) SendEvent(events[i]);
+		if(physics->collider->triggerActive){ forI(events.count){ SendEvent(events[i]); } }
 		physics->collider->triggerActive = false;
 	}
 	
