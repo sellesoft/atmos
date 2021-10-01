@@ -469,6 +469,7 @@ local void PasteEntities(){
 				dst->physics->collider->noCollide = src->physics->collider->noCollide;
 				dst->physics->collider->isTrigger = src->physics->collider->isTrigger;
 				dst->physics->collider->triggerActive = src->physics->collider->triggerActive;
+				dst->physics->collider->playerOnly = src->physics->collider->playerOnly;
 			}
 		}
 		if(src->interp){
@@ -921,6 +922,10 @@ void EntitiesTab(){
 						ImGui::TextEx("Is Trigger"); ImGui::SameLine();
 						if(ImGui::Button((sel->physics->collider->isTrigger) ? "True" : "False", ImVec2(-FLT_MIN, 0))){
 							sel->physics->collider->isTrigger = !sel->physics->collider->isTrigger;
+						}
+						ImGui::TextEx("Player Only"); ImGui::SameLine();
+						if(ImGui::Button((sel->physics->collider->playerOnly) ? "True" : "False", ImVec2(-FLT_MIN, 0))){
+							sel->physics->collider->playerOnly = !sel->physics->collider->playerOnly;
 						}
 						
 						switch(sel->physics->collider->type){

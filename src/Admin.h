@@ -39,7 +39,7 @@ struct Admin{
 	
 	b32 loadNextLevel = false;
 	u32 levelListIdx = 0;
-	cstring levelList[5] = { cstr_lit("drop0"), cstr_lit("drop1"), cstr_lit("drop2"), cstr_lit("drop3"), cstr_lit("drop4") };
+	cstring levelList[3] = { cstr_lit("drop0"), cstr_lit("drop1"), cstr_lit("drop2"), };
 	
 	PlayerEntity* player = 0; //store player separate so we can access it directly
 	array<Entity*> entities;
@@ -49,7 +49,7 @@ struct Admin{
 	array<ModelInstance> modelArr;
 	array<InterpTransform> interpTransformArr;
 	
-	void Init(string _dataPath);
+	void Init();
 	void Update();
 	void PostRenderUpdate();
 	void Reset();
@@ -58,7 +58,7 @@ struct Admin{
 	void ChangeState(GameState new_state);
 	void SaveLevel(cstring level_name);
 	void LoadLevel(cstring level_name);
-	Entity* EntityRaycast(vec3 origin, vec3 direction, f32 maxDistance, EntityType filter = 0);
+	Entity* EntityRaycast(vec3 origin, vec3 direction, f32 maxDistance, EntityType filter = 0, b32 requireCollider = false);
 };
 
 extern Admin* g_admin;

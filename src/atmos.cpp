@@ -86,7 +86,7 @@ int main() {
 	
 	//init atmos
 	AddAtmosCommands();
-	AtmoAdmin->Init("data/");
+	AtmoAdmin->Init();
 	
 	TIMER_START(t_d); TIMER_START(t_f);
 	while (!deshi::shouldClose()) {

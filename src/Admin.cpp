@@ -10,11 +10,16 @@
 #include "core/logging.h"
 #include "core/window.h"
 
-void Admin::Init(string _dataPath){
-	dataPath = _dataPath;
+void Admin::Init(){
+#if      ATMOS_RELEASE
+	AtmoAdmin->LoadLevel(AtmoAdmin->levelList[AtmoAdmin->levelListIdx]);
+	state = GameState_Editor;
+	ChangeState(GameState_Play);
+#else  //ATMOS_RELEASE
 	state = GameState_Editor;
 	simulateInEditor = false;
 	levelName = "";
+#endif //ATMOS_RELEASE
 	
 	camera = CameraInstance(90);
 	InitMenu();
@@ -140,13 +145,13 @@ void Admin::ChangeState(GameState new_state){
 			case GameState_Play:{   to = "PLAY";
 				DeshWindow->UpdateCursorMode(CursorMode_FirstPerson);
 				player->model->visible = false;
-				AtmoAdmin->player->spawnpoint = AtmoAdmin->player->transform;
+				player->spawnpoint = player->transform;
 				//TODO save level
 			}break;
 			case GameState_Menu:{   to = "MENU";
 				DeshWindow->UpdateCursorMode(CursorMode_Default);
 				player->model->visible = true;
-				AtmoAdmin->player->spawnpoint = AtmoAdmin->player->transform;
+				player->spawnpoint = player->transform;
 				//TODO save level
 			}break;
 		}break;
@@ -224,14 +229,14 @@ void Admin::SaveLevel(cstring level_name){
 	}
 	
 	//write to file
-	string level_path = dataPath + "levels/" + to_string(level_name) + ".level";
+	string level_path = "data/levels/" + to_string(level_name) + ".level";
 	Assets::writeFileBinary(level_path.str, level.str, level.count);
 }
 
 #define ParseError(...) LogE("admin-level","Error parsing level '",level_name,"' on line '",line_number,"'!",__VA_ARGS__)
 void Admin::LoadLevel(cstring level_name){
 	//load file
-	string level_path = dataPath + "levels/" + to_string(level_name) + ".level";
+	string level_path = "data/levels/" + to_string(level_name) + ".level";
 	char* buffer = Assets::readFileAsciiToArray(level_path.str);
 	if(!buffer) return;
 	defer{ delete[] buffer; };
@@ -474,6 +479,8 @@ void Admin::LoadLevel(cstring level_name){
 							entity->physics->collider->noCollide = parse_b32(value);
 						}else if(key == cstr_lit("collider_trigger")){
 							entity->physics->collider->isTrigger = parse_b32(value);
+						}else if(key == cstr_lit("collider_playeronly")){
+							entity->physics->collider->playerOnly = parse_b32(value);
 						}else if(key == cstr_lit("collider_half_dims")){
 							AABBCollider* c = (AABBCollider*)entity->physics->collider;
 							c->halfDims = parse_vec3(value);
@@ -527,7 +534,7 @@ void Admin::LoadLevel(cstring level_name){
 }
 #undef ParseError
 
-Entity* Admin::EntityRaycast(vec3 origin, vec3 direction, f32 maxDistance, EntityType filter) {
+Entity* Admin::EntityRaycast(vec3 origin, vec3 direction, f32 maxDistance, EntityType filter, b32 requireCollider) {
 	Assert(maxDistance > 0 && direction != vec3::ZERO);
 	
 	Entity* result = 0;
@@ -538,6 +545,7 @@ Entity* Admin::EntityRaycast(vec3 origin, vec3 direction, f32 maxDistance, Entit
 			mat4 rotation = mat4::RotationMatrix(e->transform.rotation);
 			if(ModelInstance* mc = e->model){
 				if(!mc->visible) continue;
+				if(requireCollider && !(e->physics && e->physics->collider)) continue; //skip if no collider when required
 				forX(tri_idx, mc->mesh->triangleCount){
 					Mesh::Triangle* tri = &mc->mesh->triangleArray[tri_idx];
 					vec3 p0 = tri->p[0] * transform;

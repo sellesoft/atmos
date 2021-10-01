@@ -132,6 +132,8 @@ void PhysicsSystem::Update(){
 					//check if able to collide
 					if((p1 != p2) && (p2->collider != 0) && (p2->collider->type != ColliderType_NONE) 
 					   && (p1->collider->layer == p2->collider->layer)){
+						if(p1->collider->playerOnly && p2->attribute.entity != AtmoAdmin->player) continue;
+						if(p2->collider->playerOnly && p1->attribute.entity != AtmoAdmin->player) continue;
 						//find collision type and check for it
 						bool collision = false;
 						switch(p1->collider->type){

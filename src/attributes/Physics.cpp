@@ -79,11 +79,12 @@ void Physics::SaveText(Physics* p, string& level){
 					  "\nstatic_pos   ",(p->staticPosition) ? "true" : "false",
 					  "\nstatic_rot   ",(p->staticRotation) ? "true" : "false");
 	if(p->collider){
-		level += TOSTRING("\ncollider_type      ",p->collider->type," #",ColliderTypeStrings[p->collider->type],
-						  "\ncollider_offset    ",p->collider->offset,
-						  "\ncollider_layer     ",p->collider->layer,
-						  "\ncollider_nocollide ",(p->collider->noCollide) ? "true" : "false",
-						  "\ncollider_trigger   ",(p->collider->isTrigger) ? "true" : "false");
+		level += TOSTRING("\ncollider_type       ",p->collider->type," #",ColliderTypeStrings[p->collider->type],
+						  "\ncollider_offset     ",p->collider->offset,
+						  "\ncollider_layer      ",p->collider->layer,
+						  "\ncollider_nocollide  ",(p->collider->noCollide) ? "true" : "false",
+						  "\ncollider_trigger    ",(p->collider->isTrigger) ? "true" : "false",
+						  "\ncollider_playeronly ",(p->collider->playerOnly) ? "true" : "false");
 		switch(p->collider->type){
 			case ColliderType_AABB:{
 				level += TOSTRING("\ncollider_half_dims ",((AABBCollider*)p->collider)->halfDims);

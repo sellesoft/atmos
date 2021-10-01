@@ -73,16 +73,20 @@ struct PlayerEntity : public Entity {
 		}
 		
 		//check if in air or on ground
-		Entity* below = AtmoAdmin->EntityRaycast(physics->position, vec3::DOWN, .05f);
+		Entity* below = AtmoAdmin->EntityRaycast(physics->position, vec3::DOWN, .05f, 0, true);
 		bool inAir = (below == 0);
 		
 		//apply gravity to velocity
 		physics->velocity += vec3(0,-gravity,0) * dt;
 		
 		if(inAir){
+			//cancel horizontal velocity if input is in opposite direction
+			if(inputs.angleBetween(physics->velocity.yZero().normalized()) > M_PI*.75f){
+				physics->velocity.x = 0;
+				physics->velocity.z = 0;
+			}
+			
 			physics->velocity += inputs * airAccel * dt;
-			vec3 horiz_clamp = physics->velocity; horiz_clamp.y = 0; horiz_clamp.clampMag(0, max_speed);
-			physics->velocity = vec3(horiz_clamp.x, physics->velocity.y, horiz_clamp.z);
 		}else{
 			physics->velocity += inputs * groundAccel * dt;
 			physics->velocity.y = 0; 
@@ -136,6 +140,7 @@ struct PlayerEntity : public Entity {
 			physics->rotation = spawnpoint.rotation;
 			physics->scale    = spawnpoint.scale;
 			physics->velocity = vec3::ZERO;
+			
 		}else if(event == Event_NextLevel){
 			AtmoAdmin->loadNextLevel = true;
 		}

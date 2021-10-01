@@ -49,8 +49,9 @@ struct Collider{
 	mat3 tensor{};
 	vec3 offset{};
 	u32  layer = 0;
-	b32  noCollide = false;
-	b32  isTrigger = false;
+	b32  noCollide  = false;
+	b32  isTrigger  = false;
+	b32  playerOnly = false;
 	
 	b32 triggerActive = false; //TODO replace this with manifold stuffs
 	

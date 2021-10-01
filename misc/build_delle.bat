@@ -34,9 +34,10 @@ REM  DESHI_INTERNAL:  build for developer only (Renderer debug, etc)
 REM  DESHI_VULKAN:    build for Vulkan
 REM  DESHI_OPENGL:    build for OpenGL
 REM  DESHI_DIRECTX12: build for DirectX12
+REM  ATMOS_RELEASE:   build for final release (no imgui and no editor)
 
 @set DEFINES_DEBUG=/D"DESHI_INTERNAL=1" /D"DESHI_SLOW=1" 
-@set DEFINES_RELEASE=
+@set DEFINES_RELEASE=/D"ATMOS_RELEASE=1"
 @set DEFINES_OS=/D"DESHI_WINDOWS=1" /D"DESHI_MAC=0" /D"DESHI_LINUX=0"
 @set DEFINES_RENDERER=/D"DESHI_VULKAN=1" /D"DESHI_OPENGL=0" /D"DESHI_DIRECTX12=0"
 
