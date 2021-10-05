@@ -823,7 +823,7 @@ void EntitiesTab(){
 				ImGui::Indent();
 				
 				ImGui::TextEx("Visible  "); ImGui::SameLine();
-				if(ImGui::Button((sel->model->visible) ? "True" : "False", ImVec2(-FLT_MIN, 0))){
+				if(ImGui::Button((sel->model->visible) ? "True##model_vis" : "False##model_vis", ImVec2(-FLT_MIN, 0))){
 					sel->model->ToggleVisibility();
 				}
 				
@@ -877,11 +877,11 @@ void EntitiesTab(){
 				ImGui::InputFloat("##phys_airfric", &sel->physics->airFricCoef, 0, 0);
 				
 				ImGui::TextEx("Static Position "); ImGui::SameLine();
-				if(ImGui::Button((sel->physics->staticPosition) ? "True" : "False", ImVec2(-FLT_MIN, 0))){
+				if(ImGui::Button((sel->physics->staticPosition) ? "True##phys_stapos" : "False##phys_stapos", ImVec2(-FLT_MIN, 0))){
 					sel->physics->staticPosition = !sel->physics->staticPosition;
 				}
 				ImGui::TextEx("Static Rotation "); ImGui::SameLine();
-				if(ImGui::Button((sel->physics->staticRotation) ? "True" : "False", ImVec2(-FLT_MIN, 0))){
+				if(ImGui::Button((sel->physics->staticRotation) ? "True##phys_starot" : "False##phys_starot", ImVec2(-FLT_MIN, 0))){
 					sel->physics->staticRotation = !sel->physics->staticRotation;
 				}
 				
@@ -911,15 +911,15 @@ void EntitiesTab(){
 					}
 					
 					if(sel->physics->collider){
-						ImGui::TextEx("Offset    "); ImGui::SameLine();
+						ImGui::TextEx("Offset     "); ImGui::SameLine();
 						if(ImGui::Inputvec3("##phys_offset", &sel->physics->collider->offset));
 						ImGui::TextEx("Layer     "); ImGui::SameLine(); ImGui::SetNextItemWidth(-1);
 						if(ImGui::DragInt("##phys_layer", (int*)&sel->physics->collider->layer, 1, 0, INT_MAX));
-						ImGui::TextEx("No Collide"); ImGui::SameLine();
+						ImGui::TextEx("No Collide "); ImGui::SameLine();
 						if(ImGui::Button((sel->physics->collider->noCollide) ? "True##phys_nocoll" : "False##phys_nocoll", ImVec2(-FLT_MIN, 0))){
 							sel->physics->collider->noCollide = !sel->physics->collider->noCollide;
 						}
-						ImGui::TextEx("Is Trigger"); ImGui::SameLine();
+						ImGui::TextEx("Is Trigger "); ImGui::SameLine();
 						if(ImGui::Button((sel->physics->collider->isTrigger) ? "True##phys_trigger" : "False##phys_trigger", ImVec2(-FLT_MIN, 0))){
 							sel->physics->collider->isTrigger = !sel->physics->collider->isTrigger;
 						}
@@ -930,11 +930,11 @@ void EntitiesTab(){
 						
 						switch(sel->physics->collider->type){
 							case ColliderType_AABB:{
-								ImGui::TextEx("Half Dims "); ImGui::SameLine();
+								ImGui::TextEx("Half Dims  "); ImGui::SameLine();
 								if(ImGui::Inputvec3("##phys_halfdims", &((AABBCollider*)sel->physics->collider)->halfDims));
 							}break;
 							case ColliderType_Sphere:{
-								ImGui::TextEx("Radius    "); ImGui::SameLine(); ImGui::SetNextItemWidth(-FLT_MIN);
+								ImGui::TextEx("Radius     "); ImGui::SameLine(); ImGui::SetNextItemWidth(-FLT_MIN);
 								ImGui::InputFloat("##phys_radius", &((SphereCollider*)sel->physics->collider)->radius, 0, 0);
 							}break;
 							default:{
@@ -988,7 +988,7 @@ void EntitiesTab(){
 				ImGui::TextEx("Starting "); ImGui::SameLine(); ImGui::SetNextItemWidth(-1);
 				ImGui::InputFloat("##interp_current", &sel->interp->current, 0, 0);
 				ImGui::TextEx("Active   "); ImGui::SameLine();
-				if(ImGui::Button((sel->interp->active) ? "True" : "False", ImVec2(-FLT_MIN, 0))){
+				if(ImGui::Button((sel->interp->active) ? "True##interp_active" : "False##interp_active", ImVec2(-FLT_MIN, 0))){
 					sel->interp->active = !sel->interp->active;
 				}
 				
@@ -1857,7 +1857,7 @@ void SettingsTab(){
 		//// physics properties ////
 		if(ImGui::CollapsingHeader("Physics", 0)){
 			ImGui::TextEx("Sim Physics"); ImGui::SameLine();
-			if(ImGui::Button((AtmoAdmin->simulateInEditor) ? "True" : "False", ImVec2(-FLT_MIN, 0))){
+			if(ImGui::Button((AtmoAdmin->simulateInEditor) ? "True##editor_sim" : "False##editor_sim", ImVec2(-FLT_MIN, 0))){
 				AtmoAdmin->simulateInEditor = !AtmoAdmin->simulateInEditor;
 			}
 			//ImGui::TextEx("Gravity       "); ImGui::SameLine(); ImGui::InputFloat("##phys_gravity", &AtmoAdmin->physics.gravity);

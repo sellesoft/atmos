@@ -28,7 +28,9 @@ global_ const char* ColliderTypeStrings[] = {
 };
 
 struct Contact{
-	vec3 point;
+	vec3 point0; //local to p0
+	vec3 point1; //local to p1
+	vec3 normal; //0 to 1
 	f32  penetration;
 };
 
@@ -36,9 +38,9 @@ struct Manifold{
 	Entity   *e0, *e1;
 	Physics  *p0, *p1;
 	Collider *c0, *c1;
-	vec3 normal;
+	Contact contacts[4];
+	u32 contact_count;
 	Type state;
-	Contact contacts[8];
 };
 
 struct Collider{

@@ -40,7 +40,7 @@ void AABBCollider::RecalculateTensor(f32 mass){
 /////////
 SphereCollider::SphereCollider(float _radius, f32 mass){
 	Assert(_radius > 0 && mass > 0);
-	type   = ColliderType_AABB;
+	type   = ColliderType_Sphere;
 	radius = _radius;
 	tensor = InertiaTensors::SolidSphere(radius,mass);
 }
