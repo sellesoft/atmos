@@ -11,7 +11,7 @@ struct Physics;
 struct Collider;
 struct Mesh;
 
-enum ContactState_{
+enum ContactState{
 	ContactState_NONE,
 	ContactState_Stationary,
 	ContactState_Moving,
@@ -33,15 +33,12 @@ struct Contact{
 };
 
 struct Manifold{
-	Entity*   e1 = 0;
-	Entity*   e2 = 0;
-	Physics*  p1 = 0;
-	Physics*  p2 = 0;
-	Collider* c1 = 0;
-	Collider* c2 = 0;
-	vec3 normal{};
-	Type state = ContactState_NONE;
-	array<Contact> contacts;
+	Entity   *e0, *e1;
+	Physics  *p0, *p1;
+	Collider *c0, *c1;
+	vec3 normal;
+	Type state;
+	Contact contacts[8];
 };
 
 struct Collider{

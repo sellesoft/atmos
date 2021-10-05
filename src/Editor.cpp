@@ -916,15 +916,15 @@ void EntitiesTab(){
 						ImGui::TextEx("Layer     "); ImGui::SameLine(); ImGui::SetNextItemWidth(-1);
 						if(ImGui::DragInt("##phys_layer", (int*)&sel->physics->collider->layer, 1, 0, INT_MAX));
 						ImGui::TextEx("No Collide"); ImGui::SameLine();
-						if(ImGui::Button((sel->physics->collider->noCollide) ? "True" : "False", ImVec2(-FLT_MIN, 0))){
+						if(ImGui::Button((sel->physics->collider->noCollide) ? "True##phys_nocoll" : "False##phys_nocoll", ImVec2(-FLT_MIN, 0))){
 							sel->physics->collider->noCollide = !sel->physics->collider->noCollide;
 						}
 						ImGui::TextEx("Is Trigger"); ImGui::SameLine();
-						if(ImGui::Button((sel->physics->collider->isTrigger) ? "True" : "False", ImVec2(-FLT_MIN, 0))){
+						if(ImGui::Button((sel->physics->collider->isTrigger) ? "True##phys_trigger" : "False##phys_trigger", ImVec2(-FLT_MIN, 0))){
 							sel->physics->collider->isTrigger = !sel->physics->collider->isTrigger;
 						}
 						ImGui::TextEx("Player Only"); ImGui::SameLine();
-						if(ImGui::Button((sel->physics->collider->playerOnly) ? "True" : "False", ImVec2(-FLT_MIN, 0))){
+						if(ImGui::Button((sel->physics->collider->playerOnly) ? "True##phys_player" : "False##phys_player", ImVec2(-FLT_MIN, 0))){
 							sel->physics->collider->playerOnly = !sel->physics->collider->playerOnly;
 						}
 						
