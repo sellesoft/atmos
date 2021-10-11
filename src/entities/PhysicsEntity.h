@@ -8,7 +8,7 @@
 #include "core/storage.h"
 
 struct PhysicsEntity : public Entity {
-	void Init(const char* _name, Transform _transform, Model* _model, Collider* _collider, f32 _mass, b32 _static = false){
+	void Init(const char* _name, Transform _transform, Model* _model, Collider _collider, f32 _mass, b32 _static = false){
 		type = EntityType_Physics;
 		name = _name;
 		transform = _transform;

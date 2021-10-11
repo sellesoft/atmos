@@ -28,9 +28,9 @@ global_ const char* ColliderTypeStrings[] = {
 };
 
 struct Contact{
-	vec3 point0; //local to p0
-	vec3 point1; //local to p1
-	vec3 normal; //0 to 1
+	vec3 local0; //local to p0
+	vec3 local1; //local to p1
+	vec3 normal; //1 to 0
 	f32  penetration;
 };
 
@@ -39,38 +39,35 @@ struct Manifold{
 	Physics  *p0, *p1;
 	Collider *c0, *c1;
 	Contact contacts[4];
-	u32 contact_count;
+	u32 contactCount;
 	Type state;
 };
 
 struct Collider{
 	Type type = ColliderType_NONE;
-	mat3 tensor{};
+	mat3 inverseTensor;
 	vec3 offset{};
 	u32  layer = 0;
-	b32  noCollide  = false;
-	b32  isTrigger  = false;
+	b32  noCollide = false;
+	b32  isTrigger = false;
 	b32  playerOnly = false;
+	b32  triggerActive = false; //TODO replace this with manifold stuffs
+	struct{
+		union{
+			vec3 halfDims;
+			f32  radius;
+		};
+	};
 	
-	b32 triggerActive = false; //TODO replace this with manifold stuffs
-	
+	Collider(){}
+	Collider(const Collider& rhs);
+	void operator= (const Collider& rhs);
 	//evenly distributes mass through the respective body
-	virtual void RecalculateTensor(f32 mass) = 0;
+	void RecalculateTensor(f32 mass);
 };
 
-struct AABBCollider : public Collider{
-	vec3 halfDims;
-	
-	AABBCollider(Mesh* mesh,    f32 mass);
-	AABBCollider(vec3 halfDims, f32 mass);
-	void RecalculateTensor(f32 mass) override;
-};
-
-struct SphereCollider : public Collider{
-	f32 radius;
-	
-	SphereCollider(f32 radius, f32 mass);
-	void RecalculateTensor(f32 mass) override;
-};
+Collider AABBCollider(Mesh* mesh, f32 mass);
+Collider AABBCollider(vec3 halfDimensions, f32 mass);
+Collider SphereCollider(f32 radius, f32 mass);
 
 #endif //ATMOS_COLLIDER_H

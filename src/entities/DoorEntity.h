@@ -9,7 +9,7 @@
 #include "core/storage.h"
 
 struct DoorEntity : public Entity{
-	void Init(const char* _name, Collider* _collider, Model* _model, Transform _start, Transform _end, f32 _duration){
+	void Init(const char* _name, Collider _collider, Model* _model, Transform _start, Transform _end, f32 _duration){
 		type = EntityType_Door;
 		name = _name;
 		transform = _start;

@@ -451,26 +451,28 @@ local void PasteEntities(){
 			dst->physics = AtmoAdmin->physicsArr.last;
 			memcpy(dst->physics, src->physics, sizeof(Physics));
 			dst->physics->attribute.entity = dst;
-			if(src->physics->collider){
-				switch(src->physics->collider->type){
-					case ColliderType_AABB:{
-						dst->physics->collider = new AABBCollider(((AABBCollider*)src->physics->collider)->halfDims, src->physics->mass);
-					}break;
-					case ColliderType_Sphere:{
-						dst->physics->collider = new SphereCollider(((SphereCollider*)src->physics->collider)->radius, src->physics->mass);
-					}break;
-					default:{
-						LogfE("editor","Unhandled collider type '%d' when pasting copied entities.",src->physics->collider->type);
-					}break;
-				}
-				dst->physics->collider->type = src->physics->collider->type;
-				dst->physics->collider->tensor = src->physics->collider->tensor;
-				dst->physics->collider->offset = src->physics->collider->offset;
-				dst->physics->collider->noCollide = src->physics->collider->noCollide;
-				dst->physics->collider->isTrigger = src->physics->collider->isTrigger;
-				dst->physics->collider->triggerActive = src->physics->collider->triggerActive;
-				dst->physics->collider->playerOnly = src->physics->collider->playerOnly;
+			
+			switch(src->physics->collider.type){
+				case ColliderType_NONE:{
+					//nothing special
+				}break;
+				case ColliderType_AABB:{
+					dst->physics->collider = AABBCollider(src->physics->collider.halfDims, src->physics->mass);
+				}break;
+				case ColliderType_Sphere:{
+					dst->physics->collider = SphereCollider(src->physics->collider.radius, src->physics->mass);
+				}break;
+				default:{
+					LogfE("editor","Unhandled collider type '%d' when pasting copied entities.",src->physics->collider.type);
+				}break;
 			}
+			dst->physics->collider.type = src->physics->collider.type;
+			dst->physics->collider.inverseTensor = src->physics->collider.inverseTensor;
+			dst->physics->collider.offset = src->physics->collider.offset;
+			dst->physics->collider.noCollide = src->physics->collider.noCollide;
+			dst->physics->collider.isTrigger = src->physics->collider.isTrigger;
+			dst->physics->collider.triggerActive = src->physics->collider.triggerActive;
+			dst->physics->collider.playerOnly = src->physics->collider.playerOnly;
 		}
 		if(src->interp){
 			AtmoAdmin->interpTransformArr.add(InterpTransform());
@@ -625,12 +627,12 @@ void EntitiesTab(){
 			}break;
 			case(1):        { //StaticEntity
 				PhysicsEntity* e = new PhysicsEntity;
-				e->Init(ent_name.str, Transform(), Storage::NullModel(), new AABBCollider(Storage::NullMesh(),1.0f),1.0f,true);
+				e->Init(ent_name.str, Transform(), Storage::NullModel(), AABBCollider(Storage::NullMesh(),1.0f),1.0f,true);
 				ent = e;
 			}break;
 			case(2):        { //PhysicsEntity
 				PhysicsEntity* e = new PhysicsEntity;
-				e->Init(ent_name.str, Transform(), Storage::NullModel(), new AABBCollider(Storage::NullMesh(),1.0f),1.0f);
+				e->Init(ent_name.str, Transform(), Storage::NullModel(), AABBCollider(Storage::NullMesh(),1.0f),1.0f);
 				ent = e;
 			}break;
 			case(3):        { //Player
@@ -642,17 +644,17 @@ void EntitiesTab(){
 			}break;
 			case(4):        { //Visible Trigger
 				TriggerEntity* e = new TriggerEntity;
-				e->Init(ent_name.str, Transform(), new AABBCollider(Storage::NullMesh(),1.0f), Storage::NullModel());
+				e->Init(ent_name.str, Transform(), AABBCollider(Storage::NullMesh(),1.0f), Storage::NullModel());
 				ent = e;
 			}break;
 			case(5):        { //Invisible Trigger
 				TriggerEntity* e = new TriggerEntity;
-				e->Init(ent_name.str, Transform(), new AABBCollider(Storage::NullMesh(),1.0f));
+				e->Init(ent_name.str, Transform(), AABBCollider(Storage::NullMesh(),1.0f));
 				ent = e;
 			}break;
 			case(6):        { //Door
 				DoorEntity* e = new DoorEntity;
-				e->Init(ent_name.str, new AABBCollider(Storage::NullMesh(),1.0f), Storage::NullModel(), Transform(), Transform(), 1.f);
+				e->Init(ent_name.str, AABBCollider(Storage::NullMesh(),1.0f), Storage::NullModel(), Transform(), Transform(), 1.f);
 				ent = e;
 			}break;
 			case(7):        { //Scenery
@@ -847,9 +849,9 @@ void EntitiesTab(){
 		
 		//physics
 		if(sel->physics){
-			if(sel->physics->collider && (sel->physics->collider->type == ColliderType_AABB)){
-				Render::DrawBox(Transform(sel->transform.position+sel->physics->collider->offset, vec3::ZERO,
-										  sel->transform.scale*(((AABBCollider*)sel->physics->collider)->halfDims*2)).Matrix(), Color_Green);
+			if(sel->physics->collider.type == ColliderType_AABB){
+				Render::DrawBox(Transform(sel->transform.position+sel->physics->collider.offset, vec3::ZERO,
+										  sel->transform.scale*(sel->physics->collider.halfDims*2)).Matrix(), Color_Green);
 			}
 			
 			bool delete_button = 1;
@@ -888,20 +890,19 @@ void EntitiesTab(){
 				ImGui::Separator();
 				
 				ImGui::TextEx("Collider"); ImGui::SameLine(); ImGui::SetNextItemWidth(-1);
-				if(sel->physics->collider){
-					if(ImGui::BeginCombo("##phys_collider", ColliderTypeStrings[sel->physics->collider->type])){
+				if(sel->physics->collider.type != ColliderType_NONE){
+					if(ImGui::BeginCombo("##phys_collider", ColliderTypeStrings[sel->physics->collider.type])){
 						forI(ColliderType_COUNT){
-							if(ImGui::Selectable(ColliderTypeStrings[i], sel->physics->collider->type == i)){
-								delete sel->physics->collider;
+							if(ImGui::Selectable(ColliderTypeStrings[i], sel->physics->collider.type == i)){
 								switch(i){
 									case ColliderType_AABB:{
-										sel->physics->collider = new AABBCollider(vec3{.5f,.5f,.5f},sel->physics->mass);
+										sel->physics->collider = AABBCollider(vec3{.5f,.5f,.5f},sel->physics->mass);
 									}break;
 									case ColliderType_Sphere:{
-										sel->physics->collider = new SphereCollider(1.f,sel->physics->mass);
+										sel->physics->collider = SphereCollider(1.f,sel->physics->mass);
 									}break;
 									case ColliderType_NONE:default:{
-										sel->physics->collider = 0;
+										sel->physics->collider.type = ColliderType_NONE;
 									}break;
 								}
 								break;
@@ -910,37 +911,35 @@ void EntitiesTab(){
 						ImGui::EndCombo();
 					}
 					
-					if(sel->physics->collider){
-						ImGui::TextEx("Offset     "); ImGui::SameLine();
-						if(ImGui::Inputvec3("##phys_offset", &sel->physics->collider->offset));
-						ImGui::TextEx("Layer     "); ImGui::SameLine(); ImGui::SetNextItemWidth(-1);
-						if(ImGui::DragInt("##phys_layer", (int*)&sel->physics->collider->layer, 1, 0, INT_MAX));
-						ImGui::TextEx("No Collide "); ImGui::SameLine();
-						if(ImGui::Button((sel->physics->collider->noCollide) ? "True##phys_nocoll" : "False##phys_nocoll", ImVec2(-FLT_MIN, 0))){
-							sel->physics->collider->noCollide = !sel->physics->collider->noCollide;
-						}
-						ImGui::TextEx("Is Trigger "); ImGui::SameLine();
-						if(ImGui::Button((sel->physics->collider->isTrigger) ? "True##phys_trigger" : "False##phys_trigger", ImVec2(-FLT_MIN, 0))){
-							sel->physics->collider->isTrigger = !sel->physics->collider->isTrigger;
-						}
-						ImGui::TextEx("Player Only"); ImGui::SameLine();
-						if(ImGui::Button((sel->physics->collider->playerOnly) ? "True##phys_player" : "False##phys_player", ImVec2(-FLT_MIN, 0))){
-							sel->physics->collider->playerOnly = !sel->physics->collider->playerOnly;
-						}
-						
-						switch(sel->physics->collider->type){
-							case ColliderType_AABB:{
-								ImGui::TextEx("Half Dims  "); ImGui::SameLine();
-								if(ImGui::Inputvec3("##phys_halfdims", &((AABBCollider*)sel->physics->collider)->halfDims));
-							}break;
-							case ColliderType_Sphere:{
-								ImGui::TextEx("Radius     "); ImGui::SameLine(); ImGui::SetNextItemWidth(-FLT_MIN);
-								ImGui::InputFloat("##phys_radius", &((SphereCollider*)sel->physics->collider)->radius, 0, 0);
-							}break;
-							default:{
-								ImGui::TextEx("unhandled collider shape");
-							}break;
-						}
+					ImGui::TextEx("Offset     "); ImGui::SameLine();
+					if(ImGui::Inputvec3("##phys_offset", &sel->physics->collider.offset));
+					ImGui::TextEx("Layer     "); ImGui::SameLine(); ImGui::SetNextItemWidth(-1);
+					if(ImGui::DragInt("##phys_layer", (int*)&sel->physics->collider.layer, 1, 0, INT_MAX));
+					ImGui::TextEx("No Collide "); ImGui::SameLine();
+					if(ImGui::Button((sel->physics->collider.noCollide) ? "True##phys_nocoll" : "False##phys_nocoll", ImVec2(-FLT_MIN, 0))){
+						sel->physics->collider.noCollide = !sel->physics->collider.noCollide;
+					}
+					ImGui::TextEx("Is Trigger "); ImGui::SameLine();
+					if(ImGui::Button((sel->physics->collider.isTrigger) ? "True##phys_trigger" : "False##phys_trigger", ImVec2(-FLT_MIN, 0))){
+						sel->physics->collider.isTrigger = !sel->physics->collider.isTrigger;
+					}
+					ImGui::TextEx("Player Only"); ImGui::SameLine();
+					if(ImGui::Button((sel->physics->collider.playerOnly) ? "True##phys_player" : "False##phys_player", ImVec2(-FLT_MIN, 0))){
+						sel->physics->collider.playerOnly = !sel->physics->collider.playerOnly;
+					}
+					
+					switch(sel->physics->collider.type){
+						case ColliderType_AABB:{
+							ImGui::TextEx("Half Dims  "); ImGui::SameLine();
+							if(ImGui::Inputvec3("##phys_halfdims", &sel->physics->collider.halfDims));
+						}break;
+						case ColliderType_Sphere:{
+							ImGui::TextEx("Radius     "); ImGui::SameLine(); ImGui::SetNextItemWidth(-FLT_MIN);
+							ImGui::InputFloat("##phys_radius", &sel->physics->collider.radius, 0, 0);
+						}break;
+						default:{
+							ImGui::TextEx("unhandled collider shape");
+						}break;
 					}
 				}else{
 					if(ImGui::BeginCombo("##phys_collider", "None")){
@@ -948,10 +947,10 @@ void EntitiesTab(){
 							if(ImGui::Selectable(ColliderTypeStrings[i], false)){
 								switch(i){
 									case ColliderType_AABB:{
-										sel->physics->collider = new AABBCollider(vec3{.5f,.5f,.5f},sel->physics->mass);
+										sel->physics->collider = AABBCollider(vec3{.5f,.5f,.5f},sel->physics->mass);
 									}break;
 									case ColliderType_Sphere:{
-										sel->physics->collider = new SphereCollider(1.f,sel->physics->mass);
+										sel->physics->collider = SphereCollider(1.f,sel->physics->mass);
 									}break;
 								}
 							}

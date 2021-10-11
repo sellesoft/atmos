@@ -2,34 +2,53 @@
 #include "math/InertiaTensors.h"
 #include "core/model.h"
 
+Collider::Collider(const Collider& rhs){
+	memcpy(this, &rhs, sizeof(Collider));
+}
+
+void Collider::operator= (const Collider& rhs){
+	memcpy(this, &rhs, sizeof(Collider));
+}
+
+void Collider::RecalculateTensor(f32 mass){
+	Assert(mass > 0);
+	switch(type){
+		case ColliderType_AABB:{
+			inverseTensor = InertiaTensors::SolidCuboid(2.f*halfDims.x, 2.f*halfDims.y, 2.f*halfDims.z, mass).Inverse(); 
+		}break;
+		case ColliderType_Sphere:{
+			inverseTensor = InertiaTensors::SolidSphere(radius, mass).Inverse(); 
+		}break;
+	}
+}
+
+
 /////////
 // 
 //    AABB
 // 
 /////////
-AABBCollider::AABBCollider(Mesh* mesh, f32 mass){
+Collider AABBCollider(Mesh* mesh, f32 mass){
 	Assert(mesh && mesh->vertexCount && mass > 0);
-	type     = ColliderType_AABB;
+	Collider result{};
+	result.type = ColliderType_AABB;
 	
 	vec3 min = mesh->aabbMin.absV();
 	vec3 max = mesh->aabbMax.absV();
-	halfDims.x = (min.x > max.x) ? min.x : max.x;
-	halfDims.y = (min.y > max.y) ? min.y : max.y;
-	halfDims.z = (min.z > max.z) ? min.z : max.z;
-	
-	tensor = InertiaTensors::SolidCuboid(2.f*halfDims.x, 2.f*halfDims.y, 2.f*halfDims.z, mass);
+	result.halfDims.x = (min.x > max.x) ? min.x : max.x;
+	result.halfDims.y = (min.y > max.y) ? min.y : max.y;
+	result.halfDims.z = (min.z > max.z) ? min.z : max.z;
+	result.inverseTensor = InertiaTensors::SolidCuboid(2.f*result.halfDims.x, 2.f*result.halfDims.y, 2.f*result.halfDims.z, mass).Inverse();
+	return result;
 }
 
-AABBCollider::AABBCollider(vec3 _halfDims, f32 mass){
+Collider AABBCollider(vec3 _halfDims, f32 mass){
 	Assert(_halfDims.x > 0 && _halfDims.y > 0 && _halfDims.z > 0 && mass > 0);
-	type     = ColliderType_AABB;
-	halfDims = _halfDims;
-	tensor   = InertiaTensors::SolidCuboid(2.f*halfDims.x, 2.f*halfDims.y, 2.f*halfDims.z, mass);
-}
-
-void AABBCollider::RecalculateTensor(f32 mass){
-	Assert(mass > 0);
-	tensor = InertiaTensors::SolidCuboid(2.f*halfDims.x, 2.f*halfDims.y, 2.f*halfDims.z, mass);
+	Collider result{};
+	result.type = ColliderType_AABB;
+	result.halfDims = _halfDims;
+	result.inverseTensor = InertiaTensors::SolidCuboid(2.f*_halfDims.x, 2.f*_halfDims.y, 2.f*_halfDims.z, mass).Inverse();
+	return result;
 }
 
 
@@ -38,14 +57,11 @@ void AABBCollider::RecalculateTensor(f32 mass){
 //    Sphere
 // 
 /////////
-SphereCollider::SphereCollider(float _radius, f32 mass){
+Collider SphereCollider(float _radius, f32 mass){
 	Assert(_radius > 0 && mass > 0);
-	type   = ColliderType_Sphere;
-	radius = _radius;
-	tensor = InertiaTensors::SolidSphere(radius,mass);
-}
-
-void SphereCollider::RecalculateTensor(f32 mass){
-	Assert(mass > 0);
-	tensor = InertiaTensors::SolidSphere(radius,mass);
+	Collider result{};
+	result.type = ColliderType_Sphere;
+	result.radius = _radius;
+	result.inverseTensor = InertiaTensors::SolidSphere(_radius,mass).Inverse();
+	return result;
 }

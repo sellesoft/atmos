@@ -43,13 +43,13 @@ struct PlayerEntity : public Entity {
 		AtmoAdmin->physicsArr.add(Physics());
 		physics = AtmoAdmin->physicsArr.last;
 		physics->attribute.entity = this;
-		physics->collider   = new AABBCollider(vec3(.5f,standHeight/2.f,.5f), 1.0);
+		physics->collider   = AABBCollider(vec3(.5f,standHeight/2.f,.5f), 1.0);
 		physics->position   = _transform.position;
 		physics->rotation   = _transform.rotation;
 		physics->scale      = _transform.scale;
 		physics->mass       = 1.0;
 		physics->elasticity = 0.01;
-		physics->collider->offset = vec3(0,standHeight/2.f,0);
+		physics->collider.offset = vec3(0,standHeight/2.f,0);
 		spawnpoint = _transform;
 		
 		id = AtmoAdmin->entities.count;
@@ -119,10 +119,9 @@ struct PlayerEntity : public Entity {
 		
 		physics->position += physics->velocity * dt;
 		physics->acceleration = vec3::ZERO;
-		
-		AABBCollider* collider = (AABBCollider*)physics->collider;
 		f32 crouch_interp = Math::lerp(standHeight, crouchHeight, crouchTimer / timeToCrouch) / 2.f;
-		collider->halfDims.y = crouch_interp; collider->offset.y = crouch_interp;
+		physics->collider.halfDims.y = crouch_interp; 
+		physics->collider.offset.y = crouch_interp;
 	}
 	
 	void PostCollisionUpdate(){

@@ -19,7 +19,7 @@ FORCE_INLINE bool AABBAABBTest(vec3 min0, vec3 max0, vec3 min1, vec3 max1){
 	return (min0.x <= max1.x && max0.x >= min1.x) && (min0.y <= max1.y && max0.y >= min1.y) && (min0.z <= max1.z && max0.z >= min1.z);
 }
 
-void AABBAABBCollision(Physics* p0, AABBCollider* c0, Physics* p1, AABBCollider* c1, Manifold* manifold){
+void AABBAABBCollision(Physics* p0, Collider* c0, Physics* p1, Collider* c1, Manifold* manifold){
 	vec3 min0 = (p0->position - (c0->halfDims * p0->scale)) + c0->offset;
 	vec3 max0 = (p0->position + (c0->halfDims * p0->scale)) + c0->offset;
 	vec3 min1 = (p1->position - (c1->halfDims * p1->scale)) + c1->offset;
@@ -52,11 +52,11 @@ void AABBAABBCollision(Physics* p0, AABBCollider* c0, Physics* p1, AABBCollider*
 				normal = normals[i];
 			}
 		}
-		manifold->contacts[0].point0 = vec3::ZERO;
-		manifold->contacts[0].point1 = vec3::ZERO;
+		manifold->contactCount = 1;
+		manifold->contacts[0].local0 = vec3::ZERO;
+		manifold->contacts[0].local1 = vec3::ZERO;
 		manifold->contacts[0].normal = normal;
 		manifold->contacts[0].penetration = penetration;
-		manifold->contact_count = 1;
 		
 		//// static resolution ////
 		if     (p0->staticPosition){ p1->position += normal*penetration; }
@@ -81,7 +81,11 @@ void AABBAABBCollision(Physics* p0, AABBCollider* c0, Physics* p1, AABBCollider*
 	}
 }
 
-void SphereSphereCollision(Physics* p0, SphereCollider* c0, Physics* p1, SphereCollider* c1, Manifold* manifold){
+void AABBSphereCollision(Physics* p0, Collider* c0, Physics* p1, Collider* c1, Manifold* manifold){
+	
+}
+
+void SphereSphereCollision(Physics* p0, Collider* c0, Physics* p1, Collider* c1, Manifold* manifold){
 	f32  radii = c0->radius + c1->radius;
 	vec3 delta = p1->position - p0->position;
 	f32  dist  = delta.mag();
@@ -96,11 +100,11 @@ void SphereSphereCollision(Physics* p0, SphereCollider* c0, Physics* p1, SphereC
 		//// manifold generation ////
 		f32 penetration = radii - dist;
 		vec3 normal = delta / dist;
-		manifold->contacts[0].point0 = normal * c0->radius;
-		manifold->contacts[0].point1 = -normal * c1->radius;
+		manifold->contactCount = 1;
+		manifold->contacts[0].local0 = normal * c0->radius;
+		manifold->contacts[0].local1 = -normal * c1->radius;
 		manifold->contacts[0].normal = normal;
 		manifold->contacts[0].penetration = penetration;
-		manifold->contact_count = 1;
 		
 		//// static resolution ////
 		if     (p0->staticPosition){ p1->position += normal*penetration; }
@@ -144,75 +148,91 @@ void PhysicsSystem::Update(){
 		//// integration ////
 		AtmoAdmin->player->Update();
 		forE(AtmoAdmin->physicsArr){
-			if(it->attribute.entity != AtmoAdmin->player){
-				//TODO contact state frictions
+			if(it->attribute.entity == AtmoAdmin->player) continue;
+			
+			//linear motion
+			if(!it->staticPosition){
+				it->acceleration += vec3(0, -gravity, 0); //add gravity
+				it->velocity += it->acceleration * fixedDeltaTime;
 				
-				//linear motion
-				if(!it->staticPosition){
-					it->acceleration += vec3(0, -gravity, 0); //add gravity
-					it->velocity += it->acceleration * fixedDeltaTime;
-					
-					f32 vm = it->velocity.mag();
-					if(vm > maxVelocity) {
-						it->velocity /= vm;
-						it->velocity *= maxVelocity;
-					}else if(vm < minVelocity){
-						it->velocity = vec3::ZERO;
-						it->acceleration = vec3::ZERO;
-					}
-					it->position += it->velocity * fixedDeltaTime;
-					
+				f32 vm = it->velocity.mag();
+				if(vm > maxVelocity) {
+					it->velocity /= vm;
+					it->velocity *= maxVelocity;
+				}else if(vm < minVelocity){
+					it->velocity = vec3::ZERO;
 					it->acceleration = vec3::ZERO;
 				}
+				it->position += it->velocity * fixedDeltaTime;
 				
-				//rotational motion
-				if(!it->staticRotation){
-					if(it->rotVelocity != vec3::ZERO){ //fake rotational friction
-						it->rotAcceleration += vec3(it->rotVelocity.x > 0 ? -1 : 1, 
-													it->rotVelocity.y > 0 ? -1 : 1, 
-													it->rotVelocity.z > 0 ? -1 : 1) * it->airFricCoef * it->mass * 100;
-					}
-					
-					it->rotVelocity += it->rotAcceleration * fixedDeltaTime;
-					it->rotation += it->rotVelocity * fixedDeltaTime;
+				it->acceleration = vec3::ZERO;
+			}
+			
+			//rotational motion
+			if(!it->staticRotation){
+				if(it->rotVelocity != vec3::ZERO){ //fake rotational friction
+					it->rotAcceleration += vec3(it->rotVelocity.x > 0 ? -1 : 1, 
+												it->rotVelocity.y > 0 ? -1 : 1, 
+												it->rotVelocity.z > 0 ? -1 : 1) * it->airFricCoef * it->mass * 100;
 				}
+				
+				it->rotVelocity += it->rotAcceleration * fixedDeltaTime;
+				it->rotation += it->rotVelocity * fixedDeltaTime;
 			}
 		}
 		
 		//// broad collision detection //// (filter manifolds)
 		array<Manifold> manifolds;
 		for(Physics* p0 = AtmoAdmin->physicsArr.begin(); p0 != AtmoAdmin->physicsArr.end(); ++p0){
-			if(p0->collider && p0->collider->type != ColliderType_NONE){
+			if(p0->collider.type != ColliderType_NONE){
 				for(Physics* p1 = p0+1; p1 != AtmoAdmin->physicsArr.end(); ++p1){
-					if(    (p1->collider) 
-					   &&  (p1->collider->type != ColliderType_NONE) 
-					   &&  (p0->collider->layer == p1->collider->layer) 
-					   && !(p0->collider->playerOnly && p1->attribute.entity != AtmoAdmin->player) 
-					   && !(p1->collider->playerOnly && p0->attribute.entity != AtmoAdmin->player)){
-						manifolds.add(Manifold{p0->attribute.entity, p1->attribute.entity, p0, p1, p0->collider, p1->collider});
+					if(    (p1->collider.type != ColliderType_NONE) 
+					   &&  (p0->collider.layer == p1->collider.layer) 
+					   && !(p0->collider.playerOnly && p1->attribute.entity != AtmoAdmin->player) 
+					   && !(p1->collider.playerOnly && p0->attribute.entity != AtmoAdmin->player)){
+						manifolds.add(Manifold{p0->attribute.entity, p1->attribute.entity, p0, p1, &p0->collider, &p1->collider});
 					}
 				}
 			}
 		}
 		
-		//// narrow collision detection //// (fill and solve manifolds)
+		//// narrow collision detection //// (fill manifolds)
 		forE(manifolds){
 			switch((1 << it->c0->type) | (1 << it->c1->type)){
-				case CollisionType_AABBAABB:    { AABBAABBCollision(it->p0, (AABBCollider*)it->c0, 
-																	it->p1, (AABBCollider*)it->c1, it); }break;
-				case CollisionType_SphereSphere:{ SphereSphereCollision(it->p0, (SphereCollider*)it->c0, 
-																		it->p1, (SphereCollider*)it->c1, it); }break;
+				case CollisionType_AABBAABB:    { AABBAABBCollision    (it->p0, it->c0, it->p1, it->c1, it); }break;
+				case CollisionType_SphereSphere:{ SphereSphereCollision(it->p0, it->c0, it->p1, it->c1, it); }break;
 				default: Assert(!"not implemented"); break;
 			}
 			
 			//set triggers as active
 			if(it->state != ContactState_NONE){
-				if(it->c0->isTrigger) it->p0->collider->triggerActive = true;
-				if(it->c1->isTrigger) it->p1->collider->triggerActive = true;
+				if(it->c0->isTrigger) it->c0->triggerActive = true;
+				if(it->c1->isTrigger) it->c1->triggerActive = true;
 				//Log("physics","Collision between '",it->e0->name,"' and '",it->e1->name,"'");
 			}
 		}
 		
+		//// collision resolution //// (solve manifolds)
+		/*
+		forE(manifolds){
+			if(it->type == ContactState_NONE) continue;
+			
+			forI(it->contactCount){
+				vec3 normal = it->contacts[i].normal;
+				f32  penetration = it->contacts[i].penetration;
+				
+				//static resolution
+				if     (p0->staticPosition){ p1->position += normal*penetration; }
+				else if(p1->staticPosition){ p0->position -= normal*penetration; }
+				else{ p0->position -= normal*penetration/2.f; p1->position += normal*penetration/2.f; }
+				
+				//dynamic resolution
+				vec2 r0 = it->p0->position + it->contacts[i].local0;
+				vec2 r1 = it->p1->position + it->contacts[i].local1;
+				
+			}
+		}
+		*/
 		AtmoAdmin->player->PostCollisionUpdate();
 		
 		//// update fixed time ////

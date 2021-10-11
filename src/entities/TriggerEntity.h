@@ -10,7 +10,7 @@
 struct TriggerEntity : public Entity {
 	array<Event> events;
 	
-	void Init(const char* _name, Transform _transform, Collider* _collider, Model* _model = 0){
+	void Init(const char* _name, Transform _transform, Collider _collider, Model* _model = 0){
 		type = EntityType_Trigger;
 		name = _name;
 		transform = _transform;
@@ -31,8 +31,8 @@ struct TriggerEntity : public Entity {
 		physics->mass           = 1.0f;
 		physics->staticPosition = true;
 		physics->staticRotation = true;
-		physics->collider->isTrigger = true;
-		physics->collider->noCollide = true;
+		physics->collider.isTrigger = true;
+		physics->collider.noCollide = true;
 		
 		id = AtmoAdmin->entities.count;
 		AtmoAdmin->entities.add(this);
@@ -40,13 +40,13 @@ struct TriggerEntity : public Entity {
 	}
 	
 	void Update(){
-		if(physics->collider->triggerActive){ forI(events.count){ SendEvent(events[i]); } }
-		physics->collider->triggerActive = false;
+		if(physics->collider.triggerActive){ forI(events.count){ SendEvent(events[i]); } }
+		physics->collider.triggerActive = false;
 	}
 	
 	void ReceiveEvent(Event event)override{
 		if      (event == Event_ToggleTriggerActive){
-			physics->collider->isTrigger = !physics->collider->isTrigger;
+			physics->collider.isTrigger = !physics->collider.isTrigger;
 		}else if(model && event == Event_ModelVisibleToggle){
 			model->visible = !model->visible;
 		}

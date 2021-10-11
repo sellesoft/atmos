@@ -9,7 +9,7 @@
 struct Collider;
 struct Physics{
 	Attribute attribute{ AttributeType_Physics };
-	Collider* collider = 0;
+	Collider collider{};
 	
 	vec3 position        = vec3::ZERO;
 	vec3 rotation        = vec3::ZERO;
@@ -28,7 +28,7 @@ struct Physics{
 	b32 staticPosition = false;
 	b32 staticRotation = false;
 	
-	Physics();
+	Physics(){}
 	Physics(vec3 position, vec3 rotation, vec3 velocity = vec3::ZERO, vec3 acceleration = vec3::ZERO,
 			vec3 rotVeloctiy = vec3::ZERO, vec3 rotAcceleration = vec3::ZERO, float elasticity = .2f,
 			float mass = 1.f, bool staticPosition = false);

@@ -3,18 +3,6 @@
 #include "../entities/entity.h"
 #include "utils/string_conversion.h"
 
-Physics::Physics() {
-	position = vec3::ZERO;
-	rotation = vec3::ZERO;
-	velocity = vec3::ZERO;
-	acceleration = vec3::ZERO;
-	rotVelocity = vec3::ZERO;
-	rotAcceleration = vec3::ZERO;
-	elasticity = .2f;
-	mass = 1;
-	staticPosition = false;
-}
-
 Physics::Physics(vec3 position, vec3 rotation, vec3 velocity, vec3 acceleration, vec3 rotVeloctiy,
 				 vec3 rotAcceleration, float elasticity, float mass, bool staticPosition) {
 	this->position = position;
@@ -78,19 +66,19 @@ void Physics::SaveText(Physics* p, string& level){
 					  "\nair_fric     ",p->airFricCoef,
 					  "\nstatic_pos   ",(p->staticPosition) ? "true" : "false",
 					  "\nstatic_rot   ",(p->staticRotation) ? "true" : "false");
-	if(p->collider){
-		level += TOSTRING("\ncollider_type       ",p->collider->type," #",ColliderTypeStrings[p->collider->type],
-						  "\ncollider_offset     ",p->collider->offset,
-						  "\ncollider_layer      ",p->collider->layer,
-						  "\ncollider_nocollide  ",(p->collider->noCollide) ? "true" : "false",
-						  "\ncollider_trigger    ",(p->collider->isTrigger) ? "true" : "false",
-						  "\ncollider_playeronly ",(p->collider->playerOnly) ? "true" : "false");
-		switch(p->collider->type){
+	if(p->collider.type != ColliderType_NONE){
+		level += TOSTRING("\ncollider_type       ",p->collider.type," #",ColliderTypeStrings[p->collider.type],
+						  "\ncollider_offset     ",p->collider.offset,
+						  "\ncollider_layer      ",p->collider.layer,
+						  "\ncollider_nocollide  ",(p->collider.noCollide) ? "true" : "false",
+						  "\ncollider_trigger    ",(p->collider.isTrigger) ? "true" : "false",
+						  "\ncollider_playeronly ",(p->collider.playerOnly) ? "true" : "false");
+		switch(p->collider.type){
 			case ColliderType_AABB:{
-				level += TOSTRING("\ncollider_half_dims ",((AABBCollider*)p->collider)->halfDims);
+				level += TOSTRING("\ncollider_half_dims ",p->collider.halfDims);
 			}break;
 			case ColliderType_Sphere:{
-				level += TOSTRING("\ncollider_radius    ",((SphereCollider*)p->collider)->radius);
+				level += TOSTRING("\ncollider_radius    ",p->collider.radius);
 			}break;
 		}
 	}

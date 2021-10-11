@@ -467,28 +467,26 @@ void Admin::LoadLevel(cstring level_name){
 							entity->physics->staticRotation = parse_b32(value);
 						}else if(key == cstr_lit("collider_type")){
 							switch(Type(b10tou64(value))){
-								case ColliderType_AABB:   { entity->physics->collider = new AABBCollider(vec3::ONE, entity->physics->mass); }break;
-								case ColliderType_Sphere: { entity->physics->collider = new SphereCollider(1.f, entity->physics->mass); }break;
+								case ColliderType_AABB:  { entity->physics->collider = AABBCollider(vec3::ONE, entity->physics->mass); }break;
+								case ColliderType_Sphere:{ entity->physics->collider = SphereCollider(1.f, entity->physics->mass); }break;
 								default:{ ParseError("Unhandled Collider shape: ",value); }break;
 							}
 						}else if(key == cstr_lit("collider_offset")){
-							entity->physics->collider->offset = parse_vec3(value);
+							entity->physics->collider.offset = parse_vec3(value);
 						}else if(key == cstr_lit("collider_layer")){
-							entity->physics->collider->layer = atoi(value_start);
+							entity->physics->collider.layer = atoi(value_start);
 						}else if(key == cstr_lit("collider_nocollide")){
-							entity->physics->collider->noCollide = parse_b32(value);
+							entity->physics->collider.noCollide = parse_b32(value);
 						}else if(key == cstr_lit("collider_trigger")){
-							entity->physics->collider->isTrigger = parse_b32(value);
+							entity->physics->collider.isTrigger = parse_b32(value);
 						}else if(key == cstr_lit("collider_playeronly")){
-							entity->physics->collider->playerOnly = parse_b32(value);
+							entity->physics->collider.playerOnly = parse_b32(value);
 						}else if(key == cstr_lit("collider_half_dims")){
-							AABBCollider* c = (AABBCollider*)entity->physics->collider;
-							c->halfDims = parse_vec3(value);
-							c->RecalculateTensor(entity->physics->mass);
+							entity->physics->collider.halfDims = parse_vec3(value);
+							entity->physics->collider.RecalculateTensor(entity->physics->mass);
 						}else if(key == cstr_lit("collider_radius")){
-							SphereCollider* c = (SphereCollider*)entity->physics->collider;
-							c->radius = (f32)atof(value_start);
-							c->RecalculateTensor(entity->physics->mass);
+							entity->physics->collider.radius = (f32)atof(value_start);
+							entity->physics->collider.RecalculateTensor(entity->physics->mass);
 						}else{ ParseError("Unhandled Physics key: ",key); }
 					}break;
 					case AttributeType_Player:{
@@ -545,7 +543,7 @@ Entity* Admin::EntityRaycast(vec3 origin, vec3 direction, f32 maxDistance, Entit
 			mat4 rotation = mat4::RotationMatrix(e->transform.rotation);
 			if(ModelInstance* mc = e->model){
 				if(!mc->visible) continue;
-				if(requireCollider && !(e->physics && e->physics->collider)) continue; //skip if no collider when required
+				if(requireCollider && !(e->physics && e->physics->collider.type != ColliderType_NONE)) continue; //skip if no collider when required
 				forX(tri_idx, mc->mesh->triangleCount){
 					Mesh::Triangle* tri = &mc->mesh->triangleArray[tri_idx];
 					vec3 p0 = tri->p[0] * transform;
