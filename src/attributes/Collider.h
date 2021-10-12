@@ -45,7 +45,7 @@ struct Manifold{
 
 struct Collider{
 	Type type = ColliderType_NONE;
-	mat3 inverseTensor;
+	mat3 tensor;
 	vec3 offset{};
 	u32  layer = 0;
 	b32  noCollide = false;

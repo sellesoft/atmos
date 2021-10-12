@@ -19,6 +19,7 @@ struct PhysicsSystem {
 	f32 fixedAlpha;
 	
 	b32 paused;
+	b32 step;
 	
 	void Init(f32 fixedUpdatesPerSecond);
 	void Update();

@@ -41,13 +41,12 @@ redo debug bar to be more informative and have different modes
 
  Physics TODOs
 -------------
-make collider trigger latching a boolean, so it can continuous trigger an event while an obj is in it
-redo main physics loop
+add mesh colliders
+add compound colliders (multiple colliders that represent one physics object)
+rework collider to have flags: player only collision, dont collide with others with this flag, dont resolve collisions, 
+____dont collide at all (for some reason), trigger, etc
 add physics collision sweeping
-add physics based collision resolution for remaining collider primitives
-add physics interaction functions
-implement collision manifold generation
-implement Complex Colliders
+add physics based collision resolution for: cylinder, capsule, box
 
 Ungrouped TODOs
 ---------------
@@ -63,9 +62,7 @@ binary file saving/loading
 
 Bug Board       //NOTE mark these with a last-known active date (M/D/Y)
 ---------
-(06/13/21) rotating using R no longer seems to work, it wildly rotates the object
-__________ it might have something to do with our rotate by axis function
-(07/20/21) copy/paste produces an extra mesh in the renderer sometimes
+(10/12/21) rotation scalar in physics manifold resolution is extra large
 
 */
 

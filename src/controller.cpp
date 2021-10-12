@@ -110,6 +110,10 @@ void Controller::Update(){
 				AtmoAdmin->camera.rotation.x += (DeshInput->mouseY - DeshWindow->centerY) * cameraSensitivity * MOUSE_SENS_FRACTION;
 				AtmoAdmin->camera.rotation.x = Clamp(AtmoAdmin->camera.rotation.x, -80.f, 80.f);
 			}
+			
+			//physics
+			if(AtmoAdmin->simulateInEditor && DeshInput->KeyPressed(physicsPause)) AtmoAdmin->physics.paused = !AtmoAdmin->physics.paused;
+			if(AtmoAdmin->simulateInEditor && DeshInput->KeyPressed(physicsStep))  AtmoAdmin->physics.step = true;
 		}break;
 	}
 }

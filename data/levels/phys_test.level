@@ -6,22 +6,22 @@ last_updated 0
 ]0
 type     2 #Physics
 name     "Physics0"
-position (0, 0, 0)
+position (-2, 3, 0)
 rotation (0, 0, 0)
 scale    (1, 1, 1)
 attributes 1 2
 :1 #ModelInstance
-model   "null"
+model   "sphere"
 visible true
 :2 #Physics
-position     (0, 0, 0)
+position     (-2, 3, 0)
 rotation     (0, 0, 0)
 scale        (1, 1, 1)
 velocity     (0, 0, 0)
 accel        (0, 0, 0)
 rot_velocity (0, 0, 0)
 rot_accel    (0, 0, 0)
-mass         1
+mass         1000
 elasticity   0.2
 kinetic_fric 0.3
 static_fric  0.3
@@ -30,7 +30,7 @@ static_pos   true
 static_rot   true
 collider_type       2 #Sphere
 collider_offset     (0, 0, 0)
-collider_layer      1
+collider_layer      0
 collider_nocollide  false
 collider_trigger    false
 collider_playeronly false
@@ -39,15 +39,15 @@ collider_radius    1
 ]1
 type     2 #Physics
 name     "Physics0"
-position (0.2, 5, 0)
+position (2, 2, 0)
 rotation (0, 0, 0)
 scale    (1, 1, 1)
 attributes 1 2
 :1 #ModelInstance
-model   "null"
+model   "sphere"
 visible true
 :2 #Physics
-position     (0.2, 5, 0)
+position     (2, 2, 0)
 rotation     (0, 0, 0)
 scale        (1, 1, 1)
 velocity     (0, 0, 0)
@@ -60,10 +60,10 @@ kinetic_fric 0.3
 static_fric  0.3
 air_fric     0.1
 static_pos   false
-static_rot   true
+static_rot   false
 collider_type       2 #Sphere
 collider_offset     (0, 0, 0)
-collider_layer      1
+collider_layer      0
 collider_nocollide  false
 collider_trigger    false
 collider_playeronly false

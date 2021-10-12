@@ -122,6 +122,7 @@ namespace ImGui {
 	}
 } //namespace ImGui
 
+#define BoolButton(value, tag) ImGui::Button((value) ? "True##"tag : "False##"tag, ImVec2(-FLT_MIN, 0))
 
 ///////////////
 //// @undo ////
@@ -467,7 +468,7 @@ local void PasteEntities(){
 				}break;
 			}
 			dst->physics->collider.type = src->physics->collider.type;
-			dst->physics->collider.inverseTensor = src->physics->collider.inverseTensor;
+			dst->physics->collider.tensor = src->physics->collider.tensor;
 			dst->physics->collider.offset = src->physics->collider.offset;
 			dst->physics->collider.noCollide = src->physics->collider.noCollide;
 			dst->physics->collider.isTrigger = src->physics->collider.isTrigger;
@@ -825,7 +826,7 @@ void EntitiesTab(){
 				ImGui::Indent();
 				
 				ImGui::TextEx("Visible  "); ImGui::SameLine();
-				if(ImGui::Button((sel->model->visible) ? "True##model_vis" : "False##model_vis", ImVec2(-FLT_MIN, 0))){
+				if(BoolButton(sel->model->visible, "model_vis")){
 					sel->model->ToggleVisibility();
 				}
 				
@@ -879,11 +880,11 @@ void EntitiesTab(){
 				ImGui::InputFloat("##phys_airfric", &sel->physics->airFricCoef, 0, 0);
 				
 				ImGui::TextEx("Static Position "); ImGui::SameLine();
-				if(ImGui::Button((sel->physics->staticPosition) ? "True##phys_stapos" : "False##phys_stapos", ImVec2(-FLT_MIN, 0))){
+				if(BoolButton(sel->physics->staticPosition, "phys_stapos")){
 					sel->physics->staticPosition = !sel->physics->staticPosition;
 				}
 				ImGui::TextEx("Static Rotation "); ImGui::SameLine();
-				if(ImGui::Button((sel->physics->staticRotation) ? "True##phys_starot" : "False##phys_starot", ImVec2(-FLT_MIN, 0))){
+				if(BoolButton(sel->physics->staticRotation, "phys_starot")){
 					sel->physics->staticRotation = !sel->physics->staticRotation;
 				}
 				
@@ -916,15 +917,15 @@ void EntitiesTab(){
 					ImGui::TextEx("Layer     "); ImGui::SameLine(); ImGui::SetNextItemWidth(-1);
 					if(ImGui::DragInt("##phys_layer", (int*)&sel->physics->collider.layer, 1, 0, INT_MAX));
 					ImGui::TextEx("No Collide "); ImGui::SameLine();
-					if(ImGui::Button((sel->physics->collider.noCollide) ? "True##phys_nocoll" : "False##phys_nocoll", ImVec2(-FLT_MIN, 0))){
+					if(BoolButton(sel->physics->collider.noCollide, "phys_nocoll")){
 						sel->physics->collider.noCollide = !sel->physics->collider.noCollide;
 					}
 					ImGui::TextEx("Is Trigger "); ImGui::SameLine();
-					if(ImGui::Button((sel->physics->collider.isTrigger) ? "True##phys_trigger" : "False##phys_trigger", ImVec2(-FLT_MIN, 0))){
+					if(BoolButton(sel->physics->collider.isTrigger, "phys_trigger")){
 						sel->physics->collider.isTrigger = !sel->physics->collider.isTrigger;
 					}
 					ImGui::TextEx("Player Only"); ImGui::SameLine();
-					if(ImGui::Button((sel->physics->collider.playerOnly) ? "True##phys_player" : "False##phys_player", ImVec2(-FLT_MIN, 0))){
+					if(BoolButton(sel->physics->collider.playerOnly, "phys_player")){
 						sel->physics->collider.playerOnly = !sel->physics->collider.playerOnly;
 					}
 					
@@ -987,7 +988,7 @@ void EntitiesTab(){
 				ImGui::TextEx("Starting "); ImGui::SameLine(); ImGui::SetNextItemWidth(-1);
 				ImGui::InputFloat("##interp_current", &sel->interp->current, 0, 0);
 				ImGui::TextEx("Active   "); ImGui::SameLine();
-				if(ImGui::Button((sel->interp->active) ? "True##interp_active" : "False##interp_active", ImVec2(-FLT_MIN, 0))){
+				if(BoolButton(sel->interp->active, "interp_active")){
 					sel->interp->active = !sel->interp->active;
 				}
 				
@@ -1855,13 +1856,16 @@ void SettingsTab(){
 	if(ImGui::BeginChild("##settings_tab", ImVec2(ImGui::GetWindowWidth() * 0.95f, ImGui::GetWindowHeight() * .9f))){
 		//// physics properties ////
 		if(ImGui::CollapsingHeader("Physics", 0)){
-			ImGui::TextEx("Sim Physics"); ImGui::SameLine();
-			if(ImGui::Button((AtmoAdmin->simulateInEditor) ? "True##editor_sim" : "False##editor_sim", ImVec2(-FLT_MIN, 0))){
-				AtmoAdmin->simulateInEditor = !AtmoAdmin->simulateInEditor;
-			}
-			//ImGui::TextEx("Gravity       "); ImGui::SameLine(); ImGui::InputFloat("##phys_gravity", &AtmoAdmin->physics.gravity);
-			
-			//ImGui::TextEx("Phys TPS      "); ImGui::SameLine(); ImGui::InputFloat("##phys_tps", );
+			ImGui::TextEx("Sim in Editor "); ImGui::SameLine();
+			if(BoolButton(AtmoAdmin->simulateInEditor, "editor_sim")){ AtmoAdmin->simulateInEditor = !AtmoAdmin->simulateInEditor; }
+			ImGui::TextEx("Physics Paused"); ImGui::SameLine();
+			if(BoolButton(AtmoAdmin->physics.paused, "pengine_pause")){ AtmoAdmin->physics.paused = !AtmoAdmin->physics.paused; }
+			if(ImGui::Button("Step Forward", ImVec2(-FLT_MIN, 0))){ AtmoAdmin->physics.step = true; }
+			ImGui::TextEx("Gravity             "); ImGui::SameLine(); ImGui::InputFloat("##pengine_gravity", &AtmoAdmin->physics.gravity);
+			ImGui::TextEx("Min Linear Velocity "); ImGui::SameLine(); ImGui::InputFloat("##pengine_minvel", &AtmoAdmin->physics.minVelocity);
+			ImGui::TextEx("Max Linear Velocity "); ImGui::SameLine(); ImGui::InputFloat("##pengine_maxvel", &AtmoAdmin->physics.maxVelocity);
+			ImGui::TextEx("Min Angular Velocity"); ImGui::SameLine(); ImGui::InputFloat("##pengine_minrvel", &AtmoAdmin->physics.maxRotVelocity);
+			ImGui::TextEx("Max Angular Velocity"); ImGui::SameLine(); ImGui::InputFloat("##pengine_maxrvel", &AtmoAdmin->physics.maxRotVelocity);
 			
 			ImGui::Separator();
 		}

@@ -63,6 +63,8 @@ struct Controller{
 	Key::Key cut   = Key::X | InputMod_AnyCtrl;
 	Key::Key copy  = Key::C | InputMod_AnyCtrl;
 	Key::Key paste = Key::V | InputMod_AnyCtrl;
+	Key::Key physicsPause = Key::SPACE;
+	Key::Key physicsStep = Key::SPACE | InputMod_AnyCtrl;
 	
 	Key::Key saveLevel = Key::S | InputMod_AnyCtrl;
 	
