@@ -2,6 +2,7 @@
 #include "../admin.h"
 #include "../entities/entity.h"
 #include "utils/string_conversion.h"
+#include "core/storage.h"
 
 Physics::Physics(vec3 position, vec3 rotation, vec3 velocity, vec3 acceleration, vec3 rotVeloctiy,
 				 vec3 rotAcceleration, float elasticity, float mass, bool staticPosition) {
@@ -79,6 +80,10 @@ void Physics::SaveText(Physics* p, string& level){
 			}break;
 			case ColliderType_Sphere:{
 				level += TOSTRING("\ncollider_radius    ",p->collider.radius);
+			}break;
+			case ColliderType_ConvexMesh:{
+				Storage::SaveMesh(p->collider.mesh);
+				level += TOSTRING("\ncollider_mesh      \"",p->collider.mesh->name,"\"");
 			}break;
 		}
 	}

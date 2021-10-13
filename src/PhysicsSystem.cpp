@@ -20,7 +20,7 @@ FORCE_INLINE bool AABBAABBTest(vec3 min0, vec3 max0, vec3 min1, vec3 max1){
 ////////////////////
 //// @detection ////
 ////////////////////
-void AABBAABBCollision(Physics* p0, Collider* c0, Physics* p1, Collider* c1, Manifold* manifold){
+void AABBAABBCollision(Physics* p0, Collider* c0, Physics* p1, Collider* c1, Manifold* m){
 	vec3 min0 = (p0->position - (c0->halfDims * p0->scale)) + c0->offset;
 	vec3 max0 = (p0->position + (c0->halfDims * p0->scale)) + c0->offset;
 	vec3 min1 = (p1->position - (c1->halfDims * p1->scale)) + c1->offset;
@@ -28,7 +28,7 @@ void AABBAABBCollision(Physics* p0, Collider* c0, Physics* p1, Collider* c1, Man
 	
 	if(AABBAABBTest(min0, max0, min1, max1)){
 		//early out if no collision or both are static
-		manifold->state = ContactState_Stationary;
+		m->state = ContactState_Stationary;
 		if(c0->noCollide || c1->noCollide) return;
 		if(p0->staticPosition && p1->staticPosition && p0->staticRotation && p1->staticRotation) return;
 		
@@ -51,53 +51,83 @@ void AABBAABBCollision(Physics* p0, Collider* c0, Physics* p1, Collider* c1, Man
 				normal = normals[i];
 			}
 		}
-		manifold->contactCount = 1;
-		manifold->contacts[0].local0 = vec3::ZERO;
-		manifold->contacts[0].local1 = vec3::ZERO;
-		manifold->contacts[0].normal = normal;
-		manifold->contacts[0].penetration = penetration;
+		m->contactCount = 1;
+		m->contacts[0].local0 = vec3::ZERO;
+		m->contacts[0].local1 = vec3::ZERO;
+		m->contacts[0].normal = normal;
+		m->contacts[0].penetration = penetration;
 	}
 }
 
-void AABBSphereCollision(Physics* p0, Collider* c0, Physics* p1, Collider* c1, Manifold* manifold){
-	vec3 closest_aabb = Geometry::ClosestPointOnAABB(p0->position, (c0->halfDims*p0->scale), p1->position);
-	vec3 between = closest_aabb - p1->position;
-	f32 distance = between.mag();
+void AABBSphereCollision(Physics* p0, Collider* c0, Physics* p1, Collider* c1, Manifold* m){
+	vec3 aabb_point = Geometry::ClosestPointOnAABB(p0->position, (c0->halfDims*p0->scale), p1->position);
+	vec3 delta = aabb_point - p1->position;
+	f32  distance = delta.mag();
+	
 	if(distance < c1->radius){
 		//early out if no collision or both are static
-		manifold->state = ContactState_Stationary;
+		m->state = ContactState_Stationary;
 		if(c0->noCollide || c1->noCollide) return;
 		if(p0->staticPosition && p1->staticPosition && p0->staticRotation && p1->staticRotation) return;
 		
 		f32 penetration = c1->radius - distance;
-		vec3 normal = between.normalized();
-		manifold->contactCount = 1;
-		manifold->contacts[0].local0 = vec3::ZERO;
-		manifold->contacts[0].local1 = -normal * c1->radius;
-		manifold->contacts[0].normal = normal;
-		manifold->contacts[0].penetration = penetration;
+		vec3 normal = delta / distance;
+		m->contactCount = 1;
+		m->contacts[0].local0 = vec3::ZERO;
+		m->contacts[0].local1 = -normal * c1->radius;
+		m->contacts[0].normal = normal;
+		m->contacts[0].penetration = penetration;
 	}
 }
 
-void SphereSphereCollision(Physics* p0, Collider* c0, Physics* p1, Collider* c1, Manifold* manifold){
+void AABBConvexMeshCollision(Physics* p0, Collider* c0, Physics* p1, Collider* c1, Manifold* m){
+	
+}
+
+void SphereSphereCollision(Physics* p0, Collider* c0, Physics* p1, Collider* c1, Manifold* m){
 	f32  radii = c0->radius + c1->radius;
 	vec3 delta = p1->position - p0->position;
-	f32  dist  = delta.mag();
+	f32  distance = delta.mag();
 	
-	if(dist < radii){
+	if(distance < radii){
 		//early out if no collision or both are static
-		manifold->state = ContactState_Stationary;
+		m->state = ContactState_Stationary;
 		if(c0->noCollide || c1->noCollide) return;
 		if(p0->staticPosition && p1->staticPosition && p0->staticRotation && p1->staticRotation) return;
 		
-		f32 penetration = radii - dist;
-		vec3 normal = delta / dist;
-		manifold->contactCount = 1;
-		manifold->contacts[0].local0 = normal * c0->radius;
-		manifold->contacts[0].local1 = -normal * c1->radius;
-		manifold->contacts[0].normal = normal;
-		manifold->contacts[0].penetration = penetration;
+		f32 penetration = radii - distance;
+		vec3 normal = delta / distance;
+		m->contactCount = 1;
+		m->contacts[0].local0 = normal * c0->radius;
+		m->contacts[0].local1 = -normal * c1->radius;
+		m->contacts[0].normal = normal;
+		m->contacts[0].penetration = penetration;
 	}
+}
+
+void SphereConvexMeshCollision(Physics* p0, Collider* c0, Physics* p1, Collider* c1, Manifold* m){
+	vec3 mesh_point = Geometry::ClosestPointOnConvexMesh(c1->mesh, p1->position, p1->rotation, p1->scale, p0->position);
+	vec3 delta = mesh_point - p0->position;
+	f32  distance = delta.mag();
+	
+	if(distance < c0->radius){
+		//early out if no collision or both are static
+		m->state = ContactState_Stationary;
+		if(c0->noCollide || c1->noCollide) return;
+		if(p0->staticPosition && p1->staticPosition && p0->staticRotation && p1->staticRotation) return;
+		
+		f32 penetration = c0->radius - distance;
+		vec3 normal = (mesh_point - p1->position).normalized();
+		m->contactCount = 1;
+		m->contacts[0].local0 = (delta / distance) * c0->radius;
+		m->contacts[0].local1 = mesh_point * mat4::TransformationMatrix(p1->position, p1->rotation, p1->scale).Inverse();
+		m->contacts[0].normal = normal;
+		m->contacts[0].penetration = penetration;
+	}
+}
+
+void ConvexMeshConvexMeshCollision(Physics* p0, Collider* c0, Physics* p1, Collider* c1, Manifold* m){
+	
 }
 
 ///////////////
@@ -128,7 +158,7 @@ void PhysicsSystem::Update(){
 	fixedAccumulator += DeshTime->deltaTime;
 	while(fixedAccumulator >= fixedDeltaTime){
 		//// integration ////
-		AtmoAdmin->player->Update();
+		if(!AtmoAdmin->simulateInEditor) AtmoAdmin->player->Update();
 		forE(AtmoAdmin->physicsArr){
 			if(it->attribute.entity == AtmoAdmin->player) continue;
 			
@@ -166,14 +196,13 @@ void PhysicsSystem::Update(){
 		//// broad collision detection //// (filter manifolds)
 		array<Manifold> manifolds;
 		for(Physics* p0 = AtmoAdmin->physicsArr.begin(); p0 != AtmoAdmin->physicsArr.end(); ++p0){
-			if(p0->collider.type != ColliderType_NONE){
-				for(Physics* p1 = p0+1; p1 != AtmoAdmin->physicsArr.end(); ++p1){
-					if(    (p1->collider.type != ColliderType_NONE) 
-					   &&  (p0->collider.layer == p1->collider.layer) 
-					   && !(p0->collider.playerOnly && p1->attribute.entity != AtmoAdmin->player) 
-					   && !(p1->collider.playerOnly && p0->attribute.entity != AtmoAdmin->player)){
-						manifolds.add(Manifold{p0->attribute.entity, p1->attribute.entity, p0, p1, &p0->collider, &p1->collider});
-					}
+			if(p0->collider.type == ColliderType_NONE) continue;
+			for(Physics* p1 = p0+1; p1 != AtmoAdmin->physicsArr.end(); ++p1){
+				if(    (p1->collider.type != ColliderType_NONE) 
+				   &&  (p0->collider.layer == p1->collider.layer) 
+				   && !(p0->collider.playerOnly && p1->attribute.entity != AtmoAdmin->player) 
+				   && !(p1->collider.playerOnly && p0->attribute.entity != AtmoAdmin->player)){
+					manifolds.add(Manifold{p0->attribute.entity, p1->attribute.entity, p0, p1, &p0->collider, &p1->collider});
 				}
 			}
 		}
@@ -181,29 +210,35 @@ void PhysicsSystem::Update(){
 		//// narrow collision detection //// (fill manifolds)
 		forE(manifolds){
 			switch(it->c0->type){
-				case ColliderType_AABB:   switch(it->c1->type){
-					case ColliderType_AABB:  { AABBAABBCollision    (it->p0, it->c0, it->p1, it->c1, it); }break;
-					case ColliderType_Sphere:{ AABBSphereCollision  (it->p0, it->c0, it->p1, it->c1, it); }break;
+				case ColliderType_AABB:       switch(it->c1->type){
+					case ColliderType_AABB:      { AABBAABBCollision      (it->p0, it->c0, it->p1, it->c1, it); }break;
+					case ColliderType_Sphere:    { AABBSphereCollision    (it->p0, it->c0, it->p1, it->c1, it); }break;
+					case ColliderType_ConvexMesh:{ AABBConvexMeshCollision(it->p0, it->c0, it->p1, it->c1, it); }break;
 					default:{ Assert(!"not implemented"); }break;
 				}break;
-				case ColliderType_Sphere: switch(it->c1->type){
-					case ColliderType_AABB:  { AABBSphereCollision  (it->p1, it->c1, it->p0, it->c0, it); }break;
-					case ColliderType_Sphere:{ SphereSphereCollision(it->p0, it->c0, it->p1, it->c1, it); }break;
+				case ColliderType_Sphere:     switch(it->c1->type){
+					case ColliderType_AABB:      { AABBSphereCollision      (it->p1, it->c1, it->p0, it->c0, it); }break;
+					case ColliderType_Sphere:    { SphereSphereCollision    (it->p0, it->c0, it->p1, it->c1, it); }break;
+					case ColliderType_ConvexMesh:{ SphereConvexMeshCollision(it->p0, it->c0, it->p1, it->c1, it); }break;
+					default:{ Assert(!"not implemented"); }break;
+				}break;
+				case ColliderType_ConvexMesh: switch(it->c1->type){
+					case ColliderType_AABB:      { AABBConvexMeshCollision      (it->p1, it->c1, it->p0, it->c0, it); }break;
+					case ColliderType_Sphere:    { SphereConvexMeshCollision    (it->p1, it->c1, it->p0, it->c0, it); }break;
+					case ColliderType_ConvexMesh:{ ConvexMeshConvexMeshCollision(it->p0, it->c0, it->p1, it->c1, it); }break;
 					default:{ Assert(!"not implemented"); }break;
 				}break;
 				default:{ Assert(!"not implemented"); }break;
-			}
-			
-			//set triggers as active
-			if(it->state != ContactState_NONE){
-				if(it->c0->isTrigger) it->c0->triggerActive = true;
-				if(it->c1->isTrigger) it->c1->triggerActive = true;
 			}
 		}
 		
 		//// collision resolution //// (solve manifolds)
 		forE(manifolds){
 			if(it->state == ContactState_NONE) continue;
+			
+			//set triggers as active
+			if(it->c0->isTrigger) it->c0->triggerActive = true;
+			if(it->c1->isTrigger) it->c1->triggerActive = true;
 			
 			forI(it->contactCount){
 				vec3 normal = it->contacts[i].normal;

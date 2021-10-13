@@ -21,10 +21,11 @@ enum ColliderType{
 	ColliderType_NONE,
 	ColliderType_AABB,
 	ColliderType_Sphere,
+	ColliderType_ConvexMesh,
 	ColliderType_COUNT,
 };
 global_ const char* ColliderTypeStrings[] = {
-	"None", "AABB", "Sphere"
+	"None", "AABB", "Sphere", "ConvexMesh"
 };
 
 struct Contact{
@@ -52,11 +53,10 @@ struct Collider{
 	b32  isTrigger = false;
 	b32  playerOnly = false;
 	b32  triggerActive = false; //TODO replace this with manifold stuffs
-	struct{
-		union{
-			vec3 halfDims;
-			f32  radius;
-		};
+	union{
+		vec3  halfDims;
+		f32   radius;
+		Mesh* mesh;
 	};
 	
 	Collider(){}
@@ -69,5 +69,6 @@ struct Collider{
 Collider AABBCollider(Mesh* mesh, f32 mass);
 Collider AABBCollider(vec3 halfDimensions, f32 mass);
 Collider SphereCollider(f32 radius, f32 mass);
+Collider ConvexMeshCollider(Mesh* mesh, f32 mass);
 
 #endif //ATMOS_COLLIDER_H

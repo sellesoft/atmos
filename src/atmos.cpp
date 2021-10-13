@@ -41,12 +41,12 @@ redo debug bar to be more informative and have different modes
 
  Physics TODOs
 -------------
-add mesh colliders
 add compound colliders (multiple colliders that represent one physics object)
+add convex mesh inertia tensor generation
 rework collider to have flags: player only collision, dont collide with others with this flag, dont resolve collisions, 
 ____dont collide at all (for some reason), trigger, etc
-add physics collision sweeping
-add physics based collision resolution for: cylinder, capsule, box
+add collision sweeping
+add collision resolution for: cylinder, capsule, box
 
 Ungrouped TODOs
 ---------------
@@ -63,6 +63,7 @@ binary file saving/loading
 Bug Board       //NOTE mark these with a last-known active date (M/D/Y)
 ---------
 (10/12/21) rotation scalar in physics manifold resolution is extra large
+__________ maybe scale the tensor to not lose precision?
 
 */
 

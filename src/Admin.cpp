@@ -467,8 +467,9 @@ void Admin::LoadLevel(cstring level_name){
 							entity->physics->staticRotation = parse_b32(value);
 						}else if(key == cstr_lit("collider_type")){
 							switch(Type(b10tou64(value))){
-								case ColliderType_AABB:  { entity->physics->collider = AABBCollider(vec3::ONE, entity->physics->mass); }break;
+								case ColliderType_AABB:{ entity->physics->collider = AABBCollider(vec3::ONE, entity->physics->mass); }break;
 								case ColliderType_Sphere:{ entity->physics->collider = SphereCollider(1.f, entity->physics->mass); }break;
+								case ColliderType_ConvexMesh:{ entity->physics->collider = ConvexMeshCollider(Storage::NullMesh(), entity->physics->mass); }break;
 								default:{ ParseError("Unhandled Collider shape: ",value); }break;
 							}
 						}else if(key == cstr_lit("collider_offset")){
@@ -486,6 +487,9 @@ void Admin::LoadLevel(cstring level_name){
 							entity->physics->collider.RecalculateTensor(entity->physics->mass);
 						}else if(key == cstr_lit("collider_radius")){
 							entity->physics->collider.radius = (f32)atof(value_start);
+							entity->physics->collider.RecalculateTensor(entity->physics->mass);
+						}else if(key == cstr_lit("collider_mesh")){
+							entity->physics->collider.mesh = Storage::CreateMeshFromFile((string(value_start+1,value_end-value_start-2) + ".mesh").str).second;
 							entity->physics->collider.RecalculateTensor(entity->physics->mass);
 						}else{ ParseError("Unhandled Physics key: ",key); }
 					}break;

@@ -902,6 +902,9 @@ void EntitiesTab(){
 									case ColliderType_Sphere:{
 										sel->physics->collider = SphereCollider(1.f,sel->physics->mass);
 									}break;
+									case ColliderType_ConvexMesh:{
+										sel->physics->collider = ConvexMeshCollider(Storage::NullMesh(),sel->physics->mass);
+									}break;
 									case ColliderType_NONE:default:{
 										sel->physics->collider.type = ColliderType_NONE;
 									}break;
@@ -932,11 +935,27 @@ void EntitiesTab(){
 					switch(sel->physics->collider.type){
 						case ColliderType_AABB:{
 							ImGui::TextEx("Half Dims  "); ImGui::SameLine();
-							if(ImGui::Inputvec3("##phys_halfdims", &sel->physics->collider.halfDims));
+							if(ImGui::Inputvec3("##phys_halfdims", &sel->physics->collider.halfDims)){
+								sel->physics->collider.RecalculateTensor(sel->physics->mass);
+							}
 						}break;
 						case ColliderType_Sphere:{
 							ImGui::TextEx("Radius     "); ImGui::SameLine(); ImGui::SetNextItemWidth(-FLT_MIN);
-							ImGui::InputFloat("##phys_radius", &sel->physics->collider.radius, 0, 0);
+							if(ImGui::InputFloat("##phys_radius", &sel->physics->collider.radius, 0, 0)){
+								sel->physics->collider.RecalculateTensor(sel->physics->mass);
+							}
+						}break;
+						case ColliderType_ConvexMesh:{
+							ImGui::TextEx("Mesh       "); ImGui::SameLine(); ImGui::SetNextItemWidth(-FLT_MIN);
+							if(ImGui::BeginCombo("##phys_mesh", sel->physics->collider.mesh->name)){
+								forI(Storage::MeshCount()){
+									if(ImGui::Selectable(Storage::MeshName(i), sel->physics->collider.mesh == Storage::MeshAt(i))){
+										sel->physics->collider.mesh = Storage::MeshAt(i);
+										sel->physics->collider.RecalculateTensor(sel->physics->mass);
+									}
+								}
+								ImGui::EndCombo();
+							}
 						}break;
 						default:{
 							ImGui::TextEx("unhandled collider shape");
