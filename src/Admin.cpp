@@ -543,11 +543,12 @@ Entity* Admin::EntityRaycast(vec3 origin, vec3 direction, f32 maxDistance, Entit
 	f32 min_depth = maxDistance;
 	for(Entity* e : entities){
 		if(!(filter & e->type)){
-			mat4 transform = e->transform.Matrix();
-			mat4 rotation = mat4::RotationMatrix(e->transform.rotation);
 			if(ModelInstance* mc = e->model){
 				if(!mc->visible) continue;
 				if(requireCollider && !(e->physics && e->physics->collider.type != ColliderType_NONE)) continue; //skip if no collider when required
+				
+				mat4 transform = e->transform.Matrix();
+				mat4 rotation = mat4::RotationMatrix(e->transform.rotation);
 				forX(tri_idx, mc->mesh->triangleCount){
 					Mesh::Triangle* tri = &mc->mesh->triangleArray[tri_idx];
 					vec3 p0 = tri->p[0] * transform;
@@ -585,6 +586,6 @@ Entity* Admin::EntityRaycast(vec3 origin, vec3 direction, f32 maxDistance, Entit
 		}
 	}
 	
-	return (result) ? result : 0;
+	return result;
 }
 

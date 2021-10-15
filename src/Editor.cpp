@@ -1875,10 +1875,14 @@ void SettingsTab(){
 	if(ImGui::BeginChild("##settings_tab", ImVec2(ImGui::GetWindowWidth() * 0.95f, ImGui::GetWindowHeight() * .9f))){
 		//// physics properties ////
 		if(ImGui::CollapsingHeader("Physics", 0)){
-			ImGui::TextEx("Sim in Editor "); ImGui::SameLine();
-			if(BoolButton(AtmoAdmin->simulateInEditor, "editor_sim")){ AtmoAdmin->simulateInEditor = !AtmoAdmin->simulateInEditor; }
-			ImGui::TextEx("Physics Paused"); ImGui::SameLine();
-			if(BoolButton(AtmoAdmin->physics.paused, "pengine_pause")){ AtmoAdmin->physics.paused = !AtmoAdmin->physics.paused; }
+			ImGui::TextEx("Sim in Editor   "); ImGui::SameLine();
+			if(BoolButton(AtmoAdmin->simulateInEditor, "editor_sim")){ ToggleBool(AtmoAdmin->simulateInEditor); }
+			ImGui::TextEx("Physics Paused  "); ImGui::SameLine();
+			if(BoolButton(AtmoAdmin->physics.paused, "pengine_pause")){ ToggleBool(AtmoAdmin->physics.paused); }
+			ImGui::TextEx("Integrating     "); ImGui::SameLine();
+			if(BoolButton(AtmoAdmin->physics.integrating, "pengine_integrate")){ ToggleBool(AtmoAdmin->physics.integrating); }
+			ImGui::TextEx("Manifold Solving"); ImGui::SameLine();
+			if(BoolButton(AtmoAdmin->physics.solving, "pengine_solve")){ ToggleBool(AtmoAdmin->physics.solving); }
 			if(ImGui::Button("Step Forward", ImVec2(-FLT_MIN, 0))){ AtmoAdmin->physics.step = true; }
 			ImGui::TextEx("Gravity             "); ImGui::SameLine(); ImGui::InputFloat("##pengine_gravity", &AtmoAdmin->physics.gravity);
 			ImGui::TextEx("Min Linear Velocity "); ImGui::SameLine(); ImGui::InputFloat("##pengine_minvel", &AtmoAdmin->physics.minVelocity);

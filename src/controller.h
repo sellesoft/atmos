@@ -8,6 +8,8 @@
 
 struct CameraInstance;
 struct Controller{
+	//// game ////
+	
 	//flying movement
 	Key::Key movementFlyingUp      = Key::E;
 	Key::Key movementFlyingDown    = Key::Q;
@@ -27,6 +29,8 @@ struct Controller{
 	
 	//player controls
 	Key::Key use = Key::E;
+	
+	//// editor ////
 	
 	//camera controls
 	f32 cameraSensitivity      = 2.5f;
@@ -48,7 +52,7 @@ struct Controller{
 	Key::Key gotoSelected      = Key::NUMPADENTER;
 	
 	//editor UI
-	Key::Key toggleConsole   = Key::TILDE;
+	Key::Key toggleConsole   = Key::TILDE | InputMod_AnyCtrl;
 	Key::Key toggleDebugMenu = Key::TILDE | InputMod_AnyCtrl;
 	Key::Key toggleDebugBar  = Key::TILDE | InputMod_AnyShift;
 	Key::Key toggleMenuBar   = Key::TILDE | InputMod_AnyAlt;
@@ -63,8 +67,12 @@ struct Controller{
 	Key::Key cut   = Key::X | InputMod_AnyCtrl;
 	Key::Key copy  = Key::C | InputMod_AnyCtrl;
 	Key::Key paste = Key::V | InputMod_AnyCtrl;
-	Key::Key physicsPause = Key::SPACE;
-	Key::Key physicsStep = Key::SPACE | InputMod_AnyCtrl;
+	
+	Key::Key physicsPause       = Key::SPACE | InputMod_None;
+	Key::Key physicsStep        = Key::SPACE | InputMod_AnyCtrl;
+	Key::Key physicsSolving     = Key::SPACE | InputMod_AnyShift;
+	Key::Key physicsIntegrating = Key::SPACE | InputMod_AnyAlt;
+	Key::Key physicsEditorSim   = Key::SPACE | InputMod_AnyCtrl | InputMod_AnyShift | InputMod_AnyAlt;
 	
 	Key::Key saveLevel = Key::S | InputMod_AnyCtrl;
 	

@@ -8,15 +8,15 @@ type     2 #Physics
 name     "Physics0"
 position (0, 5, 0)
 rotation (0, 0, 0)
-scale    (2, 2, 2)
+scale    (1, 1, 1)
 attributes 1 2
 :1 #ModelInstance
-model   "16sides"
+model   "box_flat"
 visible true
 :2 #Physics
 position     (0, 5, 0)
 rotation     (0, 0, 0)
-scale        (2, 2, 2)
+scale        (1, 1, 1)
 velocity     (0, 0, 0)
 accel        (0, 0, 0)
 rot_velocity (0, 0, 0)
@@ -39,7 +39,7 @@ collider_mesh      "box"
 ]1
 type     2 #Physics
 name     "Physics0"
-position (1.5, 10, 0.75)
+position (3, 5, 3)
 rotation (0, 0, 0)
 scale    (1, 1, 1)
 attributes 1 2
@@ -47,10 +47,10 @@ attributes 1 2
 model   "sphere"
 visible true
 :2 #Physics
-position     (1.5, 10, 0.75)
+position     (3, 5, 3)
 rotation     (0, 0, 0)
 scale        (1, 1, 1)
-velocity     (0, 0, 0)
+velocity     (-3, 0, -3)
 accel        (0, 0, 0)
 rot_velocity (0, 0, 0)
 rot_accel    (0, 0, 0)

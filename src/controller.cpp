@@ -112,8 +112,11 @@ void Controller::Update(){
 			}
 			
 			//physics
-			if(AtmoAdmin->simulateInEditor && DeshInput->KeyPressed(physicsPause)) AtmoAdmin->physics.paused = !AtmoAdmin->physics.paused;
-			if(AtmoAdmin->simulateInEditor && DeshInput->KeyPressed(physicsStep))  AtmoAdmin->physics.step = true;
+			if(DeshInput->KeyPressed(physicsEditorSim))   AtmoAdmin->simulateInEditor = !AtmoAdmin->simulateInEditor;
+			if(DeshInput->KeyPressed(physicsPause))       AtmoAdmin->physics.paused = !AtmoAdmin->physics.paused;
+			if(DeshInput->KeyPressed(physicsSolving))     AtmoAdmin->physics.solving = !AtmoAdmin->physics.solving;
+			if(DeshInput->KeyPressed(physicsIntegrating)) AtmoAdmin->physics.integrating = !AtmoAdmin->physics.integrating;
+			if(AtmoAdmin->simulateInEditor && DeshInput->KeyPressed(physicsStep)) AtmoAdmin->physics.step = true;
 		}break;
 	}
 }
