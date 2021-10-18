@@ -568,10 +568,9 @@ Entity* Admin::EntityRaycast(vec3 origin, vec3 direction, f32 maxDistance, Entit
 					vec3 p2 = tri->p[2] * transform;
 					
 					//check that the intersection point is within the triangle and its the closest triangle found so far
-					if(
-						(normal.cross(p1 - p0).normalized().dot(intersect - p0) > 0) &&
-					    (normal.cross(p2 - p1).normalized().dot(intersect - p1) > 0) &&
-					    (normal.cross(p0 - p2).normalized().dot(intersect - p2) > 0)){
+					if((normal.cross(p1 - p0).normalized().dot(intersect - p0) > 0) &&
+					   (normal.cross(p2 - p1).normalized().dot(intersect - p1) > 0) &&
+					   (normal.cross(p0 - p2).normalized().dot(intersect - p2) > 0)){
 						//if its the closest triangle so far we store its index
 						if(depth < min_depth){
 							result = e;

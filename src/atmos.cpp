@@ -3,6 +3,7 @@
 Admin TODOs
 -----------
 reimplement timers
+save gravity with levels
 
 Attribute TODOs
 ---------------
@@ -41,6 +42,7 @@ redo debug bar to be more informative and have different modes
 
  Physics TODOs
 -------------
+account for mass in static resolution so heavier things move less than lighter, but overall change is the same
 account for entity scale in sphere collisions
 add compound colliders (multiple colliders that represent one physics object)
 add convex mesh inertia tensor generation
@@ -50,6 +52,7 @@ add collision sweeping
 add collision resolution for: cylinder, capsule, box
 test if collision detection is faster if we transform one object into the space of the other, or transform both into world
 add overall outer vertexes to mesh data
+add colliders that modify physics in that space
 
 Ungrouped TODOs
 ---------------

@@ -850,9 +850,23 @@ void EntitiesTab(){
 		
 		//physics
 		if(sel->physics){
-			if(sel->physics->collider.type == ColliderType_AABB){
-				Render::DrawBox(Transform(sel->transform.position+sel->physics->collider.offset, vec3::ZERO,
-										  sel->transform.scale*(sel->physics->collider.halfDims*2)).Matrix(), Color_Green);
+			switch(sel->physics->collider.type){
+				case ColliderType_AABB:{
+					Render::DrawBox(Transform(sel->physics->position+sel->physics->collider.offset, vec3::ZERO,
+											  sel->physics->scale*(sel->physics->collider.halfDims*2)).Matrix(), Color_Green);
+				}break;
+				case ColliderType_ConvexMesh:{
+					mat4 transform = mat4::TransformationMatrix(sel->physics->position + sel->physics->collider.offset, sel->physics->rotation, sel->physics->scale);
+					forE(sel->physics->collider.mesh->faces){
+						vec3 prev = sel->physics->collider.mesh->vertexes[it->outerVertexes[0]].pos * transform;
+						Render::DrawLine(prev, sel->physics->collider.mesh->vertexes[it->outerVertexes[it->outerVertexCount-1]].pos * transform, Color_Green);
+						for(u32 i=1; i < it->outerVertexCount; ++i){
+							vec3 curr = sel->physics->collider.mesh->vertexes[it->outerVertexes[i]].pos * transform;
+							Render::DrawLine(prev, curr, Color_Green);
+							prev = curr;
+						}
+					}
+				}break;
 			}
 			
 			bool delete_button = 1;
@@ -1238,7 +1252,7 @@ void MeshesTab(){
 		}
 		if(sel_triangle_idx != -1){
 			Mesh::Triangle* sel_triangle = &selected->triangles[sel_triangle_idx];
-			vec3 tri_center = Geometry::MeshTriangleMidpoint(sel_triangle);
+			vec3 tri_center = MeshTriangleMidpoint(sel_triangle);
 			ImGui::Text("Vertex 0: (%.2f,%.2f,%.2f)", sel_triangle->p[0].x, sel_triangle->p[0].y, sel_triangle->p[0].z);
 			ImGui::Text("Vertex 1: (%.2f,%.2f,%.2f)", sel_triangle->p[1].x, sel_triangle->p[1].y, sel_triangle->p[1].z);
 			ImGui::Text("Vertex 2: (%.2f,%.2f,%.2f)", sel_triangle->p[2].x, sel_triangle->p[2].y, sel_triangle->p[2].z);
@@ -1320,14 +1334,14 @@ void MeshesTab(){
 		//// triangles ////
 		if(sel_triangle_idx != -1){
 			Mesh::Triangle* sel_triangle = &selected->triangles[sel_triangle_idx];
-			vec3 tri_center = Geometry::MeshTriangleMidpoint(sel_triangle) * scale;
+			vec3 tri_center = MeshTriangleMidpoint(sel_triangle) * scale;
 			Render::DrawTriangleFilled(sel_triangle->p[0] * scale, sel_triangle->p[1] * scale, sel_triangle->p[2] * scale, selected_color);
 			if(triangle_indexes) ImGui::DebugDrawText3(TOSTRING("T", sel_triangle_idx).str, tri_center, text_color, vec2{ -5,-5 });
 			if(triangle_centers) Render::DrawBoxFilled(mat4::TransformationMatrix(tri_center, vec3::ZERO, vec3{ .05f,.05f,.05f }), selected_color);
 			if(triangle_normals) Render::DrawLine(tri_center, tri_center + sel_triangle->normal * normal_scale, selected_color);
 			forX(tni, sel_triangle->neighbors.count){
 				Mesh::Triangle* tri_nei = &selected->triangles[sel_triangle->neighbors[tni]];
-				if(trinei_indexes) ImGui::DebugDrawText3(TOSTRING("TN", tni).str, Geometry::MeshTriangleMidpoint(tri_nei) * scale, text_color, vec2{ 10,10 });
+				if(trinei_indexes) ImGui::DebugDrawText3(TOSTRING("TN", tni).str, MeshTriangleMidpoint(tri_nei) * scale, text_color, vec2{ 10,10 });
 				if(triangle_neighbors) Render::DrawTriangleFilled(tri_nei->p[0] * scale, tri_nei->p[1] * scale, tri_nei->p[2] * scale, neighbor_color);
 				int e0 = (sel_triangle->edges[tni] == 0) ? 0 : (sel_triangle->edges[tni] == 1) ? 1 : 2;
 				int e1 = (sel_triangle->edges[tni] == 0) ? 1 : (sel_triangle->edges[tni] == 1) ? 2 : 0;
@@ -1338,7 +1352,7 @@ void MeshesTab(){
 			forI(selected->triangleCount){
 				if(i == sel_triangle_idx) continue;
 				Mesh::Triangle* sel_triangle = &selected->triangles[i];
-				vec3 tri_center = Geometry::MeshTriangleMidpoint(sel_triangle) * scale;
+				vec3 tri_center = MeshTriangleMidpoint(sel_triangle) * scale;
 				if(triangle_draw) Render::DrawTriangle(sel_triangle->p[0] * scale, sel_triangle->p[1] * scale, sel_triangle->p[2] * scale, triangle_color);
 				if(triangle_indexes) ImGui::DebugDrawText3(TOSTRING("T", i).str, tri_center, text_color, vec2{ -5,-5 });
 				if(triangle_centers) Render::DrawBoxFilled(mat4::TransformationMatrix(tri_center, vec3::ZERO, vec3{ .03f,.03f,.03f }), triangle_color);
@@ -1366,12 +1380,12 @@ void MeshesTab(){
 				MeshTriangle* ft = &selected->triangles[sel_face->triangles[fti]];
 				Render::DrawTriangleFilled(ft->p[0] * scale, ft->p[1] * scale, ft->p[2] * scale, selected_color);
 				if(face_triangles) Render::DrawTriangle(ft->p[0] * scale, ft->p[1] * scale, ft->p[2] * scale, text_color);
-				if(face_triangle_indexes) ImGui::DebugDrawText3(TOSTRING("FT", fti).str, Geometry::MeshTriangleMidpoint(ft) * scale, text_color, vec2{ -10,-10 });
+				if(face_triangle_indexes) ImGui::DebugDrawText3(TOSTRING("FT", fti).str, MeshTriangleMidpoint(ft) * scale, text_color, vec2{ -10,-10 });
 			}
 			forX(fnti, sel_face->neighborTriangleCount){
 				MeshTriangle* ft = &selected->triangles[sel_face->triangleNeighbors[fnti]];
 				if(face_tri_neighbors) Render::DrawTriangleFilled(ft->p[0] * scale, ft->p[1] * scale, ft->p[2] * scale, neighbor_color);
-				if(face_trinei_indexes) ImGui::DebugDrawText3(TOSTRING("FTN", fnti).str, Geometry::MeshTriangleMidpoint(ft) * scale, text_color, vec2{ 10,10 });
+				if(face_trinei_indexes) ImGui::DebugDrawText3(TOSTRING("FTN", fnti).str, MeshTriangleMidpoint(ft) * scale, text_color, vec2{ 10,10 });
 			}
 			forX(fnfi, sel_face->neighborFaceCount){
 				MeshFace* ff = &selected->faces[sel_face->faceNeighbors[fnfi]];

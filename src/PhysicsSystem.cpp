@@ -18,22 +18,16 @@ local const vec3 physics_aabb_normals[PHYSICS_AABB_FACE_COUNT] = {
 	vec3::RIGHT, vec3::UP,   vec3::FORWARD,
 	vec3::LEFT,  vec3::DOWN, vec3::BACK,
 };
-#define PHYSICS_MAX_COLLISION_AXIS_COUNT 1024
-local u32  physics_possible_collision_count = 0;
-local vec3 physics_possible_collision_axes[PHYSICS_MAX_COLLISION_AXIS_COUNT];
+local const vec3 physics_aabb_vertexes[8] = { 
+	vec3( 1,1,1), vec3( 1,-1,1), vec3( 1,1,-1), vec3( 1,-1,-1),
+	vec3(-1,1,1), vec3(-1,-1,1), vec3(-1,1,-1), vec3(-1,-1,-1)
+};
 
-FORCE_INLINE bool AABBAABBTest(vec3 min0, vec3 max0, vec3 min1, vec3 max1){
-	return (min0.x <= max1.x && max0.x >= min1.x) && (min0.y <= max1.y && max0.y >= min1.y) && (min0.z <= max1.z && max0.z >= min1.z);
-}
-
-FORCE_INLINE local void AddPossibleCollisionAxis(vec3 axis){
-	Assert(physics_possible_collision_count < PHYSICS_MAX_COLLISION_AXIS_COUNT);
-	forI(physics_possible_collision_count){ if(physics_possible_collision_axes[i] == axis){ return; } }
-	physics_possible_collision_axes[physics_possible_collision_count++] = axis;
-}
-
-FORCE_INLINE local void ResetPossibleCollisionAxes(){
-	physics_possible_collision_count = 0;
+local pair<u32,f32> MeshFaceSATQuery(Physics* p0, Collider* c0, Physics* p1, Collider* c1){
+	pair<u32,f32> result{0,-FLT_MAX};
+	
+	
+	return result;
 }
 
 ////////////////////
@@ -73,7 +67,7 @@ void AABBAABBCollision(Physics* p0, Collider* c0, Physics* p1, Collider* c1, Man
 }
 
 void AABBSphereCollision(Physics* p0, Collider* c0, Physics* p1, Collider* c1, Manifold* m){
-	vec3 aabb_point = Geometry::ClosestPointOnAABB(p0->position, (c0->halfDims*p0->scale), p1->position);
+	vec3 aabb_point = ClosestPointOnAABB(c0->halfDims * p0->scale, p1->position - p0->position) + p0->position;
 	vec3 delta = aabb_point - p1->position;
 	f32  distance = delta.mag();
 	
@@ -94,76 +88,7 @@ void AABBSphereCollision(Physics* p0, Collider* c0, Physics* p1, Collider* c1, M
 }
 
 void AABBConvexMeshCollision(Physics* p0, Collider* c0, Physics* p1, Collider* c1, Manifold* m){
-	ResetPossibleCollisionAxes();
 	
-	mat4 aabb_transform = mat4::TransformationMatrix(p0->position, vec3::ZERO, p0->scale);
-	mat4 mesh_transform = mat4::TransformationMatrix(p1->position, p1->rotation, p1->scale); 
-	mat4 mesh_to_world_to_aabb_space = mesh_transform * aabb_transform.Inverse();
-	
-	const f32 aabb_min_vertexes[PHYSICS_AABB_FACE_COUNT/2] = { -c0->halfDims.x, -c0->halfDims.y, -c0->halfDims.z };
-	const f32 aabb_max_vertexes[PHYSICS_AABB_FACE_COUNT/2] = {  c0->halfDims.x,  c0->halfDims.y,  c0->halfDims.z };
-	
-	//collect possible collision axes
-	forX(aabb_normal_idx, PHYSICS_AABB_FACE_COUNT/2){
-		AddPossibleCollisionAxis(physics_aabb_normals[aabb_normal_idx]);
-		for(MeshFace& face : c1->mesh->faces){
-			vec3 prev_pos = c1->mesh->vertexes[face.outerVertexes[0]].pos;
-			for(u32 vert_idx = 1; vert_idx < face.outerVertexCount; ++vert_idx){
-				vec3 edge = ((c1->mesh->vertexes[face.outerVertexes[vert_idx]].pos - prev_pos) * mesh_to_world_to_aabb_space).normalized();
-				AddPossibleCollisionAxis(physics_aabb_normals[aabb_normal_idx].cross(edge));
-				prev_pos = c1->mesh->vertexes[face.outerVertexes[vert_idx]].pos;
-			}
-		}
-	}
-	forE(c1->mesh->faces) AddPossibleCollisionAxis(it->normal);
-	
-	//check if the objects overlap after projection onto the possible collision axes
-	m->contacts[0].penetration = -FLT_MAX;
-	forX(axis_idx, physics_possible_collision_count){
-		vec3 axis = physics_possible_collision_axes[axis_idx];
-		
-		//find min and max aabb vertexes projected on the axis
-		f32 aabb_min_vertex = axis.dot(c0->halfDims);
-		f32 aabb_max_vertex = axis.dot(-c0->halfDims);
-		
-		//find min and max mesh vertexes projected on the axis
-		f32 mesh_min_vertex = FLT_MAX;
-		f32 mesh_max_vertex = -FLT_MAX;
-		for(MeshFace& face : c1->mesh->faces){
-			for(u32 vert_idx : face.outerVertexes){
-				f32 mesh_local_vertex = axis.dot(c1->mesh->vertexes[vert_idx].pos * mesh_to_world_to_aabb_space);
-				if(mesh_local_vertex < mesh_min_vertex) mesh_min_vertex = mesh_local_vertex;
-				if(mesh_local_vertex > mesh_max_vertex) mesh_max_vertex = mesh_local_vertex;
-			}
-		}
-		
-		//check if mesh vertexes overlap aabb vertexes on the axis
-		if(aabb_min_vertex <= mesh_min_vertex && aabb_max_vertex >= mesh_min_vertex){
-			f32 local_penetration = mesh_min_vertex - aabb_max_vertex;
-			if(local_penetration >= m->contacts[0].penetration){
-				m->state = ContactState_Stationary;
-				m->contacts[0].local0 = c0->halfDims + (axis * local_penetration);
-				m->contacts[0].normal = axis;
-				m->contacts[0].penetration = local_penetration;
-			}
-			continue; //collision on this axis
-		}
-		if(mesh_min_vertex <= aabb_min_vertex && mesh_max_vertex >= aabb_min_vertex){
-			f32 local_penetration = aabb_min_vertex - mesh_max_vertex;
-			if(local_penetration >= m->contacts[0].penetration){
-				m->state = ContactState_Stationary;
-				m->contacts[0].local0 = -c0->halfDims + (-axis * local_penetration);
-				m->contacts[0].normal = -axis;
-				m->contacts[0].penetration = local_penetration;
-			}
-			continue; //collision on this axis in the negative direction
-		}
-		m->state = ContactState_NONE;
-		return; //no collision on this axis
-	}
-	
-	//Render::DrawLine();
-	//TODO find contact points
 }
 
 void SphereSphereCollision(Physics* p0, Collider* c0, Physics* p1, Collider* c1, Manifold* m){
@@ -188,7 +113,10 @@ void SphereSphereCollision(Physics* p0, Collider* c0, Physics* p1, Collider* c1,
 }
 
 void SphereConvexMeshCollision(Physics* p0, Collider* c0, Physics* p1, Collider* c1, Manifold* m){
-	vec3 mesh_point = Geometry::ClosestPointOnConvexMesh(c1->mesh, p1->position, p1->rotation, p1->scale, p0->position);
+	mat4 mesh_transform = mat4::TransformationMatrix(p1->position, p1->rotation, p1->scale);
+	mat4 inverse_mesh_transform = mesh_transform.Inverse();
+	vec3 mesh_space_mesh_point = ClosestPointOnConvexMesh(c1->mesh, p0->position * inverse_mesh_transform);
+	vec3 mesh_point = mesh_space_mesh_point * mesh_transform;
 	vec3 delta = mesh_point - p0->position;
 	f32  distance = delta.mag();
 	
@@ -207,13 +135,13 @@ void SphereConvexMeshCollision(Physics* p0, Collider* c0, Physics* p1, Collider*
 		vec3 normal = (mesh_point - p1->position).normalized();
 		m->contactCount = 1;
 		m->contacts[0].local0 = (delta / distance) * c0->radius;
-		m->contacts[0].local1 = mesh_point * mat4::TransformationMatrix(p1->position, p1->rotation, p1->scale).Inverse();
+		m->contacts[0].local1 = mesh_space_mesh_point;
 		m->contacts[0].normal = normal;
 		m->contacts[0].penetration = penetration;
 #if 0
 		Render::DrawLine(p0->position+m->contacts[0].local0, p1->position+m->contacts[0].local1, Color_Yellow);
 		Render::DrawLine(p0->position+m->contacts[0].local0, (p0->position+m->contacts[0].local0)+(normal*penetration), Color_Magenta);
-		Log("physics","Collision between sphere and convex. mesh_point:",mesh_point," radius:",c0->radius," distance: ",distance);
+		Log("phys","Collision between sphere and convex. mesh_point:",mesh_point," radius:",c0->radius," distance: ",distance);
 #endif
 	}
 }
@@ -251,6 +179,7 @@ void PhysicsSystem::Update(){
 	if(paused && !step) return;
 	
 	fixedAccumulator += DeshTime->deltaTime;
+	if(AtmoAdmin->simulateInEditor) fixedAccumulator = fixedDeltaTime;
 	while(fixedAccumulator >= fixedDeltaTime){
 		//// integration ////
 		if(integrating){
@@ -351,10 +280,8 @@ void PhysicsSystem::Update(){
 					//TODO figure out why omega1 and thus scalar is wrong
 					vec3 r0 = it->p0->position + it->contacts[i].local0;
 					vec3 r1 = it->p1->position + it->contacts[i].local1;
-					vec3 omega0 = normal.cross(r0) 
-						* (it->c0->tensor.To4x4() * mat4::TransformationMatrix(it->p0->position, it->p0->rotation, it->p0->scale)).Inverse();
-					vec3 omega1 = normal.cross(r1) 
-						* (it->c1->tensor.To4x4() * mat4::TransformationMatrix(it->p1->position, it->p1->rotation, it->p1->scale)).Inverse();
+					vec3 omega0 = normal.cross(r0) * (it->c0->tensor.To4x4() * mat4::TransformationMatrix(it->p0->position, it->p0->rotation, it->p0->scale)).Inverse();
+					vec3 omega1 = normal.cross(r1) * (it->c1->tensor.To4x4() * mat4::TransformationMatrix(it->p1->position, it->p1->rotation, it->p1->scale)).Inverse();
 					f32 scalar = (1.f/it->p0->mass) + (1.f/it->p1->mass) /*+ normal.dot(r0.cross(omega0) + r1.cross(omega1))*/;
 					f32 rest_coef = (it->p0->elasticity + it->p1->elasticity) / 2.f; //NOTE not how restitution coef is calulated in real physics
 					f32 impulse_mod = (1.f + rest_coef) * (it->p1->velocity - it->p0->velocity).mag() / scalar;
@@ -382,5 +309,7 @@ void PhysicsSystem::Update(){
 			break;
 		}
 	}
+	
 	fixedAlpha = fixedAccumulator / fixedDeltaTime;
+	if(AtmoAdmin->simulateInEditor) fixedAlpha = 1;
 }
