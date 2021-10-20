@@ -1,5 +1,5 @@
 >level
-name         "phys_aabbconvex_edgeedge"
+name         "phys_aabbhull_faceface"
 last_updated 0
 
 >entities
@@ -38,19 +38,19 @@ collider_half_dims (0.5, 0.5, 0.5)
 
 ]1
 type     2 #Physics
-name     "convex"
-position (2.1, 5, 2)
-rotation (45, 45, 0)
+name     "hull"
+position (2.1, 6, 1)
+rotation (0, 0, 0)
 scale    (1, 1, 1)
 attributes 1 2
 :1 #ModelInstance
 model   "box_flat"
 visible true
 :2 #Physics
-position     (2.1, 5, 2)
-rotation     (45, 45, 0)
+position     (2.1, 6, 1)
+rotation     (0, 0, 0)
 scale        (1, 1, 1)
-velocity     (-5, 0, -5)
+velocity     (-5, 0, 0)
 accel        (0, 0, 0)
 rot_velocity (0, 0, 0)
 rot_accel    (0, 0, 0)
@@ -61,7 +61,7 @@ static_fric  0.3
 air_fric     0.1
 static_pos   false
 static_rot   false
-collider_type       3 #ConvexMesh
+collider_type       3 #Hull
 collider_offset     (0, 0, 0)
 collider_layer      0
 collider_nocollide  false

@@ -469,7 +469,7 @@ void Admin::LoadLevel(cstring level_name){
 							switch(Type(b10tou64(value))){
 								case ColliderType_AABB:{ entity->physics->collider = AABBCollider(vec3::ONE, entity->physics->mass); }break;
 								case ColliderType_Sphere:{ entity->physics->collider = SphereCollider(1.f, entity->physics->mass); }break;
-								case ColliderType_ConvexMesh:{ entity->physics->collider = ConvexMeshCollider(Storage::NullMesh(), entity->physics->mass); }break;
+								case ColliderType_Hull:{ entity->physics->collider = HullCollider(Storage::NullMesh(), entity->physics->mass); }break;
 								default:{ ParseError("Unhandled Collider shape: ",value); }break;
 							}
 						}else if(key == cstr_lit("collider_offset")){

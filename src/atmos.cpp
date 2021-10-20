@@ -42,7 +42,12 @@ redo debug bar to be more informative and have different modes
 
  Physics TODOs
 -------------
+store previous frame's manifolds and separating axes and check them first to see if still valid
+store physics mass and collider tensor as inverse
+test if static resolution is even necessary 
 account for mass in static resolution so heavier things move less than lighter, but overall change is the same
+optimize detection by removing duplicate calculation of matrices
+handle collider offset in all primitive collisions
 account for entity scale in sphere collisions
 add compound colliders (multiple colliders that represent one physics object)
 add convex mesh inertia tensor generation
@@ -70,6 +75,7 @@ Bug Board       //NOTE mark these with a last-known active date (M/D/Y)
 ---------
 (10/12/21) rotation scalar in physics manifold resolution is extra large
 __________ maybe scale the tensor to not lose precision?
+(10/18/21) entities renamed in the editor often get cut short when saving them
 
 */
 

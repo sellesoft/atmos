@@ -19,7 +19,7 @@ void Collider::RecalculateTensor(f32 mass){
 		case ColliderType_Sphere:{
 			tensor = InertiaTensors::SolidSphere(radius, mass); 
 		}break;
-		case ColliderType_ConvexMesh:{
+		case ColliderType_Hull:{
 			tensor = InertiaTensors::SolidCuboid(mesh->aabbMax.x - mesh->aabbMin.x, mesh->aabbMax.y - mesh->aabbMin.y, 
 												 mesh->aabbMax.z - mesh->aabbMin.z, mass);
 		}break;
@@ -57,10 +57,10 @@ Collider SphereCollider(f32 radius, f32 mass){
 
 //NOTE treating the inertia tensor as a cube for now
 //TODO generic mesh inertia tensor generation
-Collider ConvexMeshCollider(Mesh* mesh, f32 mass){
+Collider HullCollider(Mesh* mesh, f32 mass){
 	Assert(mesh && mass > 0);
 	Collider result{};
-	result.type = ColliderType_ConvexMesh;
+	result.type = ColliderType_Hull;
 	result.mesh = mesh;
 	result.RecalculateTensor(mass);
 	return result;

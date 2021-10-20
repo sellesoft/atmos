@@ -11,37 +11,30 @@ struct Physics;
 struct Collider;
 struct Mesh;
 
-enum ContactState{
-	ContactState_NONE,
-	ContactState_Stationary,
-	ContactState_Moving,
-};
-
 enum ColliderType{
 	ColliderType_NONE,
 	ColliderType_AABB,
 	ColliderType_Sphere,
-	ColliderType_ConvexMesh,
+	ColliderType_Hull,
 	ColliderType_COUNT,
 };
 global_ const char* ColliderTypeStrings[] = {
-	"None", "AABB", "Sphere", "ConvexMesh"
+	"None", "AABB", "Sphere", "Hull"
 };
 
 struct Contact{
 	vec3 local0; //local to p0
 	vec3 local1; //local to p1
-	vec3 normal; //1 to 0
 	f32  penetration;
 };
 
+#define MAX_MANIFOLD_CONTACTS 4
 struct Manifold{
-	Entity   *e0, *e1;
 	Physics  *p0, *p1;
 	Collider *c0, *c1;
-	Contact contacts[4];
-	u32 contactCount;
-	Type state;
+	vec3 normal;
+	u32 contactCount; //collision exists if -1, but dont resolve
+	Contact contacts[MAX_MANIFOLD_CONTACTS];
 };
 
 struct Collider{
@@ -69,6 +62,6 @@ struct Collider{
 Collider AABBCollider(Mesh* mesh, f32 mass);
 Collider AABBCollider(vec3 halfDimensions, f32 mass);
 Collider SphereCollider(f32 radius, f32 mass);
-Collider ConvexMeshCollider(Mesh* mesh, f32 mass);
+Collider HullCollider(Mesh* mesh, f32 mass);
 
 #endif //ATMOS_COLLIDER_H

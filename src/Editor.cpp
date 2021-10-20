@@ -855,7 +855,7 @@ void EntitiesTab(){
 					Render::DrawBox(Transform(sel->physics->position+sel->physics->collider.offset, vec3::ZERO,
 											  sel->physics->scale*(sel->physics->collider.halfDims*2)).Matrix(), Color_Green);
 				}break;
-				case ColliderType_ConvexMesh:{
+				case ColliderType_Hull:{
 					mat4 transform = mat4::TransformationMatrix(sel->physics->position + sel->physics->collider.offset, sel->physics->rotation, sel->physics->scale);
 					forE(sel->physics->collider.mesh->faces){
 						vec3 prev = sel->physics->collider.mesh->vertexes[it->outerVertexes[0]].pos * transform;
@@ -916,8 +916,8 @@ void EntitiesTab(){
 									case ColliderType_Sphere:{
 										sel->physics->collider = SphereCollider(1.f,sel->physics->mass);
 									}break;
-									case ColliderType_ConvexMesh:{
-										sel->physics->collider = ConvexMeshCollider(Storage::NullMesh(),sel->physics->mass);
+									case ColliderType_Hull:{
+										sel->physics->collider = HullCollider(Storage::NullMesh(),sel->physics->mass);
 									}break;
 									case ColliderType_NONE:default:{
 										sel->physics->collider.type = ColliderType_NONE;
@@ -959,7 +959,7 @@ void EntitiesTab(){
 								sel->physics->collider.RecalculateTensor(sel->physics->mass);
 							}
 						}break;
-						case ColliderType_ConvexMesh:{
+						case ColliderType_Hull:{
 							ImGui::TextEx("Mesh       "); ImGui::SameLine(); ImGui::SetNextItemWidth(-FLT_MIN);
 							if(ImGui::BeginCombo("##phys_mesh", sel->physics->collider.mesh->name)){
 								forI(Storage::MeshCount()){
@@ -2000,6 +2000,7 @@ void SettingsTab(){
 			ImGui::Checkbox("Draw mesh normals", (bool*)&settings->meshNormals);
 			ImGui::Checkbox("Draw light frustrums", (bool*)&settings->lightFrustrums);
 			ImGui::Checkbox("Draw temp meshes on top", (bool*)&settings->tempMeshOnTop);
+			if(ImGui::Button("Clear Debug Meshes")) Render::ClearDebug();
 			
 			ImGui::Separator();
 		}

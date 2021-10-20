@@ -81,7 +81,7 @@ void Physics::SaveText(Physics* p, string& level){
 			case ColliderType_Sphere:{
 				level += TOSTRING("\ncollider_radius    ",p->collider.radius);
 			}break;
-			case ColliderType_ConvexMesh:{
+			case ColliderType_Hull:{
 				Storage::SaveMesh(p->collider.mesh);
 				level += TOSTRING("\ncollider_mesh      \"",p->collider.mesh->name,"\"");
 			}break;
