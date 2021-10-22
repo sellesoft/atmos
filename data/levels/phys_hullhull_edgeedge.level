@@ -39,7 +39,7 @@ collider_mesh      "null"
 ]1
 type     2 #Physics
 name     "hull1"
-position (5, 5, 5)
+position (2.1, 5, 2.1)
 rotation (45, 45, 0)
 scale    (1, 1, 1)
 attributes 1 2
@@ -47,7 +47,7 @@ attributes 1 2
 model   "box"
 visible true
 :2 #Physics
-position     (5, 5, 5)
+position     (2.1, 5, 2.1)
 rotation     (45, 45, 0)
 scale        (1, 1, 1)
 velocity     (-5, 0, -5)

@@ -1,5 +1,6 @@
 #include "Admin.h"
 #include "PhysicsSystem.h"
+#include "core/storage.h"
 #include "utils/array.h"
 #include "entities/Entity.h"
 #include "entities/PlayerEntity.h"
@@ -7,8 +8,18 @@
 #include "attributes/Collider.h"
 #include "geometry/geometry.h"
 
-//debug
+////////////////
+//// @debug ////
+////////////////
 #include "core/renderer.h"
+void DrawMeshFace(Mesh* mesh, MeshFace* face, mat4& transform, color c){
+	vec3 prev = mesh->vertexes[face->outerVertexes[face->outerVertexCount-1]].pos * transform;
+	for(u32 idx : face->outerVertexes){
+		vec3 curr = mesh->vertexes[idx].pos * transform;
+		Render::DrawLine(prev, curr, c);
+		prev = curr;
+	}
+}
 
 //////////////////
 //// @utility ////
@@ -178,6 +189,11 @@ local void GenerateHullFaceCollisionManifoldSAT(Mesh* ref_mesh, mat3& ref_rotati
 	vec3 ref_plane_point  = ref_mesh->vertexes[ref_face->vertexes[0]].pos * transform;
 	vec3 ref_plane_normal = ref_face->normal * rotation;
 	
+#if 0
+	DrawMeshFace(ref_mesh, ref_face, ref_transform, Color_Red);
+	DrawMeshFace(inc_mesh, inc_face, inc_transform, Color_Blue);
+#endif
+	
 	//clip incident vertexes to reference face's neighbor planes
 	array<vec3> clipped; for(u32 vert_idx : inc_face->outerVertexes){ clipped.add(inc_mesh->vertexes[vert_idx].pos); }
 	for(u32 face_idx : ref_face->faceNeighbors){
@@ -189,30 +205,47 @@ local void GenerateHullFaceCollisionManifoldSAT(Mesh* ref_mesh, mat3& ref_rotati
 		f32 dist_prev = Math::DistPointToPlane(prev, nei_plane_normal, nei_plane_point);
 		for(vec3& curr : temp){
 			f32 dist_curr = Math::DistPointToPlane(curr, nei_plane_normal, nei_plane_point);
-			if      ((dist_prev > 0.0f) && (dist_curr > 0.0f)){
-				clipped.add(curr);
-			}else if((dist_prev > 0.0f) && (dist_curr > 0.0f)){
+			if      ((dist_prev < 0.0f) && (dist_curr < 0.0f)){
+				clipped.add(prev);
+			}else if((dist_prev > 0.0f) && (dist_curr < 0.0f)){
 				clipped.add(Math::VectorPlaneIntersect(nei_plane_point, nei_plane_normal, prev, curr));
-			}else if((dist_prev < 0.0f) && (dist_curr < 0.0f)){
+			}else if((dist_prev < 0.0f) && (dist_curr > 0.0f)){
+				clipped.add(prev);
 				clipped.add(Math::VectorPlaneIntersect(nei_plane_point, nei_plane_normal, prev, curr));
-				clipped.add(curr);
 			}
 			prev = curr;
 			dist_prev = dist_curr;
 		}
 	}
 	
+#if 0
+	forE(clipped) Render::DrawBox(mat4::TransformationMatrix(*it * inc_transform, vec3::ZERO, vec3{.05f,.05f,.05f}), Color_Green);
+	return;
+#endif
+	
 	//remove clipped vertexes behind reference face and place all clipped vertexes on that face
-	array<f32> clipped_dists(clipped.count);
+	array<f32>  clipped_dists;
+	array<vec3> valid_clipped;
 	forI(clipped.count){
 		f32 dist = Math::DistPointToPlane(clipped[i], ref_plane_normal, ref_plane_point);
 		if(dist < 0.0f){
-			clipped[i] += ref_plane_normal * dist;
+			valid_clipped.add(clipped[i] - (ref_plane_normal * dist));
+			clipped_dists.add(dist);
 		}
-		clipped_dists.add(dist);
 	}
+	clipped = valid_clipped;
 	
-	//enforce four contact points while maintaining maximal area and ensure manifold isnt reversed
+#if 0
+	forI(clipped.count){
+		if(clipped_dists[i] > 0.0f) continue;
+		Render::DrawBox(mat4::TransformationMatrix(clipped[i]*inc_transform, vec3::ZERO, vec3{.05f,.05f,.05f}), Color_Green);
+		Render::DrawLine(clipped[i]*inc_transform, 
+						 clipped[i]*inc_transform + (ref_plane_normal*inc_rotation)*clipped_dists[i], Color_Yellow);
+	}
+	return;
+#endif
+	
+	//enforce four contact points while maintaining maximal area
 	if(clipped.count > 4){
 		m->contactCount = 4;
 		
@@ -229,7 +262,7 @@ local void GenerateHullFaceCollisionManifoldSAT(Mesh* ref_mesh, mat3& ref_rotati
 		//second point is furthest from first (using squared distance since its the same for comparison)
 		u32 idx1 = -1; f32 idx1_dist = 0.0f;
 		forI(clipped.count){ 
-			if(clipped_dists[i] > 0.0f || idx0) continue;
+			if(idx0) continue;
 			vec3 diff = clipped[i]-clipped[idx0];
 			f32 dist = diff.dot(diff);
 			if(dist > idx1_dist){ 
@@ -242,7 +275,7 @@ local void GenerateHullFaceCollisionManifoldSAT(Mesh* ref_mesh, mat3& ref_rotati
 		//third point is the one that give the most positive area (using cross product to avoid sqrt)
 		u32 idx2 = -1; f32 idx2_area = 0.0f;
 		forI(clipped.count){ 
-			if(clipped_dists[i] > 0.0f || idx0 || idx1) continue;
+			if(idx0 || idx1) continue;
 			f32 area = (ref_plane_normal.dot((clipped[i]-point1).cross(clipped[i]-point0))) * 0.5f;
 			if(area > idx2_area){ 
 				idx2 = i; 
@@ -255,7 +288,7 @@ local void GenerateHullFaceCollisionManifoldSAT(Mesh* ref_mesh, mat3& ref_rotati
 		//fourth point is the one that give the most negative area (since we already got most positive)
 		u32 idx3 = -1; f32 idx3_area = 0.0f;
 		forI(clipped.count){ 
-			if(clipped_dists[i] > 0.0f || idx0 || idx1 || idx2) continue;
+			if(idx0 || idx1 || idx2) continue;
 			f32 area = (ref_plane_normal.dot((clipped[i]-point1).cross(clipped[i]-point0))) * 0.5f;
 			if(area < idx3_area){
 				idx3 = i; 
@@ -264,78 +297,63 @@ local void GenerateHullFaceCollisionManifoldSAT(Mesh* ref_mesh, mat3& ref_rotati
 		}
 		vec3 point3 = clipped[idx3];
 		
-		if(p0_ref){
-			m->normal = ref_face->normal * ref_rotation;
-			m->contacts[0].local0 = point0 * transform.Inverse();
-			m->contacts[1].local0 = point1 * transform.Inverse();
-			m->contacts[2].local0 = point2 * transform.Inverse();
-			m->contacts[3].local0 = point3 * transform.Inverse();
-			m->contacts[0].local1 = point0;
-			m->contacts[1].local1 = point1;
-			m->contacts[2].local1 = point2;
-			m->contacts[3].local1 = point3;
-		}else{
-			m->normal = -ref_face->normal * ref_rotation;
-			m->contacts[0].local0 = point0;
-			m->contacts[1].local0 = point1;
-			m->contacts[2].local0 = point2;
-			m->contacts[3].local0 = point3;
-			m->contacts[0].local1 = point0 * transform.Inverse();
-			m->contacts[1].local1 = point1 * transform.Inverse();
-			m->contacts[2].local1 = point2 * transform.Inverse();
-			m->contacts[3].local1 = point3 * transform.Inverse();
-		}
+		m->contacts[0].position    = (point0 + (ref_plane_normal * clipped_dists[idx0])) * inc_transform;
+		m->contacts[1].position    = (point1 + (ref_plane_normal * clipped_dists[idx1])) * inc_transform;
+		m->contacts[2].position    = (point2 + (ref_plane_normal * clipped_dists[idx2])) * inc_transform;
+		m->contacts[3].position    = (point3 + (ref_plane_normal * clipped_dists[idx3])) * inc_transform;
 		m->contacts[0].penetration = clipped_dists[idx0];
 		m->contacts[1].penetration = clipped_dists[idx1];
 		m->contacts[2].penetration = clipped_dists[idx2];
 		m->contacts[3].penetration = clipped_dists[idx3];
 	}else{
 		m->contactCount = 0;
-		if(p0_ref){
-			m->normal = ref_face->normal * ref_rotation;
-			forI(clipped.count){
-				m->contacts[m->contactCount].local0 = clipped[i] * transform.Inverse();
-				m->contacts[m->contactCount].local1 = clipped[i];
-				m->contacts[m->contactCount].penetration = clipped_dists[i];
-				m->contactCount++;
-			}
-		}else{
-			m->normal = -ref_face->normal * ref_rotation;
-			forI(clipped.count){
-				m->contacts[m->contactCount].local0 = clipped[i];
-				m->contacts[m->contactCount].local1 = clipped[i] * transform.Inverse();
-				m->contacts[m->contactCount].penetration = clipped_dists[i];
-				m->contactCount++;
-			}
+		forI(clipped.count){
+			m->contacts[m->contactCount].position    = (clipped[i] + (ref_plane_normal * clipped_dists[i])) * inc_transform;
+			m->contacts[m->contactCount].penetration = clipped_dists[i];
+			m->contactCount++;
 		}
 	}
 	
-#if 1
-	//Render::DrawLine(m->contacts[0].local0*transform0, 
-	//m->contacts[0].local0*transform0 + m->contacts[0].normal*edge_query.penetration, Color_Yellow);
-	//Render::DrawBox(mat4::TransformationMatrix(m->contacts[0].local0*transform0, vec3::ZERO, vec3{.05f,.05f,.05f}), Color_Blue);
-	//Render::DrawBox(mat4::TransformationMatrix(m->contacts[0].local1*transform1, vec3::ZERO, vec3{.05f,.05f,.05f}), Color_Red);
-#endif
+	//ensure manifold isnt reversed
+	if(p0_ref){
+		m->normal = ref_face->normal * ref_rotation;
+	}else{
+		m->normal = -ref_face->normal * ref_rotation;
+	}
+	
 #if 0
+	forI(m->contactCount){
+		Render::DrawLine(m->contacts[i].position, 
+						 m->contacts[i].position + m->normal*m->contacts[i].penetration, Color_Yellow);
+		//Render::DrawBox(mat4::TransformationMatrix(m->contacts[i].local0*inc_transform, vec3::ZERO, vec3{.05f,.05f,.05f}), Color_Red);
+		//Render::DrawBox(mat4::TransformationMatrix(m->contacts[i].local1*ref_transform, vec3::ZERO, vec3{.05f,.05f,.05f}), Color_Blue);
+		Render::DrawBox(mat4::TransformationMatrix(m->contacts[i].position, vec3::ZERO, vec3{.05f,.05f,.05f}), Color_Green);
+	}
+#endif
+#if 1
 	Log("phys","Hull-Hull face collision between ",m->p0->attribute.entity->name," and ",m->p1->attribute.entity->name,"."
-		"\n\treference: ", m->p1->attribute.entity->name,
-		"\n\tnormal:    ", m->normal,
-		"\n\tcontacts:  ", m->contactCount);
+		"\n  reference: ", m->p1->attribute.entity->name,
+		"\n  normal:    ", m->normal,
+		"\n  contacts:  ", m->contactCount);
+	forI(m->contactCount){
+		Log("","  contact",i,": position: ",m->contacts[i].position," penetration: ",m->contacts[i].penetration);
+	}
 #endif
 }
 
 //!ref: https://mathworld.wolfram.com/Line-LineIntersection.html
 //!ref: https://stackoverflow.com/questions/34602761/intersecting-3d-lines
-local void GenerateHullEdgeCollisionManifoldSAT(EdgeQuerySAT& query, mat3& rotation0, mat4& transform0, 
-												mat3& rotation1, mat4& transform1, Manifold* m){
+local void GenerateHullEdgeCollisionManifoldSAT(Mesh* mesh0, mat3& rotation0, mat4& transform0, 
+												Mesh* mesh1, mat3& rotation1, mat4& transform1, 
+												EdgeQuerySAT& query, Manifold* m){
 	//NOTE edge query info is in p1 local space and penetration is negative
 	//offset p0's edge to intersect with p1's edge in p1 space
 	mat4 transform = transform0 * transform1.Inverse();
 	vec3 offset = query.normal * query.penetration;
-	vec3 edge0_start_offset = (m->c0->mesh->vertexes[query.edge0_start].pos * transform) + offset;
-	vec3 edge0_end_offset   = (m->c0->mesh->vertexes[query.edge0_end  ].pos * transform) + offset;
-	vec3 edge1_start = m->c1->mesh->vertexes[query.edge1_start].pos;
-	vec3 edge1_end   = m->c1->mesh->vertexes[query.edge1_end  ].pos;
+	vec3 edge0_start_offset = (mesh0->vertexes[query.edge0_start].pos * transform) + offset;
+	vec3 edge0_end_offset   = (mesh0->vertexes[query.edge0_end  ].pos * transform) + offset;
+	vec3 edge1_start = mesh1->vertexes[query.edge1_start].pos;
+	vec3 edge1_end   = mesh1->vertexes[query.edge1_end  ].pos;
 	
 	//find intersect (we can assume non-parallel and intersecting due to setup)
 	vec3 edge0 = edge0_end_offset - edge0_start_offset;
@@ -355,172 +373,226 @@ local void GenerateHullEdgeCollisionManifoldSAT(EdgeQuerySAT& query, mat3& rotat
 	
 	m->contactCount = 1;
 	m->normal = query.normal * rotation1;
-	m->contacts[0].local0 = (edge0_point - offset) * transform.Inverse();
-	m->contacts[0].local1 = edge1_point;
+	m->contacts[0].position = edge1_point.midpoint(edge0_point - offset) * transform1;
 	m->contacts[0].penetration = query.penetration;
 	
-#if 1
-	Render::DrawLine(m->c0->mesh->vertexes[query.edge0_start].pos * transform0,
-					 m->c0->mesh->vertexes[query.edge0_end  ].pos * transform0, Color_Red);
-	Render::DrawLine(edge1_start * transform1, edge1_end   * transform1, Color_Blue);
-	Render::DrawLine(m->contacts[0].local0*transform0, m->contacts[0].local0*transform0 + m->normal*query.penetration, Color_Yellow);
-	Render::DrawBox(mat4::TransformationMatrix(m->contacts[0].local0*transform0, vec3::ZERO, vec3{.05f,.05f,.05f}), Color_Blue);
-	Render::DrawBox(mat4::TransformationMatrix(m->contacts[0].local1*transform1, vec3::ZERO, vec3{.05f,.05f,.05f}), Color_Red);
-#endif
 #if 0
+	Render::DrawLine(mesh0->vertexes[query.edge0_start].pos * transform0, mesh0->vertexes[query.edge0_end  ].pos * transform0, Color_Red);
+	Render::DrawLine(edge1_start * transform1, edge1_end   * transform1, Color_Blue);
+	Render::DrawLine(m->contacts[0].position, m->contacts[0].position + m->normal*query.penetration, Color_Yellow);
+	Render::DrawBox(mat4::TransformationMatrix((edge0_point - offset)*transform1, vec3::ZERO, vec3{.05f,.05f,.05f}), Color_Blue);
+	Render::DrawBox(mat4::TransformationMatrix(edge1_point*transform1, vec3::ZERO, vec3{.05f,.05f,.05f}), Color_Red);
+	Render::DrawBox(mat4::TransformationMatrix(m->contacts[0].position, vec3::ZERO, vec3{.05f,.05f,.05f}), Color_Green);
+#endif
+#if 1
 	Log("phys","Hull-Hull edge collision between ",m->p0->attribute.entity->name," and ",m->p1->attribute.entity->name,"."
-		"\n\tnormal:      ", m->normal,
-		"\n\tpenetration: ", m->contacts[0].penetration);
+		"\n  normal:      ", m->normal,
+		"\n  position:    ", m->contacts[0].position,
+		"\n  penetration: ", m->contacts[0].penetration);
 #endif
 }
 
 /////////////////////
 //// @primitives ////
 /////////////////////
+//TODO encapsulation
 void AABBAABBCollision(Physics* p0, Collider* c0, Physics* p1, Collider* c1, Manifold* m){
-	vec3 min0 = (p0->position - (c0->halfDims * p0->scale)) + c0->offset;
-	vec3 max0 = (p0->position + (c0->halfDims * p0->scale)) + c0->offset;
-	vec3 min1 = (p1->position - (c1->halfDims * p1->scale)) + c1->offset;
-	vec3 max1 = (p1->position + (c1->halfDims * p1->scale)) + c1->offset;
+	vec3 position0 = p0->position + c0->offset;
+	vec3 position1 = p1->position + c1->offset;
+	vec3 min0 = position0 - (c0->halfDims * p0->scale);
+	vec3 max0 = position0 + (c0->halfDims * p0->scale);
+	vec3 min1 = position1 - (c1->halfDims * p1->scale);
+	vec3 max1 = position1 + (c1->halfDims * p1->scale);
 	
 	if(AABBAABBTest(min0, max0, min1, max1)){
-		//early out if no collision or both are static
+		//early out if no collide or both are static
 		m->contactCount = -1;
 		if(c0->noCollide || c1->noCollide) return;
 		if(p0->staticPosition && p1->staticPosition && p0->staticRotation && p1->staticRotation) return;
 		
 		f32 distances[6] = { 
-			max0.x - min1.x, max0.y - min1.y, max0.z - min1.z,
-			max1.x - min0.x, max1.y - min0.y, max1.z - min0.z, 
+			min1.x - max0.x, min1.y - max0.y, min1.z - max0.z,
+			min0.x - max1.x, min0.y - max1.y, min0.z - max1.z, 
 		};
-		f32 penetration = FLT_MAX;
+		f32 penetration = -FLT_MAX;
 		vec3 normal;
 		
 		forI(6){
-			if(distances[i] < penetration){
+			if(distances[i] > penetration){
 				penetration = distances[i]; 
 				normal = physics_aabb_normals[i];
 			}
 		}
 		m->contactCount = 1;
 		m->normal = normal;
-		m->contacts[0].local0 = vec3::ZERO;
-		m->contacts[0].local1 = vec3::ZERO;
+		m->contacts[0].position    = vec3::ZERO; //NOTE not needed for AABB-AABB resolution
 		m->contacts[0].penetration = penetration;
+#if 1
+		Log("phys","AABB-AABB collision between ",p0->attribute.entity->name," and ",p1->attribute.entity->name,"."
+			"\n  normal:      ", m->normal,
+			"\n  position:    ", m->contacts[0].position,
+			"\n  penetration: ", m->contacts[0].penetration);
+#endif
 	}
 }
 
-//TODO collider offset, encapsulation
+//TODO encapsulation
 void AABBSphereCollision(Physics* p0, Collider* c0, Physics* p1, Collider* c1, Manifold* m){
-	vec3 aabb_point = ClosestPointOnAABB(c0->halfDims * p0->scale, p1->position - p0->position) + p0->position;
-	vec3 delta = aabb_point - p1->position;
+	vec3 position0 = p0->position + c0->offset;
+	vec3 position1 = p1->position + c1->offset;
+	vec3 aabb_point = ClosestPointOnAABB(c0->halfDims * p0->scale, position1 - position0) + position0;
+	vec3 delta =  position1 - aabb_point;
 	f32  distance = delta.mag();
 	
 	if(distance < c1->radius){
-		//early out if no collision or both are static
+		//early out if no collide or both are static
 		m->contactCount = -1;
 		if(c0->noCollide || c1->noCollide) return;
 		if(p0->staticPosition && p1->staticPosition && p0->staticRotation && p1->staticRotation) return;
 		
-		f32 penetration = c1->radius - distance;
+		f32 penetration = distance - c1->radius;
 		vec3 normal = delta / distance;
 		m->contactCount = 1;
 		m->normal = normal;
-		m->contacts[0].local0 = vec3::ZERO;
-		m->contacts[0].local1 = -normal * c1->radius;
+		m->contacts[0].position    = aabb_point;
 		m->contacts[0].penetration = penetration;
+#if 1
+		Log("phys","AABB-Sphere collision between ",p0->attribute.entity->name," and ",p1->attribute.entity->name,"."
+			"\n  normal:      ", m->normal,
+			"\n  position:    ", m->contacts[0].position,
+			"\n  penetration: ", m->contacts[0].penetration);
+#endif
 	}
 }
 
-//TODO collider offset, encapsulation
 void AABBHullCollision(Physics* p0, Collider* c0, Physics* p1, Collider* c1, Manifold* m){
-	//!Incomplete
-}
-
-//TODO collider offset, encapsulation
-void SphereSphereCollision(Physics* p0, Collider* c0, Physics* p1, Collider* c1, Manifold* m){
-	f32  radii = c0->radius + c1->radius;
-	vec3 delta = p1->position - p0->position;
-	f32  distance = delta.mag();
-	
-	if(distance < radii){
-		//early out if no collision or both are static
-		m->contactCount = -1;
-		if(c0->noCollide || c1->noCollide) return;
-		if(p0->staticPosition && p1->staticPosition && p0->staticRotation && p1->staticRotation) return;
-		
-		f32 penetration = radii - distance;
-		vec3 normal = delta / distance;
-		m->contactCount = 1;
-		m->normal = normal;
-		m->contacts[0].local0 = normal * c0->radius;
-		m->contacts[0].local1 = -normal * c1->radius;
-		m->contacts[0].penetration = penetration;
-	}
-}
-
-//TODO collider offset, encapsulation
-void SphereHullCollision(Physics* p0, Collider* c0, Physics* p1, Collider* c1, Manifold* m){
-	mat4 mesh_transform = mat4::TransformationMatrix(p1->position, p1->rotation, p1->scale);
-	mat4 inverse_mesh_transform = mesh_transform.Inverse();
-	vec3 mesh_space_mesh_point = ClosestPointOnHull(c1->mesh, p0->position * inverse_mesh_transform);
-	vec3 mesh_point = mesh_space_mesh_point * mesh_transform;
-	vec3 delta = mesh_point - p0->position;
-	f32  distance = delta.mag();
-	
-#if 0
-	Render::DrawLine(p0->position, p1->position, Color_Blue);
-	Render::DrawBox(mat4::TransformationMatrix(mesh_point, vec3::ZERO, vec3(.1f,.1f,.1f)), Color_Red);
-#endif
-	
-	if(distance < c0->radius){
-		//early out if no collision or both are static
-		m->contactCount = -1;
-		if(c0->noCollide || c1->noCollide) return;
-		if(p0->staticPosition && p1->staticPosition && p0->staticRotation && p1->staticRotation) return;
-		
-		f32 penetration = c0->radius - distance;
-		vec3 normal = (mesh_point - p1->position).normalized();
-		m->contactCount = 1;
-		m->normal = normal;
-		m->contacts[0].local0 = (delta / distance) * c0->radius;
-		m->contacts[0].local1 = mesh_space_mesh_point;
-		m->contacts[0].penetration = penetration;
-#if 0
-		Render::DrawLine(p0->position+m->contacts[0].local0, p1->position+m->contacts[0].local1, Color_Yellow);
-		Render::DrawLine(p0->position+m->contacts[0].local0, (p0->position+m->contacts[0].local0)+(normal*penetration), Color_Magenta);
-		Log("phys","Collision between sphere and hull. mesh_point:",mesh_point," radius:",c0->radius," distance: ",distance);
-#endif
-	}
-}
-
-//TODO collider offset, encapsulation
-void HullHullCollision(Physics* p0, Collider* c0, Physics* p1, Collider* c1, Manifold* m){
-	mat3 rotation0  = mat3::RotationMatrix(p0->rotation);
+	vec3 position0 = p0->position + c0->offset;
+	vec3 position1 = p1->position + c1->offset;
+	mat3 rotation0  = mat3::RotationMatrix(vec3::ZERO);
 	mat3 rotation1  = mat3::RotationMatrix(p1->rotation);
-	mat4 transform0 = mat4::TransformationMatrix(p0->position, p0->rotation, p0->scale);
-	mat4 transform1 = mat4::TransformationMatrix(p1->position, p1->rotation, p1->scale);
+	mat4 transform0 = mat4::TransformationMatrix(position0, vec3::ZERO, p0->scale * (c0->halfDims / vec3{0.5f,0.5f,0.5f}));
+	mat4 transform1 = mat4::TransformationMatrix(position1, p1->rotation, p1->scale);
 	
-	FaceQuerySAT face_query0 = HullFaceQuerySAT(c0->mesh, rotation0, transform0, c1->mesh, rotation1, transform1);
-	if(face_query0.penetration > 0) return; //no collision on mesh0 axes
+	FaceQuerySAT face_query0 = HullFaceQuerySAT(Storage::NullMesh(), rotation0, transform0, c1->mesh, rotation1, transform1);
+	if(face_query0.penetration >= 0) return; //no collision on mesh0 axes
 	
-	FaceQuerySAT face_query1 = HullFaceQuerySAT(c1->mesh, rotation1, transform1, c0->mesh, rotation0, transform0);
-	if(face_query1.penetration > 0) return; //no collision on mesh1 axes
+	FaceQuerySAT face_query1 = HullFaceQuerySAT(c1->mesh, rotation1, transform1, Storage::NullMesh(), rotation0, transform0);
+	if(face_query1.penetration >= 0) return; //no collision on mesh1 axes
 	
-	EdgeQuerySAT edge_query  = HullEdgeQuerySAT(c0->mesh, rotation0, transform0, c1->mesh, rotation1, transform1);
-	if(edge_query.penetration  > 0) return; //no collision on edge vs edge axes
+	EdgeQuerySAT edge_query  = HullEdgeQuerySAT(Storage::NullMesh(), rotation0, transform0, c1->mesh, rotation1, transform1);
+	if(edge_query.penetration  >= 0) return; //no collision on edge vs edge axes
 	
-	//early out if no collision or both are static
+	//early out if no collide or both are static
 	m->contactCount = -1;
 	if(c0->noCollide || c1->noCollide) return;
 	if(p0->staticPosition && p1->staticPosition && p0->staticRotation && p1->staticRotation) return;
 	
 	if      (face_query0.penetration > face_query1.penetration && face_query0.penetration > edge_query.penetration){
-		GenerateHullFaceCollisionManifoldSAT(c0->mesh, rotation0, transform0, c1->mesh, rotation1, transform1, face_query1, true,  m);
+		GenerateHullFaceCollisionManifoldSAT(Storage::NullMesh(), rotation0, transform0, 
+											 c1->mesh, rotation1, transform1, face_query0, true,  m);
+	}else if(face_query1.penetration > face_query0.penetration && face_query1.penetration > edge_query.penetration){
+		GenerateHullFaceCollisionManifoldSAT(c1->mesh, rotation1, transform1, 
+											 Storage::NullMesh(), rotation0, transform0, face_query1, false, m);
+	}else{
+		GenerateHullEdgeCollisionManifoldSAT(Storage::NullMesh(), rotation0, transform0, c1->mesh, rotation1, transform1, edge_query, m);
+	}
+}
+
+//TODO encapsulation
+void SphereSphereCollision(Physics* p0, Collider* c0, Physics* p1, Collider* c1, Manifold* m){
+	f32  radii = c0->radius + c1->radius;
+	vec3 delta = (p1->position + c1->offset) - (p0->position + c0->offset);
+	f32  distance = delta.mag();
+	
+	if(distance < radii){
+		//early out if no collide or both are static
+		m->contactCount = -1;
+		if(c0->noCollide || c1->noCollide) return;
+		if(p0->staticPosition && p1->staticPosition && p0->staticRotation && p1->staticRotation) return;
+		
+		f32 penetration = distance - radii;
+		vec3 normal = delta / distance;
+		m->contactCount = 1;
+		m->normal = normal;
+		m->contacts[0].position    = (normal * c0->radius).midpoint(-normal * c1->radius);
+		m->contacts[0].penetration = penetration;
+#if 1
+		Log("phys","Sphere-Sphere collision between ",p0->attribute.entity->name," and ",p1->attribute.entity->name,"."
+			"\n  normal:      ", m->normal,
+			"\n  position:    ", m->contacts[0].position,
+			"\n  penetration: ", m->contacts[0].penetration);
+#endif
+	}
+}
+
+//TODO encapsulation
+void SphereHullCollision(Physics* p0, Collider* c0, Physics* p1, Collider* c1, Manifold* m){
+	vec3 position0 = p0->position + c0->offset;
+	vec3 position1 = p1->position + c1->offset;
+	mat4 mesh_transform = mat4::TransformationMatrix(position1, p1->rotation, p1->scale);
+	vec3 mesh_space_mesh_point = ClosestPointOnHull(c1->mesh, position0 * mesh_transform.Inverse());
+	vec3 mesh_point = mesh_space_mesh_point * mesh_transform;
+	vec3 delta = mesh_point - position0;
+	f32  distance = delta.mag();
+	
+#if 0
+	Render::DrawLine(position0, position1, Color_Red);
+	Render::DrawBox(mat4::TransformationMatrix(mesh_point, vec3::ZERO, vec3(.1f,.1f,.1f)), Color_Blue);
+#endif
+	
+	if(distance < c0->radius){
+		//early out if no collide or both are static
+		m->contactCount = -1;
+		if(c0->noCollide || c1->noCollide) return;
+		if(p0->staticPosition && p1->staticPosition && p0->staticRotation && p1->staticRotation) return;
+		
+		f32 penetration = distance - c0->radius;
+		vec3 normal = (mesh_point - position1).normalized();
+		m->contactCount = 1;
+		m->normal = normal;
+		m->contacts[0].position    = mesh_point;
+		m->contacts[0].penetration = penetration;
+#if 0
+		Render::DrawLine(m->contacts[0].position, m->contacts[0].position+(normal*penetration), Color_Yellow);
+		Render::DrawBox(mat4::TransformationMatrix(m->contacts[0].position, vec3::ZERO, vec3{.05f,.05f,.05f}), Color_Green);
+#endif
+#if 1
+		Log("phys","Sphere-Hull collision between ",p0->attribute.entity->name," and ",p1->attribute.entity->name,"."
+			"\n  normal:      ", m->normal,
+			"\n  position:    ", m->contacts[0].position,
+			"\n  penetration: ", m->contacts[0].penetration);
+#endif
+	}
+}
+
+void HullHullCollision(Physics* p0, Collider* c0, Physics* p1, Collider* c1, Manifold* m){
+	vec3 position0 = p0->position + c0->offset;
+	vec3 position1 = p1->position + c1->offset;
+	mat3 rotation0  = mat3::RotationMatrix(p0->rotation);
+	mat3 rotation1  = mat3::RotationMatrix(p1->rotation);
+	mat4 transform0 = mat4::TransformationMatrix(position0, p0->rotation, p0->scale);
+	mat4 transform1 = mat4::TransformationMatrix(position1, p1->rotation, p1->scale);
+	
+	FaceQuerySAT face_query0 = HullFaceQuerySAT(c0->mesh, rotation0, transform0, c1->mesh, rotation1, transform1);
+	if(face_query0.penetration >= 0) return; //no collision on mesh0 axes
+	
+	FaceQuerySAT face_query1 = HullFaceQuerySAT(c1->mesh, rotation1, transform1, c0->mesh, rotation0, transform0);
+	if(face_query1.penetration >= 0) return; //no collision on mesh1 axes
+	
+	EdgeQuerySAT edge_query  = HullEdgeQuerySAT(c0->mesh, rotation0, transform0, c1->mesh, rotation1, transform1);
+	if(edge_query.penetration  >= 0) return; //no collision on edge vs edge axes
+	
+	//early out if no collide or both are static
+	m->contactCount = -1;
+	if(c0->noCollide || c1->noCollide) return;
+	if(p0->staticPosition && p1->staticPosition && p0->staticRotation && p1->staticRotation) return;
+	
+	if      (face_query0.penetration > face_query1.penetration && face_query0.penetration > edge_query.penetration){
+		GenerateHullFaceCollisionManifoldSAT(c0->mesh, rotation0, transform0, c1->mesh, rotation1, transform1, face_query0, true,  m);
 	}else if(face_query1.penetration > face_query0.penetration && face_query1.penetration > edge_query.penetration){
 		GenerateHullFaceCollisionManifoldSAT(c1->mesh, rotation1, transform1, c0->mesh, rotation0, transform0, face_query1, false, m);
 	}else{
-		GenerateHullEdgeCollisionManifoldSAT(edge_query, rotation0, transform0, rotation1, transform1, m);
+		GenerateHullEdgeCollisionManifoldSAT(c0->mesh, rotation0, transform0, c1->mesh, rotation1, transform1, edge_query, m);
 	}
 }
 
@@ -642,33 +714,11 @@ void PhysicsSystem::Update(){
 				if(it->c1->isTrigger) it->c1->triggerActive = true;
 				
 				vec3 normal = it->normal;
-				mat4 transform0 = mat4::TransformationMatrix(it->p0->position, it->p0->rotation, it->p0->scale);
-				mat4 transform1 = mat4::TransformationMatrix(it->p1->position, it->p1->rotation, it->p1->scale);
+				mat4 transform0 = mat4::TransformationMatrix(it->p0->position + it->c0->offset, it->p0->rotation, it->p0->scale);
+				mat4 transform1 = mat4::TransformationMatrix(it->p1->position + it->c1->offset, it->p1->rotation, it->p1->scale);
 				
 				forI(it->contactCount){
-					f32  penetration = it->contacts[i].penetration;
 					
-					//static resolution //TODO blend so that we move heavier less
-					if     (it->p0->staticPosition){ it->p1->position += normal*penetration; }
-					else if(it->p1->staticPosition){ it->p0->position -= normal*penetration; }
-					else{ it->p0->position -= normal*penetration/2.f; it->p1->position += normal*penetration/2.f; }
-					
-					//dynamic resolution; ref:https://www.euclideanspace.com/physics/dynamics/collision/threed/index.htm
-					//TODO figure out why omega1 and thus scalar is wrong
-					vec3 r0 = it->p0->position + it->contacts[i].local0;
-					vec3 r1 = it->p1->position + it->contacts[i].local1;
-					vec3 omega0 = normal.cross(r0) * (it->c0->tensor.To4x4() * transform0).Inverse();
-					vec3 omega1 = normal.cross(r1) * (it->c1->tensor.To4x4() * transform1).Inverse();
-					f32 scalar = (1.f/it->p0->mass) + (1.f/it->p1->mass) /*+ normal.dot(r0.cross(omega0) + r1.cross(omega1))*/;
-					f32 rest_coef = (it->p0->elasticity + it->p1->elasticity) / 2.f; //NOTE not how restitution coef is calulated in real physics
-					f32 impulse_mod = (1.f + rest_coef) * (it->p1->velocity - it->p0->velocity).mag() / scalar;
-					vec3 impulse = normal * impulse_mod;
-					
-					if(!it->p0->staticPosition) it->p0->velocity -= impulse / it->p0->mass;
-					if(!it->p1->staticPosition) it->p1->velocity += impulse / it->p1->mass;
-					
-					if(!(it->p0->staticRotation || it->c0->type == ColliderType_AABB)) it->p0->rotVelocity -= DEGREES(omega0);
-					if(!(it->p1->staticRotation || it->c1->type == ColliderType_AABB)) it->p1->rotVelocity += DEGREES(omega1);
 				}
 			}
 		}

@@ -855,6 +855,9 @@ void EntitiesTab(){
 					Render::DrawBox(Transform(sel->physics->position+sel->physics->collider.offset, vec3::ZERO,
 											  sel->physics->scale*(sel->physics->collider.halfDims*2)).Matrix(), Color_Green);
 				}break;
+				case ColliderType_Sphere:{
+					Render::DrawSphere(sel->physics->position+sel->physics->collider.offset, vec3::ZERO, sel->physics->collider.radius, Color_Green);
+				}break;
 				case ColliderType_Hull:{
 					mat4 transform = mat4::TransformationMatrix(sel->physics->position + sel->physics->collider.offset, sel->physics->rotation, sel->physics->scale);
 					forE(sel->physics->collider.mesh->faces){

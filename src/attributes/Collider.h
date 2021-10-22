@@ -23,18 +23,17 @@ global_ const char* ColliderTypeStrings[] = {
 };
 
 struct Contact{
-	vec3 local0; //local to p0
-	vec3 local1; //local to p1
-	f32  penetration;
+	vec3 position; //world space
+	f32  penetration; //always negative
 };
 
-#define MAX_MANIFOLD_CONTACTS 4
+//TODO maybe store rotation/position matrices on here to avoid recalculation
 struct Manifold{
 	Physics  *p0, *p1;
 	Collider *c0, *c1;
-	vec3 normal;
+	vec3 normal; //from p0 to p1
 	u32 contactCount; //collision exists if -1, but dont resolve
-	Contact contacts[MAX_MANIFOLD_CONTACTS];
+	Contact contacts[4]; //four contact points should be stable enough
 };
 
 struct Collider{
