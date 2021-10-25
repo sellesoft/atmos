@@ -2,7 +2,7 @@
 #ifndef ATMOS_TRANSFORM_H
 #define ATMOS_TRANSFORM_H
 
-#include "math/VectorMatrix.h"
+#include "math/math.h"
 
 struct Transform{
 	vec3 position = vec3::ZERO;

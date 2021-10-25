@@ -48,7 +48,6 @@ store physics mass and collider tensor as inverse
 test if static resolution is even necessary 
 account for mass in static resolution so heavier things move less than lighter, but overall change is the same
 optimize detection by removing duplicate calculation of matrices and collider offsets
-handle collider offset in all primitive collisions
 account for entity scale in sphere collisions
 add compound colliders (multiple colliders that represent one physics object)
 add convex mesh inertia tensor generation

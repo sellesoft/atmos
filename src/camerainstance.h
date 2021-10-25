@@ -3,7 +3,7 @@
 #define ATMOS_CAMERAINSTANCE_H
 
 #include "core/camera.h"
-#include "math/vectormatrix.h"
+#include "math/math.h"
 
 //TODO(delle) make this an attribute
 struct CameraInstance : public Camera{

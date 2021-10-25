@@ -34,6 +34,28 @@ enum EditActionType_{
 	EditActionType_COUNT,
 }; typedef u32 EditActionType;
 
+enum TransformType{
+	TransformType_NONE,
+	TransformType_TranslateSelectAxis,
+	TransformType_TranslateX,
+	TransformType_TranslateY,
+	TransformType_TranslateZ,
+	TransformType_TranslateFree,
+	TransformType_TranslateXY,
+	TransformType_TranslateXZ,
+	TransformType_TranslateYZ,
+	TransformType_RotateSelectAxis,
+	TransformType_RotateX,
+	TransformType_RotateY,
+	TransformType_RotateZ,
+	TransformType_RotateFree,
+	TransformType_ScaleSelectAxis,
+	TransformType_ScaleX,
+	TransformType_ScaleY,
+	TransformType_ScaleZ,
+	TransformType_ScaleFree,
+};
+
 struct EditAction{ //48 bytes
 	EditActionType type;
 	u32 data[11];
@@ -856,7 +878,7 @@ void EntitiesTab(){
 											  sel->physics->scale*(sel->physics->collider.halfDims*2)).Matrix(), Color_Green);
 				}break;
 				case ColliderType_Sphere:{
-					Render::DrawSphere(sel->physics->position+sel->physics->collider.offset, vec3::ZERO, sel->physics->collider.radius, Color_Green);
+					Render::DrawSphere(sel->physics->position+sel->physics->collider.offset, vec3::ZERO, sel->physics->collider.radius, 16, Color_Green);
 				}break;
 				case ColliderType_Hull:{
 					mat4 transform = mat4::TransformationMatrix(sel->physics->position + sel->physics->collider.offset, sel->physics->rotation, sel->physics->scale);
@@ -2325,6 +2347,67 @@ void ShowWorldAxis(){
 	Render::DrawLineUI(offset, spz + offset, 1, Color_Blue);
 }
 
+//////////////////////////@@
+//// @transform gizmo ////TODO: axis changing, selecting and dragging, local vs world, undo
+//////////////////////////TODO: free translate, plane translate, axis rotation, free rotation, axis scale, free scale 
+local Type transforming_action = TransformType_NONE;
+local b32  transforming_local_space = false;
+local vec2 transforming_screen_origin = vec2::ZERO;
+local vec3 transforming_origin = vec3::ZERO;
+local void TransformGizmo(){
+	if(selected_entities.count == 0) return;
+	
+	//change transform type
+	if(DeshInput->KeyPressed(Key::ESCAPE)) transforming_action = TransformType_NONE;
+	if(!DeshInput->KeyDown(MouseButton::RIGHT)){
+		if(DeshInput->KeyPressed(AtmoAdmin->controller.transformTranslate)) transforming_action = TransformType_TranslateSelectAxis;
+		if(DeshInput->KeyPressed(AtmoAdmin->controller.transformRotate))    transforming_action = TransformType_RotateSelectAxis;
+		if(DeshInput->KeyPressed(AtmoAdmin->controller.transformScale))     transforming_action = TransformType_ScaleSelectAxis;
+	}
+	
+	//change axis
+	if(   transforming_action == TransformType_TranslateSelectAxis 
+	   || transforming_action == TransformType_RotateSelectAxis
+	   || transforming_action == TransformType_ScaleSelectAxis){
+		if      (DeshInput->KeyPressed(Key::X)){
+			transforming_action += 1;
+		}else if(DeshInput->KeyPressed(Key::Y)){
+			transforming_action += 2;
+		}else if(DeshInput->KeyPressed(Key::Z)){
+			transforming_action += 3;
+		}else if(DeshInput->KeyPressed(Key::F)){
+			transforming_action += 4;
+		}
+	}
+	
+	//draw, check mouse input, handle movement
+	vec3 selected_position = selected_entities[0]->transform.position;
+	vec3 selected_rotation = selected_entities[0]->transform.rotation;
+	vec3 selected_scale    = selected_entities[0]->transform.scale;
+	f32  draw_scale = (selected_position.distanceTo(AtmoAdmin->camera.position) / 6.5f) * .25f;
+	switch(transforming_action){
+		case TransformType_TranslateSelectAxis:{
+			Render::DrawBoxFilled(mat4::TransformationMatrix(selected_position, vec3::ZERO, vec3{10.f,.25f,.25f}*draw_scale), Color_Red);
+			Render::DrawBoxFilled(mat4::TransformationMatrix(selected_position, vec3::ZERO, vec3{.25f,10.f,.25f}*draw_scale), Color_Green);
+			Render::DrawBoxFilled(mat4::TransformationMatrix(selected_position, vec3::ZERO, vec3{.25f,.25f,10.f}*draw_scale), Color_Blue);
+			Render::DrawBoxFilled(mat4::TransformationMatrix(selected_position, vec3::ZERO, vec3::ONE*draw_scale), Color_LightGrey);
+		}break;
+		case TransformType_TranslateX:{
+			Render::DrawBoxFilled(mat4::TransformationMatrix(selected_position, vec3::ZERO, vec3{10.f,.25f,.25f}*draw_scale), Color_Red);
+			//TODO clicked
+		}break;
+		case TransformType_TranslateY:{
+			Render::DrawBoxFilled(mat4::TransformationMatrix(selected_position, vec3::ZERO, vec3{.25f,10.f,.25f}*draw_scale), Color_Green);
+		}break;
+		case TransformType_TranslateZ:{
+			Render::DrawBoxFilled(mat4::TransformationMatrix(selected_position, vec3::ZERO, vec3{.25f,.25f,10.f}*draw_scale), Color_Blue);
+		}break;
+		case TransformType_TranslateFree:{
+			Render::DrawBoxFilled(mat4::TransformationMatrix(selected_position, vec3::ZERO, vec3::ONE*draw_scale), Color_LightGrey);
+		}break;
+	}
+}
+
 void Editor::Init(){
 	selected_entities.reserve(8);
 	
@@ -2470,6 +2553,7 @@ void Editor::Update(){
 		}ImGui::PopStyleColor();
 		
 		ShowWorldAxis();
+		TransformGizmo();
 		if(!showMenuBar)   menubarheight = 0;
 		if(!showDebugBar)  debugbarheight = 0;
 	}

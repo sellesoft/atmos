@@ -3,7 +3,7 @@
 #define ATMOS_COLLIDER_H
 
 #include "Attribute.h"
-#include "math/VectorMatrix.h"
+#include "math/math.h"
 #include "utils/array.h"
 
 struct Entity;

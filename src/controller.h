@@ -74,6 +74,10 @@ struct Controller{
 	Key::Key physicsIntegrating = Key::SPACE | InputMod_AnyAlt;
 	Key::Key physicsEditorSim   = Key::SPACE | InputMod_AnyCtrl | InputMod_AnyShift | InputMod_AnyAlt;
 	
+	Key::Key transformTranslate = Key::T;
+	Key::Key transformRotate    = Key::R;
+	Key::Key transformScale     = Key::S;
+	
 	Key::Key saveLevel = Key::S | InputMod_AnyCtrl;
 	
 	ConfigMap keybindMap;
