@@ -34,28 +34,6 @@ enum EditActionType_{
 	EditActionType_COUNT,
 }; typedef u32 EditActionType;
 
-enum TransformType{
-	TransformType_NONE,
-	TransformType_TranslateSelectAxis,
-	TransformType_TranslateX,
-	TransformType_TranslateY,
-	TransformType_TranslateZ,
-	TransformType_TranslateFree,
-	TransformType_TranslateXY,
-	TransformType_TranslateXZ,
-	TransformType_TranslateYZ,
-	TransformType_RotateSelectAxis,
-	TransformType_RotateX,
-	TransformType_RotateY,
-	TransformType_RotateZ,
-	TransformType_RotateFree,
-	TransformType_ScaleSelectAxis,
-	TransformType_ScaleX,
-	TransformType_ScaleY,
-	TransformType_ScaleZ,
-	TransformType_ScaleFree,
-};
-
 struct EditAction{ //48 bytes
 	EditActionType type;
 	u32 data[11];
@@ -2348,66 +2326,218 @@ void ShowWorldAxis(){
 }
 
 //////////////////////////@@
-//// @transform gizmo ////TODO: axis changing, selecting and dragging, local vs world, undo
+//// @transform gizmo ////TODO: axis changing, selecting and dragging, local vs world
 //////////////////////////TODO: free translate, plane translate, axis rotation, free rotation, axis scale, free scale 
-local Type transforming_action = TransformType_NONE;
-local b32  transforming_local_space = false;
-local vec2 transforming_screen_origin = vec2::ZERO;
-local vec3 transforming_origin = vec3::ZERO;
 local void TransformGizmo(){
-	if(selected_entities.count == 0) return;
+	enum TransformType{
+		TransformType_NONE,
+		TransformType_TranslateSelectAxis,
+		TransformType_TranslateX,
+		TransformType_TranslateY,
+		TransformType_TranslateZ,
+		TransformType_TranslateXY,
+		TransformType_TranslateXZ,
+		TransformType_TranslateYZ,
+		TransformType_TranslateFree,
+		TransformType_RotateSelectAxis,
+		TransformType_RotateX,
+		TransformType_RotateY,
+		TransformType_RotateZ,
+		TransformType_RotateFree,
+		TransformType_ScaleSelectAxis,
+		TransformType_ScaleX,
+		TransformType_ScaleY,
+		TransformType_ScaleZ,
+		TransformType_ScaleFree,
+	};
+	persist Type action = TransformType_NONE;
+	persist vec3 initial = vec3::ZERO;
+	persist f32  initial_dist = 0.0f;
+	persist b32  dragging = false;
+	persist b32  select = false;
+	persist b32  undo = false;
+	persist b32  local_space = false;
+	
+	//early out if no selected entities to transform
+	if(selected_entities.count == 0){
+		action = TransformType_NONE;
+		return;
+	}
 	
 	//change transform type
-	if(DeshInput->KeyPressed(Key::ESCAPE)) transforming_action = TransformType_NONE;
+	if(DeshInput->KeyPressed(Key::ESCAPE)) action = TransformType_NONE;
 	if(!DeshInput->KeyDown(MouseButton::RIGHT)){
-		if(DeshInput->KeyPressed(AtmoAdmin->controller.transformTranslate)) transforming_action = TransformType_TranslateSelectAxis;
-		if(DeshInput->KeyPressed(AtmoAdmin->controller.transformRotate))    transforming_action = TransformType_RotateSelectAxis;
-		if(DeshInput->KeyPressed(AtmoAdmin->controller.transformScale))     transforming_action = TransformType_ScaleSelectAxis;
+		if(DeshInput->KeyPressed(AtmoAdmin->controller.transformTranslate)) action = TransformType_TranslateSelectAxis;
+		if(DeshInput->KeyPressed(AtmoAdmin->controller.transformRotate))    action = TransformType_RotateSelectAxis;
+		if(DeshInput->KeyPressed(AtmoAdmin->controller.transformScale))     action = TransformType_ScaleSelectAxis;
 	}
 	
 	//change axis
-	if(   transforming_action == TransformType_TranslateSelectAxis 
-	   || transforming_action == TransformType_RotateSelectAxis
-	   || transforming_action == TransformType_ScaleSelectAxis){
+	if      (action >= TransformType_TranslateSelectAxis && action <= TransformType_TranslateFree){
 		if      (DeshInput->KeyPressed(Key::X)){
-			transforming_action += 1;
+			if      (DeshInput->KeyPressed(Key::Y)){
+				action = TransformType_TranslateXY;
+			}else if(DeshInput->KeyPressed(Key::Z)){
+				action = TransformType_TranslateXZ;
+			}else{
+				action = TransformType_TranslateX;
+			}
 		}else if(DeshInput->KeyPressed(Key::Y)){
-			transforming_action += 2;
+			if      (DeshInput->KeyPressed(Key::X)){
+				action = TransformType_TranslateXY;
+			}else if(DeshInput->KeyPressed(Key::Z)){
+				action = TransformType_TranslateYZ;
+			}else{
+				action = TransformType_TranslateY;
+			}
 		}else if(DeshInput->KeyPressed(Key::Z)){
-			transforming_action += 3;
+			if      (DeshInput->KeyPressed(Key::X)){
+				action = TransformType_TranslateXZ;
+			}else if(DeshInput->KeyPressed(Key::Y)){
+				action = TransformType_TranslateYZ;
+			}else{
+				action = TransformType_TranslateZ;
+			}
 		}else if(DeshInput->KeyPressed(Key::F)){
-			transforming_action += 4;
+			action = TransformType_TranslateFree;
+		}
+	}else if(action >= TransformType_RotateSelectAxis && action <= TransformType_RotateFree){
+		if      (DeshInput->KeyPressed(Key::X)){
+			action = TransformType_RotateX;
+		}else if(DeshInput->KeyPressed(Key::Y)){
+			action = TransformType_RotateY;
+		}else if(DeshInput->KeyPressed(Key::Z)){
+			action = TransformType_RotateZ;
+		}else if(DeshInput->KeyPressed(Key::F)){
+			action = TransformType_RotateFree;
+		}
+	}else if(action >= TransformType_ScaleSelectAxis && action <= TransformType_ScaleFree){
+		if      (DeshInput->KeyPressed(Key::X)){
+			action = TransformType_ScaleX;
+		}else if(DeshInput->KeyPressed(Key::Y)){
+			action = TransformType_ScaleY;
+		}else if(DeshInput->KeyPressed(Key::Z)){
+			action = TransformType_ScaleZ;
+		}else if(DeshInput->KeyPressed(Key::F)){
+			action = TransformType_ScaleFree;
 		}
 	}
 	
-	//draw, check mouse input, handle movement
-	vec3 selected_position = selected_entities[0]->transform.position;
-	vec3 selected_rotation = selected_entities[0]->transform.rotation;
-	vec3 selected_scale    = selected_entities[0]->transform.scale;
-	f32  draw_scale = (selected_position.distanceTo(AtmoAdmin->camera.position) / 6.5f) * .25f;
-	switch(transforming_action){
+	//mouse input
+	if(DeshInput->KeyPressed(MouseButton::LEFT)){
+		select = true;
+		dragging = true;
+	}else if(DeshInput->KeyDown(MouseButton::LEFT)){
+		select = false;
+		dragging = true;
+	}else if(DeshInput->KeyReleased(MouseButton::LEFT)){
+		select = false;
+		dragging = false;
+		undo = true;
+	}
+	
+	//dragging and drawing
+	Entity* sel = selected_entities[0];
+	Camera* cam = &AtmoAdmin->camera;
+	vec3 sel_pos     = sel->transform.position;
+	vec3 sel_rot     = sel->transform.rotation;
+	vec3 sel_scale   = sel->transform.scale;
+	f32  cam_dist    = sel_pos.distanceTo(cam->position);
+	f32  draw_scale  = cam_dist / 12.f;
+	vec3 mouse_world = Math::ScreenToWorld(DeshInput->mousePos, cam->projMat, cam->viewMat, DeshWindow->dimensions);
+	switch(action){
+		//// translation ////
 		case TransformType_TranslateSelectAxis:{
-			Render::DrawBoxFilled(mat4::TransformationMatrix(selected_position, vec3::ZERO, vec3{10.f,.25f,.25f}*draw_scale), Color_Red);
-			Render::DrawBoxFilled(mat4::TransformationMatrix(selected_position, vec3::ZERO, vec3{.25f,10.f,.25f}*draw_scale), Color_Green);
-			Render::DrawBoxFilled(mat4::TransformationMatrix(selected_position, vec3::ZERO, vec3{.25f,.25f,10.f}*draw_scale), Color_Blue);
-			Render::DrawBoxFilled(mat4::TransformationMatrix(selected_position, vec3::ZERO, vec3::ONE*draw_scale), Color_LightGrey);
+			if(select){
+				//TODO box select
+			}
+			Render::DrawBoxFilled(mat4::TransformationMatrix(sel_pos+vec3{2.f*draw_scale,0,0}, vec3::ZERO, vec3{4.f,.2f,.2f}*draw_scale), Color_Red);
+			Render::DrawBoxFilled(mat4::TransformationMatrix(sel_pos+vec3{0,2.f*draw_scale,0}, vec3::ZERO, vec3{.2f,4.f,.2f}*draw_scale), Color_Green);
+			Render::DrawBoxFilled(mat4::TransformationMatrix(sel_pos+vec3{0,0,2.f*draw_scale}, vec3::ZERO, vec3{.2f,.2f,4.f}*draw_scale), Color_Blue);
+			Render::DrawBoxFilled(mat4::TransformationMatrix(sel_pos, vec3::ZERO, vec3::ONE*draw_scale), Color_LightGrey);
 		}break;
 		case TransformType_TranslateX:{
-			Render::DrawBoxFilled(mat4::TransformationMatrix(selected_position, vec3::ZERO, vec3{10.f,.25f,.25f}*draw_scale), Color_Red);
-			//TODO clicked
+			if(select){
+				initial = sel_pos;
+				initial_dist = cam_dist;
+			}else if(dragging){
+				mouse_world = ((mouse_world - cam->position).normalized() * 1000.f) + cam->position;
+				if(Math::AngBetweenVectors(cam->forward.yZero(), cam->forward) > 60.f){
+					sel->transform.position.x = Math::VectorPlaneIntersect(initial, vec3::UP, cam->position, mouse_world).x;
+					if(sel->physics) sel->physics->position.x = sel->transform.position.x;
+				}else{
+					sel->transform.position.x = Math::VectorPlaneIntersect(initial, vec3::FORWARD, cam->position, mouse_world).x;
+					if(sel->physics) sel->physics->position.x = sel->transform.position.x;
+				}
+			}else if(undo){
+				AddUndoTranslate(&sel->transform, &initial, &sel_pos);
+			}
+			Render::DrawBoxFilled(mat4::TransformationMatrix(sel_pos+vec3{2.f*draw_scale,0,0}, vec3::ZERO, vec3{4.f,.2f,.2f}*draw_scale), Color_Red);
 		}break;
 		case TransformType_TranslateY:{
-			Render::DrawBoxFilled(mat4::TransformationMatrix(selected_position, vec3::ZERO, vec3{.25f,10.f,.25f}*draw_scale), Color_Green);
+			if(select){
+				initial = sel_pos;
+				initial_dist = cam_dist;
+			}else if(dragging){
+				mouse_world = ((mouse_world - cam->position).normalized() * 1000.f) + cam->position;
+				if(Math::AngBetweenVectors(cam->forward.yZero(), cam->forward) > 60.f){
+					sel->transform.position.y = Math::VectorPlaneIntersect(initial, vec3::RIGHT, cam->position, mouse_world).y;
+					if(sel->physics) sel->physics->position.y = sel->transform.position.y;
+				}else{
+					sel->transform.position.y = Math::VectorPlaneIntersect(initial, vec3::FORWARD, cam->position, mouse_world).y;
+					if(sel->physics) sel->physics->position.y = sel->transform.position.y;
+				}
+			}else if(undo){
+				AddUndoTranslate(&sel->transform, &initial, &sel_pos);
+			}
+			Render::DrawBoxFilled(mat4::TransformationMatrix(sel_pos+vec3{0,2.f*draw_scale,0}, vec3::ZERO, vec3{.2f,4.f,.2f}*draw_scale), Color_Green);
 		}break;
 		case TransformType_TranslateZ:{
-			Render::DrawBoxFilled(mat4::TransformationMatrix(selected_position, vec3::ZERO, vec3{.25f,.25f,10.f}*draw_scale), Color_Blue);
+			if(select){
+				initial = sel_pos;
+				initial_dist = cam_dist;
+			}else if(dragging){
+				mouse_world = ((mouse_world - cam->position).normalized() * 1000.f) + cam->position;
+				if(Math::AngBetweenVectors(cam->forward.yZero(), cam->forward) > 60.f){
+					sel->transform.position.z = Math::VectorPlaneIntersect(initial, vec3::UP, cam->position, mouse_world).z;
+					if(sel->physics) sel->physics->position.z = sel->transform.position.z;
+				}else{
+					sel->transform.position.z = Math::VectorPlaneIntersect(initial, vec3::RIGHT, cam->position, mouse_world).z;
+					if(sel->physics) sel->physics->position.z = sel->transform.position.z;
+				}
+			}else if(undo){
+				AddUndoTranslate(&sel->transform, &initial, &sel_pos);
+			}
+			Render::DrawBoxFilled(mat4::TransformationMatrix(sel_pos+vec3{0,0,2.f*draw_scale}, vec3::ZERO, vec3{.2f,.2f,4.f}*draw_scale), Color_Blue);
 		}break;
 		case TransformType_TranslateFree:{
-			Render::DrawBoxFilled(mat4::TransformationMatrix(selected_position, vec3::ZERO, vec3::ONE*draw_scale), Color_LightGrey);
+			if      (DeshInput->KeyPressed(MouseButton::SCROLLUP)){
+				initial_dist += 1.f;
+			}else if(DeshInput->KeyPressed(MouseButton::SCROLLDOWN)){
+				initial_dist -= 1.f;
+			}
+			
+			if(select){
+				initial = sel_pos;
+				initial_dist = cam_dist;
+			}else if(dragging){
+				sel->transform.position = ((mouse_world - cam->position).normalized() * initial_dist) + cam->position;
+				if(sel->physics) sel->physics->position = sel->transform.position;
+			}else if(undo){
+				AddUndoTranslate(&sel->transform, &initial, &sel_pos);
+			}
+			Render::DrawBoxFilled(mat4::TransformationMatrix(sel_pos, vec3::ZERO, vec3::ONE*draw_scale), Color_LightGrey);
 		}break;
+		
+		//// rotation ////
+		
+		//// scale ////
 	}
 }
 
+///////////////
+//// @init ////
+///////////////
 void Editor::Init(){
 	selected_entities.reserve(8);
 	
@@ -2427,6 +2557,9 @@ void Editor::Init(){
 	dir_fonts    = Assets::iterateDirectory(Assets::dirFonts());
 }
 
+/////////////////
+//// @update ////
+/////////////////
 void Editor::Update(){
 	fonth = ImGui::GetFontSize();
 	fontw = fonth / 2.f;
@@ -2559,12 +2692,18 @@ void Editor::Update(){
 	}
 }
 
+////////////////
+//// @reset ////
+////////////////
 void Editor::Reset(){
 	selected_entities.clear();
 	undos.clear();
 	redos.clear();
 }
 
+//////////////////
+//// @cleanup ////
+//////////////////
 void Editor::Cleanup(){
 	
 }

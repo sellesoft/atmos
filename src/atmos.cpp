@@ -18,6 +18,7 @@ Controller TODOs
 
  Editor TODOs
 ------------
+rework undoing (physics isnt updated by it currently)
 safety check on renaming things so no things have same name
 fix mesh viewing bools mixing?
 fix extra temp vertexes/indexes (when viewing triangle neighbors)
