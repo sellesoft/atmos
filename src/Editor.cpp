@@ -2450,63 +2450,55 @@ local b32 TransformGizmo(){
 	f32  draw_scale  = cam_dist / 12.f;
 	b32  hit_gizmo   = false;
 	switch(action){
+		
 		//// translation ////
 		case TransformType_TranslateSelectAxis:{
 			vec3 ray_dir = (mouse_world - cam->position).normalized();
 			vec3 aabb_min = sel_pos+vec3{draw_scale,0,0}-vec3{2.f,.1f,.1f}*draw_scale/2;
-			vec3 aabb_free = vec3::ONE*draw_scale/2.f;
+			vec3 aabb_free = vec3{.5f,.5f,.5f}*draw_scale/2.f;
 			if(   (DeshInput->mouseX > 0) && (DeshInput->mouseY > 0) 
 			   && (DeshInput->mouseX < DeshWindow->screenWidth) && (DeshInput->mouseY < DeshWindow->screenHeight)){
 				//x axis
-				if(AABBRaycast(mouse_world, ray_dir, aabb_min, sel_pos+vec3{2.f,.1f,.1f}*draw_scale*2)){
-					Render::DrawBoxFilled(mat4::TransformationMatrix(sel_pos+vec3{draw_scale,0,0}, vec3::ZERO, vec3{2.f,.1f,.1f}*draw_scale), Color_Yellow);
-					if(DeshInput->KeyPressed(MouseButton::LEFT)){
-						action = TransformType_TranslateX;
-						hit_gizmo = true;
-					}
+				if(AABBRaycast(mouse_world, ray_dir, aabb_min, aabb_min+vec3{2.f,.1f,.1f}*draw_scale*2)){
+					Render::DrawBoxFilled(sel_pos+vec3{draw_scale,0,0}, vec3::ZERO, vec3{2.f,.1f,.1f}*draw_scale, Color_Yellow);
+					if(select){ action = TransformType_TranslateX; hit_gizmo = true; initial = sel_pos; }
 				}else{
-					Render::DrawBoxFilled(mat4::TransformationMatrix(sel_pos+vec3{draw_scale,0,0}, vec3::ZERO, vec3{2.f,.1f,.1f}*draw_scale), Color_Red);
+					Render::DrawBoxFilled(sel_pos+vec3{draw_scale,0,0}, vec3::ZERO, vec3{2.f,.1f,.1f}*draw_scale, Color_Red);
 				}
 				
 				//y axis
-				if(AABBRaycast(mouse_world, ray_dir, aabb_min, sel_pos+vec3{.1f,2.f,.1f}*draw_scale*2)){
-					Render::DrawBoxFilled(mat4::TransformationMatrix(sel_pos+vec3{0,draw_scale,0}, vec3::ZERO, vec3{.1f,2.f,.1f}*draw_scale), Color_Yellow);
-					if(DeshInput->KeyPressed(MouseButton::LEFT)){
-						action = TransformType_TranslateY;
-						hit_gizmo = true;
-					}
+				if(AABBRaycast(mouse_world, ray_dir, aabb_min, aabb_min+vec3{.1f,2.f,.1f}*draw_scale*2)){
+					Render::DrawBoxFilled(sel_pos+vec3{0,draw_scale,0}, vec3::ZERO, vec3{.1f,2.f,.1f}*draw_scale, Color_Yellow);
+					if(select){ action = TransformType_TranslateY; hit_gizmo = true; initial = sel_pos; }
 				}else{
-					Render::DrawBoxFilled(mat4::TransformationMatrix(sel_pos+vec3{0,draw_scale,0}, vec3::ZERO, vec3{.1f,2.f,.1f}*draw_scale), Color_Green);
+					Render::DrawBoxFilled(sel_pos+vec3{0,draw_scale,0}, vec3::ZERO, vec3{.1f,2.f,.1f}*draw_scale, Color_Green);
 				}
 				
 				//z axis
-				if(AABBRaycast(mouse_world, ray_dir, aabb_min, sel_pos+vec3{.1f,.1f,2.f}*draw_scale*2)){
-					Render::DrawBoxFilled(mat4::TransformationMatrix(sel_pos+vec3{0,0,draw_scale}, vec3::ZERO, vec3{.1f,.1f,2.f}*draw_scale), Color_Yellow);
-					if(DeshInput->KeyPressed(MouseButton::LEFT)){
-						action = TransformType_TranslateZ;
-						hit_gizmo = true;
-					}
+				if(AABBRaycast(mouse_world, ray_dir, aabb_min, aabb_min+vec3{.1f,.1f,2.f}*draw_scale*2)){
+					Render::DrawBoxFilled(sel_pos+vec3{0,0,draw_scale}, vec3::ZERO, vec3{.1f,.1f,2.f}*draw_scale, Color_Yellow);
+					if(select){ action = TransformType_TranslateZ; hit_gizmo = true; initial = sel_pos; }
 				}else{
-					Render::DrawBoxFilled(mat4::TransformationMatrix(sel_pos+vec3{0,0,draw_scale}, vec3::ZERO, vec3{.1f,.1f,2.f}*draw_scale), Color_Blue);
+					Render::DrawBoxFilled(sel_pos+vec3{0,0,draw_scale}, vec3::ZERO, vec3{.1f,.1f,2.f}*draw_scale, Color_Blue);
 				}
 				
 				//free axis
 				if(AABBRaycast(mouse_world, ray_dir, sel_pos-aabb_free, sel_pos+aabb_free)){
-					Render::DrawBoxFilled(mat4::TransformationMatrix(sel_pos, vec3::ZERO, vec3::ONE*draw_scale), Color_Yellow);
-					if(DeshInput->KeyPressed(MouseButton::LEFT)){
-						action = TransformType_TranslateFree;
-						hit_gizmo = true;
-					}
+					Render::DrawBoxFilled(sel_pos, vec3::ZERO, vec3::ONE*draw_scale, Color_Yellow);
+					if(select){ action = TransformType_TranslateFree; hit_gizmo = true; initial = sel_pos; }
 				}else{
-					Render::DrawBoxFilled(mat4::TransformationMatrix(sel_pos, vec3::ZERO, vec3::ONE*draw_scale), Color_LightGrey);
+					Render::DrawBoxFilled(sel_pos, vec3::ZERO, vec3{.5f,.5f,.5f}*draw_scale, Color_LightGrey);
 				}
+			}else{
+				Render::DrawBoxFilled(sel_pos+vec3{draw_scale,0,0}, vec3::ZERO, vec3{2.f,.1f,.1f}*draw_scale, Color_Red);
+				Render::DrawBoxFilled(sel_pos+vec3{0,draw_scale,0}, vec3::ZERO, vec3{.1f,2.f,.1f}*draw_scale, Color_Green);
+				Render::DrawBoxFilled(sel_pos+vec3{0,0,draw_scale}, vec3::ZERO, vec3{.1f,.1f,2.f}*draw_scale, Color_Blue);
+				Render::DrawBoxFilled(sel_pos, vec3::ZERO, vec3{.5f,.5f,.5f}*draw_scale, Color_LightGrey);
 			}
 		}break;
+		
 		case TransformType_TranslateX:{
-			if(select){
-				initial = sel_pos;
-				initial_dist = cam_dist;
-			}else if(dragging){
+			if(dragging){
 				mouse_world = ((mouse_world - cam->position).normalized() * 1000.f) + cam->position;
 				if(Math::AngBetweenVectors(cam->forward.yZero(), cam->forward) > 60.f){
 					sel->transform.position.x = Math::VectorPlaneIntersect(initial, vec3::UP, cam->position, mouse_world).x;
@@ -2517,14 +2509,16 @@ local b32 TransformGizmo(){
 				}
 			}else if(undo){
 				AddUndoTranslate(&sel->transform, &initial, &sel_pos);
+				action = TransformType_TranslateSelectAxis;
 			}
-			Render::DrawBoxFilled(mat4::TransformationMatrix(sel_pos+vec3{draw_scale,0,0}, vec3::ZERO, vec3{2.f,.1f,.1f}*draw_scale), Color_Red);
+			Render::DrawBoxFilled(sel_pos+vec3{0,draw_scale,0}, vec3::ZERO, vec3{.1f,2.f,.1f}*draw_scale, Color_Green);
+			Render::DrawBoxFilled(sel_pos+vec3{0,0,draw_scale}, vec3::ZERO, vec3{.1f,.1f,2.f}*draw_scale, Color_Blue);
+			Render::DrawBoxFilled(sel_pos, vec3::ZERO, vec3{.5f,.5f,.5f}*draw_scale, Color_LightGrey);
+			Render::DrawBoxFilled(sel_pos+vec3{draw_scale,0,0}, vec3::ZERO, vec3{2.f,.1f,.1f}*draw_scale, Color_Yellow);
 		}break;
+		
 		case TransformType_TranslateY:{
-			if(select){
-				initial = sel_pos;
-				initial_dist = cam_dist;
-			}else if(dragging){
+			if(dragging){
 				mouse_world = ((mouse_world - cam->position).normalized() * 1000.f) + cam->position;
 				if(Math::AngBetweenVectors(cam->forward.yZero(), cam->forward) > 60.f){
 					sel->transform.position.y = Math::VectorPlaneIntersect(initial, vec3::RIGHT, cam->position, mouse_world).y;
@@ -2535,14 +2529,16 @@ local b32 TransformGizmo(){
 				}
 			}else if(undo){
 				AddUndoTranslate(&sel->transform, &initial, &sel_pos);
+				action = TransformType_TranslateSelectAxis;
 			}
-			Render::DrawBoxFilled(mat4::TransformationMatrix(sel_pos+vec3{0,draw_scale,0}, vec3::ZERO, vec3{.1f,2.f,.1f}*draw_scale), Color_Green);
+			Render::DrawBoxFilled(sel_pos+vec3{draw_scale,0,0}, vec3::ZERO, vec3{2.f,.1f,.1f}*draw_scale, Color_Red);
+			Render::DrawBoxFilled(sel_pos+vec3{0,0,draw_scale}, vec3::ZERO, vec3{.1f,.1f,2.f}*draw_scale, Color_Blue);
+			Render::DrawBoxFilled(sel_pos, vec3::ZERO, vec3{.5f,.5f,.5f}*draw_scale, Color_LightGrey);
+			Render::DrawBoxFilled(sel_pos+vec3{0,draw_scale,0}, vec3::ZERO, vec3{.1f,2.f,.1f}*draw_scale, Color_Yellow);
 		}break;
+		
 		case TransformType_TranslateZ:{
-			if(select){
-				initial = sel_pos;
-				initial_dist = cam_dist;
-			}else if(dragging){
+			if(dragging){
 				mouse_world = ((mouse_world - cam->position).normalized() * 1000.f) + cam->position;
 				if(Math::AngBetweenVectors(cam->forward.yZero(), cam->forward) > 60.f){
 					sel->transform.position.z = Math::VectorPlaneIntersect(initial, vec3::UP, cam->position, mouse_world).z;
@@ -2553,9 +2549,14 @@ local b32 TransformGizmo(){
 				}
 			}else if(undo){
 				AddUndoTranslate(&sel->transform, &initial, &sel_pos);
+				action = TransformType_TranslateSelectAxis;
 			}
-			Render::DrawBoxFilled(mat4::TransformationMatrix(sel_pos+vec3{0,0,draw_scale}, vec3::ZERO, vec3{.1f,.1f,2.f}*draw_scale), Color_Blue);
+			Render::DrawBoxFilled(sel_pos+vec3{draw_scale,0,0}, vec3::ZERO, vec3{2.f,.1f,.1f}*draw_scale, Color_Red);
+			Render::DrawBoxFilled(sel_pos+vec3{0,draw_scale,0}, vec3::ZERO, vec3{.1f,2.f,.1f}*draw_scale, Color_Green);
+			Render::DrawBoxFilled(sel_pos, vec3::ZERO, vec3{.5f,.5f,.5f}*draw_scale, Color_LightGrey);
+			Render::DrawBoxFilled(sel_pos+vec3{0,0,draw_scale}, vec3::ZERO, vec3{.1f,.1f,2.f}*draw_scale, Color_Yellow);
 		}break;
+		
 		case TransformType_TranslateFree:{
 			if      (DeshInput->KeyPressed(MouseButton::SCROLLUP)){
 				initial_dist += 1.f;
@@ -2563,21 +2564,174 @@ local b32 TransformGizmo(){
 				initial_dist -= 1.f;
 			}
 			
-			if(select){
-				initial = sel_pos;
-				initial_dist = cam_dist;
-			}else if(dragging){
+			if(dragging){
 				sel->transform.position = ((mouse_world - cam->position).normalized() * initial_dist) + cam->position;
 				if(sel->physics) sel->physics->position = sel->transform.position;
 			}else if(undo){
 				AddUndoTranslate(&sel->transform, &initial, &sel_pos);
+				action = TransformType_TranslateSelectAxis;
 			}
-			Render::DrawBoxFilled(mat4::TransformationMatrix(sel_pos, vec3::ZERO, vec3::ONE*draw_scale), Color_LightGrey);
+			Render::DrawBoxFilled(sel_pos+vec3{draw_scale,0,0}, vec3::ZERO, vec3{2.f,.1f,.1f}*draw_scale, Color_Red);
+			Render::DrawBoxFilled(sel_pos+vec3{0,draw_scale,0}, vec3::ZERO, vec3{.1f,2.f,.1f}*draw_scale, Color_Green);
+			Render::DrawBoxFilled(sel_pos+vec3{0,0,draw_scale}, vec3::ZERO, vec3{.1f,.1f,2.f}*draw_scale, Color_Blue);
+			Render::DrawBoxFilled(sel_pos, vec3::ZERO, vec3{.5f,.5f,.5f}*draw_scale, Color_Yellow);
 		}break;
 		
 		//// rotation ////
 		
 		//// scale ////
+		case TransformType_ScaleSelectAxis:{
+			vec3 ray_dir = (mouse_world - cam->position).normalized();
+			vec3 aabb_min = sel_pos+vec3{draw_scale,0,0}-vec3{2.f,.1f,.1f}*draw_scale/2;
+			vec3 aabb_free = vec3{.5f,.5f,.5f}*draw_scale/2.f;
+			if(   (DeshInput->mouseX > 0) && (DeshInput->mouseY > 0) 
+			   && (DeshInput->mouseX < DeshWindow->screenWidth) && (DeshInput->mouseY < DeshWindow->screenHeight)){
+				//x axis
+				if(AABBRaycast(mouse_world, ray_dir, aabb_min, aabb_min+vec3{2.f,.1f,.1f}*draw_scale*2)){
+					Render::DrawBoxFilled(sel_pos+vec3{draw_scale,0,0}, vec3::ZERO, vec3{2.f,.1f,.1f}*draw_scale, Color_Yellow);
+					Render::DrawBoxFilled(aabb_min+vec3{2.f,.05f,.05f}*draw_scale, vec3::ZERO, vec3{.25f,.25f,.25f}*draw_scale, Color_Yellow);
+					if(select){ action = TransformType_ScaleX; hit_gizmo = true; initial = sel_scale; }
+				}else{
+					Render::DrawBoxFilled(sel_pos+vec3{draw_scale,0,0}, vec3::ZERO, vec3{2.f,.1f,.1f}*draw_scale, Color_Red);
+					Render::DrawBoxFilled(aabb_min+vec3{2.f,.05f,.05f}*draw_scale, vec3::ZERO, vec3{.25f,.25f,.25f}*draw_scale, Color_Red);
+				}
+				
+				//y axis
+				if(AABBRaycast(mouse_world, ray_dir, aabb_min, aabb_min+vec3{.1f,2.f,.1f}*draw_scale*2)){
+					Render::DrawBoxFilled(sel_pos+vec3{0,draw_scale,0}, vec3::ZERO, vec3{.1f,2.f,.1f}*draw_scale, Color_Yellow);
+					Render::DrawBoxFilled(aabb_min+vec3{0,2.f,.05f}*draw_scale, vec3::ZERO, vec3{.25f,.25f,.25f}*draw_scale, Color_Yellow);
+					if(select){ action = TransformType_ScaleY; hit_gizmo = true; initial = sel_scale; }
+				}else{
+					Render::DrawBoxFilled(sel_pos+vec3{0,draw_scale,0}, vec3::ZERO, vec3{.1f,2.f,.1f}*draw_scale, Color_Green);
+					Render::DrawBoxFilled(aabb_min+vec3{0,2.f,.05f}*draw_scale, vec3::ZERO, vec3{.25f,.25f,.25f}*draw_scale, Color_Green);
+				}
+				
+				//z axis
+				if(AABBRaycast(mouse_world, ray_dir, aabb_min, aabb_min+vec3{.1f,.1f,2.f}*draw_scale*2)){
+					Render::DrawBoxFilled(sel_pos+vec3{0,0,draw_scale}, vec3::ZERO, vec3{.1f,.1f,2.f}*draw_scale, Color_Yellow);
+					Render::DrawBoxFilled(aabb_min+vec3{0,.05f,2.f}*draw_scale, vec3::ZERO, vec3{.25f,.25f,.25f}*draw_scale, Color_Yellow);
+					if(select){ action = TransformType_ScaleZ; hit_gizmo = true; initial = sel_scale; }
+				}else{
+					Render::DrawBoxFilled(sel_pos+vec3{0,0,draw_scale}, vec3::ZERO, vec3{.1f,.1f,2.f}*draw_scale, Color_Blue);
+					Render::DrawBoxFilled(aabb_min+vec3{0,.05f,2.f}*draw_scale, vec3::ZERO, vec3{.25f,.25f,.25f}*draw_scale, Color_Blue);
+				}
+				
+				//free axis
+				if(AABBRaycast(mouse_world, ray_dir, sel_pos-aabb_free, sel_pos+aabb_free)){
+					Render::DrawBoxFilled(sel_pos, vec3::ZERO, vec3{.5f,.5f,.5f}*draw_scale, Color_Yellow);
+					if(select){ action = TransformType_ScaleFree; hit_gizmo = true; initial = sel_scale; }
+				}else{
+					Render::DrawBoxFilled(sel_pos, vec3::ZERO, vec3{.5f,.5f,.5f}*draw_scale, Color_LightGrey);
+				}
+			}else{
+				Render::DrawBoxFilled(sel_pos+vec3{draw_scale,0,0}, vec3::ZERO, vec3{2.f,.1f,.1f}*draw_scale, Color_Red);
+				Render::DrawBoxFilled(aabb_min+vec3{2.f,.05f,.05f}*draw_scale, vec3::ZERO, vec3{.25f,.25f,.25f}*draw_scale, Color_Red);
+				Render::DrawBoxFilled(sel_pos+vec3{0,draw_scale,0}, vec3::ZERO, vec3{.1f,2.f,.1f}*draw_scale, Color_Green);
+				Render::DrawBoxFilled(aabb_min+vec3{0,2.f,.05f}*draw_scale, vec3::ZERO, vec3{.25f,.25f,.25f}*draw_scale, Color_Green);
+				Render::DrawBoxFilled(sel_pos+vec3{0,0,draw_scale}, vec3::ZERO, vec3{.1f,.1f,2.f}*draw_scale, Color_Blue);
+				Render::DrawBoxFilled(aabb_min+vec3{0,.05f,2.f}*draw_scale, vec3::ZERO, vec3{.25f,.25f,.25f}*draw_scale, Color_Blue);
+				Render::DrawBoxFilled(sel_pos, vec3::ZERO, vec3{.5f,.5f,.5f}*draw_scale, Color_LightGrey);
+			}
+		}break;
+		
+		case TransformType_ScaleX:{
+			if(dragging){
+				mouse_world = ((mouse_world - cam->position).normalized() * 1000.f) + cam->position;
+				if(Math::AngBetweenVectors(cam->forward.yZero(), cam->forward) > 60.f){
+					sel->transform.scale.x = Math::VectorPlaneIntersect(initial, vec3::UP, cam->position, mouse_world).x;
+					sel->transform.scale.x = Max(0, sel->transform.scale.x);
+					if(sel->physics) sel->physics->scale.x = sel->transform.scale.x;
+				}else{
+					sel->transform.scale.x = Math::VectorPlaneIntersect(initial, vec3::FORWARD, cam->position, mouse_world).x;
+					sel->transform.scale.x = Max(0, sel->transform.scale.x);
+					if(sel->physics) sel->physics->scale.x = sel->transform.scale.x;
+				}
+			}else if(undo){
+				AddUndoScale(&sel->transform, &initial, &sel_scale);
+				action = TransformType_ScaleSelectAxis;
+			}
+			vec3 aabb_min = sel_pos+vec3{draw_scale,0,0}-vec3{2.f,.1f,.1f}*draw_scale/2;
+			Render::DrawBoxFilled(sel_pos+vec3{0,draw_scale,0}, vec3::ZERO, vec3{.1f,2.f,.1f}*draw_scale, Color_Green);
+			Render::DrawBoxFilled(aabb_min+vec3{0,2.f,.05f}*draw_scale, vec3::ZERO, vec3{.25f,.25f,.25f}*draw_scale, Color_Green);
+			Render::DrawBoxFilled(sel_pos+vec3{0,0,draw_scale}, vec3::ZERO, vec3{.1f,.1f,2.f}*draw_scale, Color_Blue);
+			Render::DrawBoxFilled(aabb_min+vec3{0,.05f,2.f}*draw_scale, vec3::ZERO, vec3{.25f,.25f,.25f}*draw_scale, Color_Blue);
+			Render::DrawBoxFilled(sel_pos, vec3::ZERO, vec3{.5f,.5f,.5f}*draw_scale, Color_LightGrey);
+			Render::DrawBoxFilled(sel_pos+vec3{draw_scale,0,0}, vec3::ZERO, vec3{2.f,.1f,.1f}*draw_scale, Color_Yellow);
+			Render::DrawBoxFilled(aabb_min+vec3{2.f,.05f,.05f}*draw_scale, vec3::ZERO, vec3{.25f,.25f,.25f}*draw_scale, Color_Yellow);
+		}break;
+		
+		case TransformType_ScaleY:{
+			if(dragging){
+				mouse_world = ((mouse_world - cam->position).normalized() * 1000.f) + cam->position;
+				if(Math::AngBetweenVectors(cam->forward.yZero(), cam->forward) > 60.f){
+					sel->transform.scale.y = Math::VectorPlaneIntersect(initial, vec3::RIGHT, cam->position, mouse_world).y;
+					sel->transform.scale.y = Max(0, sel->transform.scale.y);
+					if(sel->physics) sel->physics->scale.y = sel->transform.scale.y;
+				}else{
+					sel->transform.scale.y = Math::VectorPlaneIntersect(initial, vec3::FORWARD, cam->position, mouse_world).y;
+					sel->transform.scale.y = Max(0, sel->transform.scale.y);
+					if(sel->physics) sel->physics->scale.y = sel->transform.scale.y;
+				}
+			}else if(undo){
+				AddUndoScale(&sel->transform, &initial, &sel_scale);
+				action = TransformType_ScaleSelectAxis;
+			}
+			vec3 aabb_min = sel_pos+vec3{draw_scale,0,0}-vec3{2.f,.1f,.1f}*draw_scale/2;
+			Render::DrawBoxFilled(sel_pos+vec3{draw_scale,0,0}, vec3::ZERO, vec3{2.f,.1f,.1f}*draw_scale, Color_Red);
+			Render::DrawBoxFilled(aabb_min+vec3{2.f,.05f,.05f}*draw_scale, vec3::ZERO, vec3{.25f,.25f,.25f}*draw_scale, Color_Red);
+			Render::DrawBoxFilled(sel_pos+vec3{0,0,draw_scale}, vec3::ZERO, vec3{.1f,.1f,2.f}*draw_scale, Color_Blue);
+			Render::DrawBoxFilled(aabb_min+vec3{0,.05f,2.f}*draw_scale, vec3::ZERO, vec3{.25f,.25f,.25f}*draw_scale, Color_Blue);
+			Render::DrawBoxFilled(sel_pos, vec3::ZERO, vec3{.5f,.5f,.5f}*draw_scale, Color_LightGrey);
+			Render::DrawBoxFilled(sel_pos+vec3{0,draw_scale,0}, vec3::ZERO, vec3{.1f,2.f,.1f}*draw_scale, Color_Yellow);
+			Render::DrawBoxFilled(aabb_min+vec3{0,2.f,.05f}*draw_scale, vec3::ZERO, vec3{.25f,.25f,.25f}*draw_scale, Color_Yellow);
+		}break;
+		
+		case TransformType_ScaleZ:{
+			if(dragging){
+				mouse_world = ((mouse_world - cam->position).normalized() * 1000.f) + cam->position;
+				if(Math::AngBetweenVectors(cam->forward.yZero(), cam->forward) > 60.f){
+					sel->transform.scale.z = Math::VectorPlaneIntersect(initial, vec3::UP, cam->position, mouse_world).z;
+					sel->transform.scale.z = Max(0, sel->transform.scale.z);
+					if(sel->physics) sel->physics->scale.z = sel->transform.scale.z;
+				}else{
+					sel->transform.scale.z = Math::VectorPlaneIntersect(initial, vec3::RIGHT, cam->position, mouse_world).z;
+					sel->transform.scale.z = Max(0, sel->transform.scale.z);
+					if(sel->physics) sel->physics->scale.z = sel->transform.scale.z;
+				}
+			}else if(undo){
+				AddUndoScale(&sel->transform, &initial, &sel_scale);
+				action = TransformType_ScaleSelectAxis;
+			}
+			vec3 aabb_min = sel_pos+vec3{draw_scale,0,0}-vec3{2.f,.1f,.1f}*draw_scale/2;
+			Render::DrawBoxFilled(sel_pos+vec3{draw_scale,0,0}, vec3::ZERO, vec3{2.f,.1f,.1f}*draw_scale, Color_Red);
+			Render::DrawBoxFilled(aabb_min+vec3{2.f,.05f,.05f}*draw_scale, vec3::ZERO, vec3{.25f,.25f,.25f}*draw_scale, Color_Red);
+			Render::DrawBoxFilled(sel_pos+vec3{0,draw_scale,0}, vec3::ZERO, vec3{.1f,2.f,.1f}*draw_scale, Color_Green);
+			Render::DrawBoxFilled(aabb_min+vec3{0,2.f,.05f}*draw_scale, vec3::ZERO, vec3{.25f,.25f,.25f}*draw_scale, Color_Green);
+			Render::DrawBoxFilled(sel_pos, vec3::ZERO, vec3{.5f,.5f,.5f}*draw_scale, Color_LightGrey);
+			Render::DrawBoxFilled(sel_pos+vec3{0,0,draw_scale}, vec3::ZERO, vec3{.1f,.1f,2.f}*draw_scale, Color_Yellow);
+			Render::DrawBoxFilled(aabb_min+vec3{0,.05f,2.f}*draw_scale, vec3::ZERO, vec3{.25f,.25f,.25f}*draw_scale, Color_Yellow);
+		}break;
+		
+		case TransformType_ScaleFree:{
+			if(dragging){
+				sel->transform.scale = initial * (mouse_world.distanceTo(sel->transform.position));
+				sel->transform.scale.x = Max(0, sel->transform.scale.x);
+				sel->transform.scale.y = Max(0, sel->transform.scale.y);
+				sel->transform.scale.z = Max(0, sel->transform.scale.z);
+				if(sel->physics) sel->physics->scale = sel->transform.scale;
+			}else if(undo){
+				AddUndoScale(&sel->transform, &initial, &sel_scale);
+				action = TransformType_ScaleSelectAxis;
+			}
+			vec3 aabb_min = sel_pos+vec3{draw_scale,0,0}-vec3{2.f,.1f,.1f}*draw_scale/2;
+			Render::DrawBoxFilled(sel_pos+vec3{draw_scale,0,0}, vec3::ZERO, vec3{2.f,.1f,.1f}*draw_scale, Color_Red);
+			Render::DrawBoxFilled(aabb_min+vec3{2.f,.05f,.05f}*draw_scale, vec3::ZERO, vec3{.25f,.25f,.25f}*draw_scale, Color_Red);
+			Render::DrawBoxFilled(sel_pos+vec3{0,draw_scale,0}, vec3::ZERO, vec3{.1f,2.f,.1f}*draw_scale, Color_Green);
+			Render::DrawBoxFilled(aabb_min+vec3{0,2.f,.05f}*draw_scale, vec3::ZERO, vec3{.25f,.25f,.25f}*draw_scale, Color_Green);
+			Render::DrawBoxFilled(sel_pos+vec3{0,0,draw_scale}, vec3::ZERO, vec3{.1f,.1f,2.f}*draw_scale, Color_Blue);
+			Render::DrawBoxFilled(aabb_min+vec3{0,.05f,2.f}*draw_scale, vec3::ZERO, vec3{.25f,.25f,.25f}*draw_scale, Color_Blue);
+			Render::DrawBoxFilled(sel_pos, vec3::ZERO, vec3{.5f,.5f,.5f}*draw_scale, Color_Yellow);
+		}break;
 	}
 	
 	return hit_gizmo;
