@@ -74,8 +74,8 @@ void UpdateMenu(){
 	
 	//draw options
 	UI::PushFont(option_font);
-	f32 cursor_y = DeshWindow->height*.2f + title_font->height*1.5f;
-	f32 stride = option_font->height * 1.5f;
+	f32 cursor_y = DeshWindow->height*.2f + title_font->max_height*1.5f;
+	f32 stride = option_font->max_height * 1.5f;
 	
 	text = cstr_lit("Resume");
 	UI::Text(text.str, {center_x-(UI::CalcTextSize(text).x/2.f),cursor_y}, 

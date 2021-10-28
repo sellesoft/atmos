@@ -2326,9 +2326,9 @@ void ShowWorldAxis(){
 }
 
 //////////////////////////@@
-//// @transform gizmo ////TODO: axis changing, selecting and dragging, local vs world
-//////////////////////////TODO: free translate, plane translate, axis rotation, free rotation, axis scale, free scale 
-local void TransformGizmo(){
+//// @transform gizmo ////TODO: local vs world, mouse offset
+//////////////////////////TODO: plane translate, axis rotation, free rotation, axis scale, free scale 
+local b32 TransformGizmo(){
 	enum TransformType{
 		TransformType_NONE,
 		TransformType_TranslateSelectAxis,
@@ -2351,6 +2351,7 @@ local void TransformGizmo(){
 		TransformType_ScaleFree,
 	};
 	persist Type action = TransformType_NONE;
+	persist vec2 mouse_offset = vec2::ZERO;
 	persist vec3 initial = vec3::ZERO;
 	persist f32  initial_dist = 0.0f;
 	persist b32  dragging = false;
@@ -2361,7 +2362,7 @@ local void TransformGizmo(){
 	//early out if no selected entities to transform
 	if(selected_entities.count == 0){
 		action = TransformType_NONE;
-		return;
+		return false;
 	}
 	
 	//change transform type
@@ -2424,16 +2425,18 @@ local void TransformGizmo(){
 	}
 	
 	//mouse input
-	if(DeshInput->KeyPressed(MouseButton::LEFT)){
-		select = true;
-		dragging = true;
-	}else if(DeshInput->KeyDown(MouseButton::LEFT)){
-		select = false;
-		dragging = true;
-	}else if(DeshInput->KeyReleased(MouseButton::LEFT)){
-		select = false;
-		dragging = false;
-		undo = true;
+	if(!WinHovFlag){
+		if(DeshInput->KeyPressed(MouseButton::LEFT)){
+			select = true;
+			dragging = true;
+		}else if(DeshInput->KeyDown(MouseButton::LEFT)){
+			select = false;
+			dragging = true;
+		}else if(DeshInput->KeyReleased(MouseButton::LEFT)){
+			select = false;
+			dragging = false;
+			undo = true;
+		}
 	}
 	
 	//dragging and drawing
@@ -2442,19 +2445,62 @@ local void TransformGizmo(){
 	vec3 sel_pos     = sel->transform.position;
 	vec3 sel_rot     = sel->transform.rotation;
 	vec3 sel_scale   = sel->transform.scale;
+	vec3 mouse_world = Math::ScreenToWorld(DeshInput->mousePos, cam->projMat, cam->viewMat, DeshWindow->dimensions);
 	f32  cam_dist    = sel_pos.distanceTo(cam->position);
 	f32  draw_scale  = cam_dist / 12.f;
-	vec3 mouse_world = Math::ScreenToWorld(DeshInput->mousePos, cam->projMat, cam->viewMat, DeshWindow->dimensions);
+	b32  hit_gizmo   = false;
 	switch(action){
 		//// translation ////
 		case TransformType_TranslateSelectAxis:{
-			if(select){
-				//TODO box select
+			vec3 ray_dir = (mouse_world - cam->position).normalized();
+			vec3 aabb_min = sel_pos+vec3{draw_scale,0,0}-vec3{2.f,.1f,.1f}*draw_scale/2;
+			vec3 aabb_free = vec3::ONE*draw_scale/2.f;
+			if(   (DeshInput->mouseX > 0) && (DeshInput->mouseY > 0) 
+			   && (DeshInput->mouseX < DeshWindow->screenWidth) && (DeshInput->mouseY < DeshWindow->screenHeight)){
+				//x axis
+				if(AABBRaycast(mouse_world, ray_dir, aabb_min, sel_pos+vec3{2.f,.1f,.1f}*draw_scale*2)){
+					Render::DrawBoxFilled(mat4::TransformationMatrix(sel_pos+vec3{draw_scale,0,0}, vec3::ZERO, vec3{2.f,.1f,.1f}*draw_scale), Color_Yellow);
+					if(DeshInput->KeyPressed(MouseButton::LEFT)){
+						action = TransformType_TranslateX;
+						hit_gizmo = true;
+					}
+				}else{
+					Render::DrawBoxFilled(mat4::TransformationMatrix(sel_pos+vec3{draw_scale,0,0}, vec3::ZERO, vec3{2.f,.1f,.1f}*draw_scale), Color_Red);
+				}
+				
+				//y axis
+				if(AABBRaycast(mouse_world, ray_dir, aabb_min, sel_pos+vec3{.1f,2.f,.1f}*draw_scale*2)){
+					Render::DrawBoxFilled(mat4::TransformationMatrix(sel_pos+vec3{0,draw_scale,0}, vec3::ZERO, vec3{.1f,2.f,.1f}*draw_scale), Color_Yellow);
+					if(DeshInput->KeyPressed(MouseButton::LEFT)){
+						action = TransformType_TranslateY;
+						hit_gizmo = true;
+					}
+				}else{
+					Render::DrawBoxFilled(mat4::TransformationMatrix(sel_pos+vec3{0,draw_scale,0}, vec3::ZERO, vec3{.1f,2.f,.1f}*draw_scale), Color_Green);
+				}
+				
+				//z axis
+				if(AABBRaycast(mouse_world, ray_dir, aabb_min, sel_pos+vec3{.1f,.1f,2.f}*draw_scale*2)){
+					Render::DrawBoxFilled(mat4::TransformationMatrix(sel_pos+vec3{0,0,draw_scale}, vec3::ZERO, vec3{.1f,.1f,2.f}*draw_scale), Color_Yellow);
+					if(DeshInput->KeyPressed(MouseButton::LEFT)){
+						action = TransformType_TranslateZ;
+						hit_gizmo = true;
+					}
+				}else{
+					Render::DrawBoxFilled(mat4::TransformationMatrix(sel_pos+vec3{0,0,draw_scale}, vec3::ZERO, vec3{.1f,.1f,2.f}*draw_scale), Color_Blue);
+				}
+				
+				//free axis
+				if(AABBRaycast(mouse_world, ray_dir, sel_pos-aabb_free, sel_pos+aabb_free)){
+					Render::DrawBoxFilled(mat4::TransformationMatrix(sel_pos, vec3::ZERO, vec3::ONE*draw_scale), Color_Yellow);
+					if(DeshInput->KeyPressed(MouseButton::LEFT)){
+						action = TransformType_TranslateFree;
+						hit_gizmo = true;
+					}
+				}else{
+					Render::DrawBoxFilled(mat4::TransformationMatrix(sel_pos, vec3::ZERO, vec3::ONE*draw_scale), Color_LightGrey);
+				}
 			}
-			Render::DrawBoxFilled(mat4::TransformationMatrix(sel_pos+vec3{2.f*draw_scale,0,0}, vec3::ZERO, vec3{4.f,.2f,.2f}*draw_scale), Color_Red);
-			Render::DrawBoxFilled(mat4::TransformationMatrix(sel_pos+vec3{0,2.f*draw_scale,0}, vec3::ZERO, vec3{.2f,4.f,.2f}*draw_scale), Color_Green);
-			Render::DrawBoxFilled(mat4::TransformationMatrix(sel_pos+vec3{0,0,2.f*draw_scale}, vec3::ZERO, vec3{.2f,.2f,4.f}*draw_scale), Color_Blue);
-			Render::DrawBoxFilled(mat4::TransformationMatrix(sel_pos, vec3::ZERO, vec3::ONE*draw_scale), Color_LightGrey);
 		}break;
 		case TransformType_TranslateX:{
 			if(select){
@@ -2472,7 +2518,7 @@ local void TransformGizmo(){
 			}else if(undo){
 				AddUndoTranslate(&sel->transform, &initial, &sel_pos);
 			}
-			Render::DrawBoxFilled(mat4::TransformationMatrix(sel_pos+vec3{2.f*draw_scale,0,0}, vec3::ZERO, vec3{4.f,.2f,.2f}*draw_scale), Color_Red);
+			Render::DrawBoxFilled(mat4::TransformationMatrix(sel_pos+vec3{draw_scale,0,0}, vec3::ZERO, vec3{2.f,.1f,.1f}*draw_scale), Color_Red);
 		}break;
 		case TransformType_TranslateY:{
 			if(select){
@@ -2490,7 +2536,7 @@ local void TransformGizmo(){
 			}else if(undo){
 				AddUndoTranslate(&sel->transform, &initial, &sel_pos);
 			}
-			Render::DrawBoxFilled(mat4::TransformationMatrix(sel_pos+vec3{0,2.f*draw_scale,0}, vec3::ZERO, vec3{.2f,4.f,.2f}*draw_scale), Color_Green);
+			Render::DrawBoxFilled(mat4::TransformationMatrix(sel_pos+vec3{0,draw_scale,0}, vec3::ZERO, vec3{.1f,2.f,.1f}*draw_scale), Color_Green);
 		}break;
 		case TransformType_TranslateZ:{
 			if(select){
@@ -2508,7 +2554,7 @@ local void TransformGizmo(){
 			}else if(undo){
 				AddUndoTranslate(&sel->transform, &initial, &sel_pos);
 			}
-			Render::DrawBoxFilled(mat4::TransformationMatrix(sel_pos+vec3{0,0,2.f*draw_scale}, vec3::ZERO, vec3{.2f,.2f,4.f}*draw_scale), Color_Blue);
+			Render::DrawBoxFilled(mat4::TransformationMatrix(sel_pos+vec3{0,0,draw_scale}, vec3::ZERO, vec3{.1f,.1f,2.f}*draw_scale), Color_Blue);
 		}break;
 		case TransformType_TranslateFree:{
 			if      (DeshInput->KeyPressed(MouseButton::SCROLLUP)){
@@ -2533,6 +2579,8 @@ local void TransformGizmo(){
 		
 		//// scale ////
 	}
+	
+	return hit_gizmo;
 }
 
 ///////////////
@@ -2572,7 +2620,8 @@ void Editor::Update(){
 	if(DeshInput->KeyPressed(Key::P | InputMod_Lctrl)) AtmoAdmin->simulateInEditor = !AtmoAdmin->simulateInEditor;
 	
 	//// select ////
-	if(!WinHovFlag && DeshInput->KeyPressed(MouseButton::LEFT)){
+	b32 hit_gizmo = TransformGizmo();
+	if(!hit_gizmo && !WinHovFlag && DeshInput->KeyPressed(MouseButton::LEFT)){
 		//NOTE adjusting the projection matrix so the nearZ is at least .1, produces bad results if less
 		mat4 adjusted_proj = Camera::MakePerspectiveProjectionMatrix(DeshWindow->width, DeshWindow->height, AtmoAdmin->camera.fov, 
 																	 AtmoAdmin->camera.farZ, Max(.1, AtmoAdmin->camera.nearZ));
@@ -2686,7 +2735,6 @@ void Editor::Update(){
 		}ImGui::PopStyleColor();
 		
 		ShowWorldAxis();
-		TransformGizmo();
 		if(!showMenuBar)   menubarheight = 0;
 		if(!showDebugBar)  debugbarheight = 0;
 	}
