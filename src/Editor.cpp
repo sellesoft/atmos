@@ -2326,8 +2326,8 @@ void ShowWorldAxis(){
 }
 
 //////////////////////////@@
-//// @transform gizmo ////TODO: local vs world, mouse offset
-//////////////////////////TODO: plane translate, axis rotation, free rotation, axis scale, free scale 
+//// @transform gizmo ////TODO: local space, mouse offset
+//////////////////////////TODO: plane translate, free rotation
 local b32 TransformGizmo(){
 	enum TransformType{
 		TransformType_NONE,
@@ -2351,7 +2351,7 @@ local b32 TransformGizmo(){
 		TransformType_ScaleFree,
 	};
 	persist Type action = TransformType_NONE;
-	persist vec2 mouse_offset = vec2::ZERO;
+	persist vec2 mouse_initial = vec2::ZERO;
 	persist vec3 initial = vec3::ZERO;
 	persist f32  initial_dist = 0.0f;
 	persist b32  dragging = false;
@@ -2461,7 +2461,7 @@ local b32 TransformGizmo(){
 				//x axis
 				if(AABBRaycast(mouse_world, ray_dir, aabb_min, aabb_min+vec3{2.f,.1f,.1f}*draw_scale*2)){
 					Render::DrawBoxFilled(sel_pos+vec3{draw_scale,0,0}, vec3::ZERO, vec3{2.f,.1f,.1f}*draw_scale, Color_Yellow);
-					if(select){ action = TransformType_TranslateX; hit_gizmo = true; initial = sel_pos; }
+					if(select){ action = TransformType_TranslateX; hit_gizmo = true; initial = sel_pos; mouse_initial = DeshInput->mousePos; }
 				}else{
 					Render::DrawBoxFilled(sel_pos+vec3{draw_scale,0,0}, vec3::ZERO, vec3{2.f,.1f,.1f}*draw_scale, Color_Red);
 				}
@@ -2469,7 +2469,7 @@ local b32 TransformGizmo(){
 				//y axis
 				if(AABBRaycast(mouse_world, ray_dir, aabb_min, aabb_min+vec3{.1f,2.f,.1f}*draw_scale*2)){
 					Render::DrawBoxFilled(sel_pos+vec3{0,draw_scale,0}, vec3::ZERO, vec3{.1f,2.f,.1f}*draw_scale, Color_Yellow);
-					if(select){ action = TransformType_TranslateY; hit_gizmo = true; initial = sel_pos; }
+					if(select){ action = TransformType_TranslateY; hit_gizmo = true; initial = sel_pos; mouse_initial = DeshInput->mousePos; }
 				}else{
 					Render::DrawBoxFilled(sel_pos+vec3{0,draw_scale,0}, vec3::ZERO, vec3{.1f,2.f,.1f}*draw_scale, Color_Green);
 				}
@@ -2477,7 +2477,7 @@ local b32 TransformGizmo(){
 				//z axis
 				if(AABBRaycast(mouse_world, ray_dir, aabb_min, aabb_min+vec3{.1f,.1f,2.f}*draw_scale*2)){
 					Render::DrawBoxFilled(sel_pos+vec3{0,0,draw_scale}, vec3::ZERO, vec3{.1f,.1f,2.f}*draw_scale, Color_Yellow);
-					if(select){ action = TransformType_TranslateZ; hit_gizmo = true; initial = sel_pos; }
+					if(select){ action = TransformType_TranslateZ; hit_gizmo = true; initial = sel_pos; mouse_initial = DeshInput->mousePos; }
 				}else{
 					Render::DrawBoxFilled(sel_pos+vec3{0,0,draw_scale}, vec3::ZERO, vec3{.1f,.1f,2.f}*draw_scale, Color_Blue);
 				}
@@ -2485,7 +2485,7 @@ local b32 TransformGizmo(){
 				//free axis
 				if(AABBRaycast(mouse_world, ray_dir, sel_pos-aabb_free, sel_pos+aabb_free)){
 					Render::DrawBoxFilled(sel_pos, vec3::ZERO, vec3::ONE*draw_scale, Color_Yellow);
-					if(select){ action = TransformType_TranslateFree; hit_gizmo = true; initial = sel_pos; }
+					if(select){ action = TransformType_TranslateFree; hit_gizmo = true; initial = sel_pos; mouse_initial = DeshInput->mousePos; }
 				}else{
 					Render::DrawBoxFilled(sel_pos, vec3::ZERO, vec3{.5f,.5f,.5f}*draw_scale, Color_LightGrey);
 				}
@@ -2578,6 +2578,105 @@ local b32 TransformGizmo(){
 		}break;
 		
 		//// rotation ////
+		case TransformType_RotateSelectAxis:{ //TODO fix axis selection
+			if(   (DeshInput->mouseX > 0) && (DeshInput->mouseY > 0) 
+			   && (DeshInput->mouseX < DeshWindow->screenWidth) && (DeshInput->mouseY < DeshWindow->screenHeight)){
+				vec3 ray_dir = (mouse_world - cam->position).normalized();
+				f32 tx = -1; f32 ty = -1; f32 tz = -1; f32 tf = -1;
+				DiskRaycast(mouse_world, ray_dir, sel_pos, vec3::FORWARD, draw_scale*2, &tx);
+				DiskRaycast(mouse_world, ray_dir, sel_pos, vec3::RIGHT,   draw_scale*2, &ty);
+				DiskRaycast(mouse_world, ray_dir, sel_pos, vec3::UP,      draw_scale*2, &tz);
+				SphereRaycast(mouse_world, ray_dir, sel_pos, draw_scale, &tf);
+				if      (tx > 0 && tx > ty && tx > tz && tx > tf){
+					Render::DrawSphere(sel_pos, vec3::ZERO, draw_scale*2, 16, Color_Yellow, Color_Green, Color_Blue);
+					Render::DrawSphere(sel_pos, vec3{0,45,0}, draw_scale);
+					if(select){ action = TransformType_RotateX; initial = sel_rot; mouse_initial = DeshInput->mousePos; }
+				}else if(ty > 0 && ty > tx && ty > tz && ty > tf){
+					Render::DrawSphere(sel_pos, vec3::ZERO, draw_scale*2, 16, Color_Red, Color_Yellow, Color_Blue);
+					Render::DrawSphere(sel_pos, vec3{0,45,0}, draw_scale);
+					if(select){ action = TransformType_RotateY; initial = sel_rot; mouse_initial = DeshInput->mousePos; }
+				}else if(tz > 0 && tz > ty && tz > tx && tz > tf){
+					Render::DrawSphere(sel_pos, vec3::ZERO, draw_scale*2, 16, Color_Red, Color_Green, Color_Yellow);
+					Render::DrawSphere(sel_pos, vec3{0,45,0}, draw_scale);
+					if(select){ action = TransformType_RotateY; initial = sel_rot; mouse_initial = DeshInput->mousePos; }
+				}else if(tf > 0 && tf > tx && tf > ty && tf > tz){
+					Render::DrawSphere(sel_pos, vec3::ZERO, draw_scale*2, 16, Color_Red, Color_Green, Color_Blue);
+					Render::DrawSphere(sel_pos, vec3{0,45,0}, draw_scale, 16, Color_Yellow);
+					if(select){ action = TransformType_RotateY; initial = sel_rot; mouse_initial = DeshInput->mousePos; }
+				}else{
+					Render::DrawSphere(sel_pos, vec3::ZERO, draw_scale*2, 16, Color_Red, Color_Green, Color_Blue);
+					Render::DrawSphere(sel_pos, vec3{0,45,0}, draw_scale);
+				}
+			}else{
+				Render::DrawSphere(sel_pos, vec3::ZERO, draw_scale*2, 16, Color_Red, Color_Green, Color_Blue);
+				Render::DrawSphere(sel_pos, vec3{0,45,0}, draw_scale);
+			}
+		}break;
+		
+		case TransformType_RotateX:{
+			if(dragging){
+				vec2 center(DeshWindow->centerX, DeshWindow->centerY);
+				vec2 diff = DeshInput->mousePos - center;
+				f32 angle = Math::AngBetweenVectors(diff, mouse_initial - center);
+				sel->transform.rotation.x = initial.x - angle;
+				if(sel->physics) sel->physics->rotation.x = sel->transform.rotation.x;
+			}else if(undo){
+				AddUndoRotate(&sel->transform, &initial, &sel_rot);
+				action = TransformType_RotateSelectAxis;
+			}
+			Render::DrawSphere(sel_pos, vec3::ZERO, draw_scale*2, 16, Color_Yellow, Color_Green, Color_Blue);
+			Render::DrawSphere(sel_pos, vec3{0,45,0}, draw_scale);
+		}break;
+		
+		case TransformType_RotateY:{
+			if(dragging){
+				vec2 center(DeshWindow->centerX, DeshWindow->centerY);
+				vec2 diff = DeshInput->mousePos - center;
+				f32 angle = Math::AngBetweenVectors(diff, mouse_initial - center);
+				sel->transform.rotation.y = initial.y - angle;
+				if(sel->physics) sel->physics->rotation.y = sel->transform.rotation.y;
+			}else if(undo){
+				AddUndoRotate(&sel->transform, &initial, &sel_rot);
+				action = TransformType_RotateSelectAxis;
+			}
+			Render::DrawSphere(sel_pos, vec3::ZERO, draw_scale*2, 16, Color_Red, Color_Yellow, Color_Blue);
+			Render::DrawSphere(sel_pos, vec3{0,45,0}, draw_scale);
+		}break;
+		
+		case TransformType_RotateZ:{
+			if(dragging){
+				vec2 center(DeshWindow->centerX, DeshWindow->centerY);
+				vec2 diff = DeshInput->mousePos - center;
+				f32 angle = Math::AngBetweenVectors(diff, mouse_initial - center);
+				sel->transform.rotation.z = initial.z - angle;
+				if(sel->physics) sel->physics->rotation.z = sel->transform.rotation.z;
+			}else if(undo){
+				AddUndoRotate(&sel->transform, &initial, &sel_rot);
+				action = TransformType_RotateSelectAxis;
+			}
+			Render::DrawSphere(sel_pos, vec3::ZERO, draw_scale*2, 16, Color_Red, Color_Green, Color_Yellow);
+			Render::DrawSphere(sel_pos, vec3{0,45,0}, draw_scale);
+		}break;
+		
+		case TransformType_RotateFree:{//TODO fix free rotation
+			if(dragging){
+				vec2 center(DeshWindow->centerX, DeshWindow->centerY);
+				vec2 cleft(0, DeshWindow->height/2.f);
+				vec2 cright(DeshWindow->width, DeshWindow->height/2.f);
+				vec2 diff = DeshInput->mousePos - cleft;
+				f32  dist = vec2(-DeshWindow->width, 0).normalized().dot(diff);
+				f32  ratio = dist / vec3(DeshWindow->width, 0).mag();
+				f32  angle = 360.f*ratio;
+				
+				sel->transform.rotation = DEGREES(mat4::AxisAngleRotationMatrix(angle, vec4((sel_pos - cam->position).normalized(), 0)).Rotation());
+				if(sel->physics) sel->physics->rotation = sel->transform.rotation;
+			}else if(undo){
+				AddUndoRotate(&sel->transform, &initial, &sel_rot);
+				action = TransformType_RotateSelectAxis;
+			}
+			Render::DrawSphere(sel_pos, vec3::ZERO, draw_scale*2, 16, Color_Red, Color_Green, Color_Blue);
+			Render::DrawSphere(sel_pos, vec3{0,45,0}, draw_scale, 16, Color_Yellow);
+		}break;
 		
 		//// scale ////
 		case TransformType_ScaleSelectAxis:{
