@@ -4,9 +4,7 @@
 
 #include "Attribute.h"
 #include "math/math.h"
-#include "utils/array.h"
 
-struct Entity;
 struct Physics;
 struct Collider;
 struct Mesh;
@@ -20,20 +18,6 @@ enum ColliderType{
 };
 global_ const char* ColliderTypeStrings[] = {
 	"None", "AABB", "Sphere", "Hull"
-};
-
-struct Contact{
-	vec3 position; //world space
-	f32  penetration; //always negative
-};
-
-//TODO maybe store rotation/position matrices on here to avoid recalculation
-struct Manifold{
-	Physics  *p0, *p1;
-	Collider *c0, *c1;
-	vec3 normal; //from p0 to p1
-	u32 contactCount; //collision exists if -1, but dont resolve
-	Contact contacts[4]; //four contact points should be stable enough
 };
 
 struct Collider{

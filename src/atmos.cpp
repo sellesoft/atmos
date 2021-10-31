@@ -22,7 +22,8 @@ rework undoing (physics isnt updated by it currently)
 safety check on renaming things so no things have same name
 fix mesh viewing bools mixing?
 fix extra temp vertexes/indexes (when viewing triangle neighbors)
-fix normals viewing on big objects crash https://stackoverflow.com/questions/63092926/what-is-causing-vk-error-device-lost-when-calling-vkqueuesubmit
+fix normals viewing on big objects crash
+ ____https://stackoverflow.com/questions/63092926/what-is-causing-vk-error-device-lost-when-calling-vkqueuesubmit
 change undo's to never use pointers and have undos that can act like linked lists to chain them
 rewrite the events menu (triggers need to be able to filter what causes them to activate)
 add box select for mesh inspector and entity selection
@@ -34,10 +35,8 @@ add transfering the player pointer between entities that have an actor comp (com
 orbitting camera for rotating around objects
 context menu when right clicking on an object 
 typing numbers while grabbing/rotating/scaling for precise manipulation (like in Blender)
-implement grabbing/rotating/scaling with a visual tool thing (like in Unreal)
 orthographic side views
 (maybe) multiple viewports
-implement orthographic grabbing 
 entity filtering in entity list
 redo debug bar to be more informative and have different modes
 
@@ -46,8 +45,6 @@ redo debug bar to be more informative and have different modes
 test contact point reduction in FaceSAT collisions
 store previous frame's manifolds and separating axes and check them first to see if still valid
 store physics mass and collider tensor as inverse
-test if static resolution is even necessary 
-account for mass in static resolution so heavier things move less than lighter, but overall change is the same
 optimize detection by removing duplicate calculation of matrices and collider offsets
 account for entity scale in sphere collisions
 add compound colliders (multiple colliders that represent one physics object)
@@ -56,9 +53,8 @@ rework collider to have flags: player only collision, dont collide with others w
 ____dont collide at all (for some reason), trigger, etc
 add collision sweeping
 add collision resolution for: cylinder, capsule, box
-test if collision detection is faster if we transform one object into the space of the other, or transform both into world
 add overall outer vertexes to mesh data
-add colliders that modify physics in that space
+add ability for colliders to modify physics in that space (lower gravity in field, high air friction, etc)
 
 Ungrouped TODOs
 ---------------
@@ -74,9 +70,7 @@ binary file saving/loading
 
 Bug Board       //NOTE mark these with a last-known active date (M/D/Y)
 ---------
-(10/12/21) rotation scalar in physics manifold resolution is extra large
-__________ maybe scale the tensor to not lose precision?
-(10/18/21) entities renamed in the editor often get their name scuffed  when saving them
+(10/18/21) entities renamed in the editor often get their name scuffed when saving them
 
 */
 
