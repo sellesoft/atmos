@@ -19,11 +19,11 @@ struct Physics{
 	vec3 rotVelocity     = vec3::ZERO;
 	vec3 rotAcceleration = vec3::ZERO;
 	
-	f32 mass            = 1.0;
-	f32 elasticity      = 0.2; //less than 1 in most cases
-	f32 kineticFricCoef = 0.3;
-	f32 staticFricCoef  = 0.3;
-	f32 airFricCoef     = 0.1;
+	f32 mass            = 1.0f;
+	f32 elasticity      = 0.6f; //less than 1 in most cases
+	f32 kineticFricCoef = 0.3f;
+	f32 staticFricCoef  = 0.3f;
+	f32 airFricCoef     = 0.1f;
 	
 	b32 staticPosition = false;
 	b32 staticRotation = false;

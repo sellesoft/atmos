@@ -8,6 +8,11 @@
 #include "attributes/Collider.h"
 #include "geometry/geometry.h"
 
+//////////////////
+//// @storage ////
+//////////////////
+array<Manifold> manifolds;
+
 ////////////////
 //// @debug ////
 ////////////////
@@ -44,6 +49,14 @@ local void ComputeNormalBasis(const vec3& a, vec3* b, vec3* c){
 	
 	b->normalize();
 	*c = b->cross(a);
+}
+
+local f32 MixElasticity(Physics* p0, Physics* p1){
+	if(p0->elasticity > p1->elasticity){
+		return p0->elasticity;
+	}else{
+		return p1->elasticity;
+	}
 }
 
 ////////////// //!ref: https://www.gdcvault.com/play/1017646/Physics-for-Game-Programmers-The
@@ -213,6 +226,7 @@ local void GenerateHullFaceCollisionManifoldSAT(Mesh* ref_mesh, mat3& ref_rotati
 		vec3 nei_plane_point  = ref_mesh->vertexes[ref_mesh->faces[face_idx].vertexes[0]].pos * transform;
 		vec3 nei_plane_normal = ref_mesh->faces[face_idx].normal * rotation;
 		
+		if(clipped.count == 0) return;
 		array<vec3> temp = clipped; clipped.clear();
 		vec3 prev = temp[temp.count-1];
 		f32 dist_prev = Math::DistPointToPlane(prev, nei_plane_normal, nei_plane_point);
@@ -477,10 +491,10 @@ void AABBAABBCollision(Physics* p0, Collider* c0, Physics* p1, Collider* c1, Man
 		m->normal = normal;
 		ComputeNormalBasis(m->normal, &m->tangent0, &m->tangent1);
 		m->contacts[0].penetration = penetration; 
-#if 0
+#if 1
 		Log("phys","AABB-AABB collision between ",p0->attribute.entity->name," and ",p1->attribute.entity->name,"."
 			"\n  normal:      ", m->normal,
-			"\n  position:    ", m->contacts[0].position,
+			"\n  position:    ", m->contacts[0].world,
 			"\n  penetration: ", m->contacts[0].penetration);
 #endif
 	}
@@ -510,10 +524,10 @@ void AABBSphereCollision(Physics* p0, Collider* c0, Physics* p1, Collider* c1, M
 		m->contacts[0].local1 = -normal * c1->radius;
 		m->contacts[0].world  = aabbPoint;
 		m->contacts[0].penetration = penetration;
-#if 0
+#if 1
 		Log("phys","AABB-Sphere collision between ",p0->attribute.entity->name," and ",p1->attribute.entity->name,"."
 			"\n  normal:      ", m->normal,
-			"\n  position:    ", m->contacts[0].position,
+			"\n  position:    ", m->contacts[0].world,
 			"\n  penetration: ", m->contacts[0].penetration);
 #endif
 	}
@@ -575,10 +589,10 @@ void SphereSphereCollision(Physics* p0, Collider* c0, Physics* p1, Collider* c1,
 		m->contacts[0].local1 = -normal * c1->radius;
 		m->contacts[0].world  = (m->contacts[0].local0 + position0).midpoint(m->contacts[0].local1 + position1);
 		m->contacts[0].penetration = penetration;
-#if 0
+#if 1
 		Log("phys","Sphere-Sphere collision between ",p0->attribute.entity->name," and ",p1->attribute.entity->name,"."
 			"\n  normal:      ", m->normal,
-			"\n  position:    ", m->contacts[0].position,
+			"\n  position:    ", m->contacts[0].world,
 			"\n  penetration: ", m->contacts[0].penetration);
 #endif
 	}
@@ -618,7 +632,7 @@ void SphereHullCollision(Physics* p0, Collider* c0, Physics* p1, Collider* c1, M
 		Render::DrawLine(m->contacts[0].position, m->contacts[0].position+(normal*penetration), Color_Yellow);
 		Render::DrawBox(mat4::TransformationMatrix(m->contacts[0].position, vec3::ZERO, vec3{.05f,.05f,.05f}), Color_Green);
 #endif
-#if 0
+#if 1
 		Log("phys","Sphere-Hull collision between ",p0->attribute.entity->name," and ",p1->attribute.entity->name,"."
 			"\n  normal:      ", m->normal,
 			"\n  position:    ", m->contacts[0].world,
@@ -663,10 +677,6 @@ void HullHullCollision(Physics* p0, Collider* c0, Physics* p1, Collider* c1, Man
 ///////////////
 void PhysicsSystem::Init(f32 fixedUpdatesPerSecond){
 	gravity        = 9.81f;
-	minVelocity    = 0.005f;
-	maxVelocity    = 100.f;
-	minRotVelocity = 1.f;
-	maxRotVelocity = 360.f;
 	
 	fixedTimeStep    = fixedUpdatesPerSecond;
 	fixedDeltaTime   = 1.f / fixedUpdatesPerSecond;
@@ -678,10 +688,24 @@ void PhysicsSystem::Init(f32 fixedUpdatesPerSecond){
 	step        = false;
 	solving     = true;
 	integrating = true;
+	
+	minVelocity    = 0.005f;
+	maxVelocity    = 100.f;
+	minRotVelocity = 1.f;
+	maxRotVelocity = 360.f;
+	
+	velocityIterations  = 8;
+	positionIterations  = 3;
+	effectiveMassBoost  = 0.0f;
+	elasticityBoost     = 0.0f;
+	baumgarte           = 0.2f;
+	linearSlop          = 0.005f;
+	angularSlop         = (2.0f / 180.0f * M_PI); //2 degrees in radians
+	maxLinearCorrection = 0.2f;
 }
 
-/////////////////
-//// @update ////
+/////////////////!ref: http://allenchou.net/2013/12/game-physics-resolution-contact-constraints/
+//// @update ////!ref: https://github.com/erincatto/box2d/blob/master/src/dynamics/b2_contact_solver.cpp
 /////////////////
 void PhysicsSystem::Update(){
 	if(paused && !step) return;
@@ -689,57 +713,9 @@ void PhysicsSystem::Update(){
 	fixedAccumulator += DeshTime->deltaTime;
 	if(AtmoAdmin->simulateInEditor) fixedAccumulator = fixedDeltaTime;
 	while(fixedAccumulator >= fixedDeltaTime){
-		//// integration ////
-		if(integrating){
-			if(!AtmoAdmin->simulateInEditor) AtmoAdmin->player->Update();
-			forE(AtmoAdmin->physicsArr){
-				if(it->attribute.entity == AtmoAdmin->player) continue;
-				
-				//linear motion
-				if(!it->staticPosition){
-					it->acceleration += vec3(0, -gravity, 0); //add gravity
-					it->velocity += it->acceleration * fixedDeltaTime;
-					it->acceleration = vec3::ZERO;
-					
-					//linear clamping
-					f32 vm = it->velocity.mag();
-					if(vm > maxVelocity){
-						it->velocity /= vm;
-						it->velocity *= maxVelocity;
-					}else if(vm < minVelocity){
-						it->velocity = vec3::ZERO;
-					}
-					
-					it->position += it->velocity * fixedDeltaTime;
-				}
-				
-				//rotational motion
-				if(!it->staticRotation){
-					if(it->rotVelocity != vec3::ZERO){  //fake rotational air friction
-						it->rotAcceleration += vec3(it->rotVelocity.x > 0 ? -1 : 1, 
-													it->rotVelocity.y > 0 ? -1 : 1, 
-													it->rotVelocity.z > 0 ? -1 : 1) * it->airFricCoef * it->mass * 10;
-					}
-					
-					it->rotVelocity += it->rotAcceleration * fixedDeltaTime;
-					it->rotAcceleration = vec3::ZERO;
-					
-					//rotational clamping
-					f32 vm = it->rotVelocity.mag();
-					if(vm > maxRotVelocity){
-						it->rotVelocity /= vm;
-						it->rotVelocity *= maxRotVelocity;
-					}else if(vm < minRotVelocity){
-						it->rotVelocity = vec3::ZERO;
-					}
-					
-					it->rotation += it->rotVelocity * fixedDeltaTime;
-				}
-			}
-		}
 		
 		//// broad collision detection //// (filter manifolds)
-		array<Manifold> manifolds;
+		manifolds.clear();
 		for(Physics* p0 = AtmoAdmin->physicsArr.begin(); p0 != AtmoAdmin->physicsArr.end(); ++p0){
 			if(p0->collider.type == ColliderType_NONE) continue;
 			for(Physics* p1 = p0+1; p1 != AtmoAdmin->physicsArr.end(); ++p1){
@@ -777,152 +753,210 @@ void PhysicsSystem::Update(){
 			}
 		}
 		
-		//// collision resolution //// (solve manifolds)
-		//!ref: http://allenchou.net/2013/12/game-physics-resolution-contact-constraints/
-		//!ref: https://github.com/erincatto/box2d/blob/master/src/dynamics/b2_contact_solver.cpp
-		if(solving){
-			forE(manifolds){
-				if(it->contactCount == 0 || it->contactCount == -1) continue; //skip when specified (no collide or static)
+		if(!AtmoAdmin->simulateInEditor) AtmoAdmin->player->Update();
+		
+		//// integrate linear and angular velocity ////
+		if(integrating){
+			forE(AtmoAdmin->physicsArr){
+				if(it->attribute.entity == AtmoAdmin->player) continue;
 				
-				//set triggers as active
-				if(it->c0->isTrigger) it->c0->triggerActive = true;
-				if(it->c1->isTrigger) it->c1->triggerActive = true;
-				
-				vec3 normal = it->normal;
-				mat4 transform0 = mat4::TransformationMatrix(it->p0->position + it->c0->offset, it->p0->rotation, it->p0->scale);
-				mat4 transform1 = mat4::TransformationMatrix(it->p1->position + it->c1->offset, it->p1->rotation, it->p1->scale);
-				f32  invMass0 = 1.f / it->p0->mass;
-				f32  invMass1 = 1.f / it->p1->mass;
-				mat3 invInertia0 = it->c0->tensor.Inverse() * transform0;
-				mat3 invInertia1 = it->c1->tensor.Inverse() * transform1;
-				vec3 vel0 = it->p0->velocity;
-				vec3 vel1 = it->p1->velocity;
-				vec3 rvel0 = it->p0->rotVelocity;
-				vec3 rvel1 = it->p1->rotVelocity;
-				f32  friction = sqrt(it->p0->kineticFricCoef * it->p1->kineticFricCoef); //mix friction but allow for zero friction
-				
-				//solve tangent contact contraints (friction)
-				forI(it->contactCount){
-					//relative velocity at contact
-					vec3 relvel = vel1 + it->contacts[i].local1.cross(rvel1) - vel0 - it->contacts[i].local0.cross(rvel0);
+				//linear motion
+				if(!it->staticPosition){
+					it->acceleration += vec3(0, -gravity, 0); //add gravity
+					it->velocity += it->acceleration * fixedDeltaTime;
+					it->acceleration = vec3::ZERO;
 					
-					//compute tangent force
+					//linear clamping
+					f32 vm = it->velocity.mag();
+					if(vm > maxVelocity){
+						it->velocity /= vm;
+						it->velocity *= maxVelocity;
+					}else if(vm < minVelocity){
+						it->velocity = vec3::ZERO;
+					}
+				}
+				
+				//rotational motion
+				if(!it->staticRotation){
+					if(it->rotVelocity != vec3::ZERO){  //fake rotational air friction
+						it->rotAcceleration += vec3(it->rotVelocity.x > 0 ? -1 : 1, 
+													it->rotVelocity.y > 0 ? -1 : 1, 
+													it->rotVelocity.z > 0 ? -1 : 1) * it->airFricCoef * it->mass;
+					}
+					
+					it->rotVelocity += it->rotAcceleration * fixedDeltaTime;
+					it->rotAcceleration = vec3::ZERO;
+					
+					//rotational clamping
+					f32 vm = it->rotVelocity.mag();
+					if(vm > maxRotVelocity){
+						it->rotVelocity /= vm;
+						it->rotVelocity *= maxRotVelocity;
+					}else if(vm < minRotVelocity){
+						it->rotVelocity = vec3::ZERO;
+					}
+				}
+			}
+		}
+		
+		//// initialize contact velocity contraints ////
+		forE(manifolds){
+			if(it->contactCount == 0 || it->contactCount == -1) continue; //skip when specified (no collide or static)
+			
+			//set triggers as active
+			if(it->c0->isTrigger) it->c0->triggerActive = true;
+			if(it->c1->isTrigger) it->c1->triggerActive = true;
+			
+			forE(manifolds){
+				mat4 rotation0 = mat4::RotationMatrix(it->p0->rotation);
+				mat4 rotation1 = mat4::RotationMatrix(it->p1->rotation);
+				it->invMass0 = 1.f / it->p0->mass;
+				it->invMass1 = 1.f / it->p1->mass;
+				//convert inertia tensors to world space, ignoring translation since tensors deal with rotation //TODO figure this out
+				//it->invInertia0 = rotation0.Transpose() * it->c0->tensor.Inverse() * rotation0;
+				//it->invInertia1 = rotation1.Transpose() * it->c1->tensor.Inverse() * rotation1;
+				it->invInertia0 = it->c0->tensor.Inverse() * mat4::TransformationMatrix(it->p0->position + it->c0->offset, it->p0->rotation, it->p0->scale);
+				it->invInertia1 = it->c1->tensor.Inverse() * mat4::TransformationMatrix(it->p1->position + it->c1->offset, it->p1->rotation, it->p1->scale);
+				it->friction = sqrt(it->p0->kineticFricCoef * it->p1->kineticFricCoef); //mix friction while allowing for zero friction
+				
+				forI(it->contactCount){
+					//compute effective mass for tangents
 					vec3 r0t0 = it->tangent0.cross(it->contacts[i].local0);
 					vec3 r1t0 = it->tangent0.cross(it->contacts[i].local1);
 					vec3 r0t1 = it->tangent1.cross(it->contacts[i].local0);
 					vec3 r1t1 = it->tangent1.cross(it->contacts[i].local1);
-					f32 kTangent0 = 
-						invMass0 + it->tangent0.dot(it->contacts[i].local0.cross(r0t0 * invInertia0)) + 
-						invMass1 + it->tangent0.dot(it->contacts[i].local1.cross(r1t0 * invInertia1));
-					f32 kTangent1 = 
-						invMass0 + it->tangent1.dot(it->contacts[i].local0.cross(r0t1 * invInertia0)) + 
-						invMass1 + it->tangent1.dot(it->contacts[i].local1.cross(r1t1 * invInertia1));
-					f32 tangentMass0 = (kTangent0 > 0.0f) ? 1.0f / kTangent0 : 0.0f; 
-					f32 tangentMass1 = (kTangent1 > 0.0f) ? 1.0f / kTangent1 : 0.0f; 
-					f32 vt0 = relvel.dot(it->tangent0); //TODO factor tangent speed with conveyer belts
-					f32 vt1 = relvel.dot(it->tangent1);
-					f32 lambda0 = -vt0 * tangentMass0;
-					f32 lambda1 = -vt1 * tangentMass1;
+					f32  kTangent0 = it->invMass0 + it->invMass1 + it->tangent0.dot(  it->contacts[i].local0.cross(r0t0 * it->invInertia0) 
+																					+ it->contacts[i].local1.cross(r1t0 * it->invInertia1));
+					f32  kTangent1 = it->invMass0 + it->invMass1 + it->tangent1.dot(  it->contacts[i].local0.cross(r0t1 * it->invInertia0) 
+																					+ it->contacts[i].local1.cross(r1t1 * it->invInertia1));
+					it->contacts[i].tangentMass0 = (kTangent0 > 0.0f) ? (1.0f / kTangent0) + effectiveMassBoost : 0.0f;
+					it->contacts[i].tangentMass1 = (kTangent1 > 0.0f) ? (1.0f / kTangent1) + effectiveMassBoost : 0.0f;
 					
-					//clamp the accumulated force (this allows solving the constraint across multiple contact points)
-					f32 maxFriction = friction * it->normalImpulseSum; //TODO figure out why this first
-					f32 newImpulse0 = Clamp(it->tangentImpulseSum0 + lambda0, -maxFriction, -maxFriction);
-					f32 newImpulse1 = Clamp(it->tangentImpulseSum1 + lambda1, -maxFriction, -maxFriction);
-					lambda0 = newImpulse0 - it->tangentImpulseSum0;
-					lambda1 = newImpulse1 - it->tangentImpulseSum1;
-					it->tangentImpulseSum0 = newImpulse0;
-					it->tangentImpulseSum1 = newImpulse1;
-					
-					//apply contact impulse
-					vec3 impulse0 = it->tangent0 * lambda0;
-					vec3 impulse1 = it->tangent1 * lambda1;
-					vel0  -= impulse0 * invMass0;
-					vel0  -= impulse1 * invMass0;
-					rvel0 -= impulse0.cross(it->contacts[i].local0) * invInertia0;
-					rvel0 -= impulse1.cross(it->contacts[i].local0) * invInertia0;
-					vel1  += impulse0 * invMass1;
-					vel1  += impulse1 * invMass1;
-					rvel1 += impulse0.cross(it->contacts[i].local1) * invInertia1;
-					rvel1 += impulse1.cross(it->contacts[i].local1) * invInertia1;
-				}
-				
-				//solve normal contact constraints //TODO block solve with multiple contact points
-				if(true || it->contactCount == 1){
-					forI(it->contactCount){
-						//relative velocity at contact
-						vec3 relvel = vel1 + it->contacts[i].local1.cross(rvel1) - vel0 - it->contacts[i].local0.cross(rvel0);
-						
-						//compute normal force
-						vec3 r0n = it->normal.cross(it->contacts[i].local0);
-						vec3 r1n = it->normal.cross(it->contacts[i].local1);
-						f32 kNormal = 
-							invMass0 + it->normal.dot(it->contacts[i].local0.cross(r0n * invInertia0)) + 
-							invMass1 + it->normal.dot(it->contacts[i].local1.cross(r1n * invInertia1));
-						f32 normalMass = (kNormal > 0.0f) ? 1.0f / kNormal : 0.0f; 
-						f32 vn = relvel.dot(it->normal);
-						f32 velBias = it->normal.dot(relvel);
-						velBias *= (velBias < -minVelocity) ? -((it->p0->elasticity > it->p1->elasticity) ? it->p0->elasticity : it->p1->elasticity) : 0.0f;
-						f32 lambda = -normalMass * (vn - velBias);
-						
-						//clamp the accumulated force (this allows solving the constraint across multiple contact points)
-						f32 newImpulse = Max(0.0f, it->normalImpulseSum + lambda);
-						lambda = newImpulse - it->normalImpulseSum;
-						it->normalImpulseSum = newImpulse;
-						
-						//apply contact impulse
-						vec3 impulse = it->normal * lambda;
-						vel0  -= impulse * invMass0;
-						rvel0 -= impulse.cross(it->contacts[i].local0) * invInertia0;
-						vel1  += impulse * invMass1;
-						rvel1 += impulse.cross(it->contacts[i].local1) * invInertia1;
-					}
-				}else{
-					
-				}
-				
-				//locally integrate position
-				vec3 pos0 = it->p0->position + (vel0 * fixedDeltaTime);
-				vec3 pos1 = it->p1->position + (vel1 * fixedDeltaTime);
-				vec3 rot0 = it->p0->rotation + (rvel0 * fixedDeltaTime);
-				vec3 rot1 = it->p1->rotation + (rvel1 * fixedDeltaTime);
-				
-				//solve position contraints
-				f32 minSeparation = 0.0f;
-				constexpr f32 baumgarte = 0.2f;
-				constexpr f32 linear_slop = 0.005f; //linear collision and constraint tolerance
-				constexpr f32 angular_slop = (2.0f / 180.0f * M_PI); //2 degrees in radians form
-				constexpr f32 max_linear_correction = 0.2f;
-				forI(it->contactCount){
-					//track min separation to loop until resolution
-					minSeparation = Min(minSeparation, it->contacts[i].penetration);
-					
-					//prevent large corrections and allow slop
-					f32 numer = Clamp(baumgarte * (it->contacts[i].penetration + linear_slop), -max_linear_correction, 0.0f);
-					
-					//compute effective mass and impulse value
+					//compute effective mass for normal
 					vec3 r0n = it->normal.cross(it->contacts[i].local0);
 					vec3 r1n = it->normal.cross(it->contacts[i].local1);
-					f32 denom = invMass0 + it->normal.dot(it->contacts[i].local0.cross(r0n * invInertia0)) + 
-						invMass1 + it->normal.dot(it->contacts[i].local1.cross(r1n * invInertia1));
-					f32 lambda = (denom > 0.0f) ? -numer / denom : 0.0f;
+					f32  kNormal = it->invMass0 + it->invMass1 + it->normal.dot(  it->contacts[i].local0.cross(r0n * it->invInertia0) 
+																				+ it->contacts[i].local1.cross(r1n * it->invInertia1));
+					it->contacts[i].normalMass = (kNormal > 0.0f) ? (1.0f / kNormal) + effectiveMassBoost : 0.0f; 
 					
-					//compute normal impulse
-					vec3 impulse = it->normal * lambda;
-					pos0 -= impulse * invMass0;
-					rot0 -= impulse.cross(it->contacts[i].local0) * invInertia0;
-					pos1 += impulse * invMass1;
-					rot1 += impulse.cross(it->contacts[i].local1) * invInertia1;
+					//compute velocity bias for restitution
+					vec3 relVel = it->p1->velocity + it->contacts[i].local1.cross(it->p1->rotVelocity) 
+						- it->p0->velocity - it->contacts[i].local0.cross(it->p0->rotVelocity);
+					f32 vn = relVel.dot(it->normal);
+					it->contacts[i].velocityBias = (vn < -minVelocity) ? vn * -(elasticityBoost + MixElasticity(it->p0, it->p1)) : 0.0f;
 				}
-				
-				//update physics component
-				it->p0->position    = pos0;
-				it->p0->rotation    = rot0;
-				it->p0->velocity    = vel0;
-				it->p0->rotVelocity = rvel0;
-				it->p1->position    = pos1;
-				it->p1->rotation    = rot1;
-				it->p1->velocity    = vel1;
-				it->p1->rotVelocity = rvel1;
+			}
+		}
+		
+		//// solve contact velocity constraints ////
+		if(solving){
+			forX(vel_it,velocityIterations){
+				forE(manifolds){
+					if(it->contactCount == 0 || it->contactCount == -1) continue; //skip when specified (no collide or static)
+					
+					/*
+										//solve tangent contact contraints (friction) 
+										//TODO figure out why we are doing this before normal despite using normal impulse
+										forI(it->contactCount){
+											//relative velocity at contact
+											vec3 relVel = it->p1->velocity + it->contacts[i].local1.cross(it->p1->rotVelocity) 
+												- it->p0->velocity - it->contacts[i].local0.cross(it->p0->rotVelocity);
+											
+											//compute tangent force  //TODO factor tangent speed with conveyer belts
+											f32 lambda0 = -(relVel.dot(it->tangent0)) * it->contacts[i].tangentMass0;
+											f32 lambda1 = -(relVel.dot(it->tangent1)) * it->contacts[i].tangentMass1;
+											
+											//clamp the accumulated impulse  //NOTE this allows solving the constraint across multiple iterations
+											f32 maxFriction = it->friction * it->contacts[i].normalImpulse;
+											f32 newImpulse0 = Clamp(it->contacts[i].tangentImpulse0 + lambda0, -maxFriction, -maxFriction);
+											f32 newImpulse1 = Clamp(it->contacts[i].tangentImpulse1 + lambda1, -maxFriction, -maxFriction);
+											lambda0 = newImpulse0 - it->contacts[i].tangentImpulse0;
+											lambda1 = newImpulse1 - it->contacts[i].tangentImpulse1;
+											it->contacts[i].tangentImpulse0 = newImpulse0;
+											it->contacts[i].tangentImpulse1 = newImpulse1;
+											
+											//apply contact impulse
+											vec3 impulse0 = it->tangent0 * lambda0;
+											vec3 impulse1 = it->tangent1 * lambda1;
+											it->p0->velocity -= impulse0 * it->invMass0;
+											it->p0->velocity -= impulse1 * it->invMass0;
+											it->p1->velocity += impulse0 * it->invMass1;
+											it->p1->velocity += impulse1 * it->invMass1;
+											it->p0->rotVelocity -= impulse0.cross(it->contacts[i].local0) * it->invInertia0;
+											it->p0->rotVelocity -= impulse1.cross(it->contacts[i].local0) * it->invInertia0;
+											it->p1->rotVelocity += impulse0.cross(it->contacts[i].local1) * it->invInertia1;
+											it->p1->rotVelocity += impulse1.cross(it->contacts[i].local1) * it->invInertia1;
+										}
+										*/
+					
+					//solve normal contact constraints //TODO block solve with multiple contact points
+					if(true || it->contactCount == 1){
+						forI(it->contactCount){
+							//relative velocity at contact
+							vec3 relVel = it->p1->velocity + it->contacts[i].local1.cross(it->p1->rotVelocity) 
+								- it->p0->velocity - it->contacts[i].local0.cross(it->p0->rotVelocity);
+							
+							//compute normal force
+							f32 lambda = -(relVel.dot(it->normal) - it->contacts[i].velocityBias) * it->contacts[i].normalMass;
+							
+							//clamp the accumulated impulse  //NOTE this allows solving the constraint across multiple iterations
+							f32 newImpulse = Max(0.0f, it->contacts[i].normalImpulse + lambda);
+							lambda = newImpulse - it->contacts[i].normalImpulse;
+							it->contacts[i].normalImpulse = newImpulse;
+							
+							//apply contact impulse
+							vec3 impulse = it->normal * lambda;
+							it->p0->velocity -= impulse * it->invMass0;
+							it->p1->velocity += impulse * it->invMass1;
+							it->p0->rotVelocity -= impulse.cross(it->contacts[i].local0) * it->invInertia0;
+							it->p1->rotVelocity += impulse.cross(it->contacts[i].local1) * it->invInertia1;
+						}
+					}else{
+						
+					}
+				}
+			}
+		}
+		
+		//// integrate position and rotation ////
+		if(integrating){
+			forE(AtmoAdmin->physicsArr){
+				if(it->attribute.entity == AtmoAdmin->player) continue;
+				if(!it->staticPosition) it->position += it->velocity * fixedDeltaTime;
+				if(!it->staticRotation) it->rotation += it->rotVelocity * fixedDeltaTime;
+			}
+		}
+		
+		//// solve contact position constraints //// //TODO figure out space
+		if(solving){
+			forX(pos_it,positionIterations){
+				f32 minSeparation = 0.0f;
+				forE(manifolds){
+					if(it->contactCount == 0 || it->contactCount == -1) continue; //skip when specified (no collide or static)
+					
+					forI(it->contactCount){
+						//track min separation to loop until resolution
+						minSeparation = Min(minSeparation, it->contacts[i].penetration);
+						
+						//prevent large corrections and allow slop
+						f32 numer = Clamp(baumgarte * (it->contacts[i].penetration + linearSlop), -maxLinearCorrection, 0.0f);
+						
+						//compute effective mass and impulse magnitude
+						vec3 r0n = it->normal.cross(it->contacts[i].local0);
+						vec3 r1n = it->normal.cross(it->contacts[i].local1);
+						f32 denom = it->invMass0 + it->invMass1 + it->normal.dot(  it->contacts[i].local0.cross(r0n * it->invInertia0) 
+																				 + it->contacts[i].local1.cross(r1n * it->invInertia1));
+						f32 lambda = (denom > 0.0f) ? -numer / denom : 0.0f;
+						
+						//apply normal impulse
+						vec3 impulse = it->normal * lambda;
+						if(!it->p0->staticPosition) it->p0->position -= impulse * it->invMass0;
+						if(!it->p1->staticPosition) it->p1->position += impulse * it->invMass1;
+						if(!it->p0->staticRotation) it->p0->rotation -= impulse.cross(it->contacts[i].local0) * it->invInertia0;
+						if(!it->p1->staticRotation) it->p1->rotation += impulse.cross(it->contacts[i].local1) * it->invInertia1;
+					}
+				}
+				if(minSeparation >= -3.0f * linearSlop) break; //early out if solved
 			}
 		}
 		

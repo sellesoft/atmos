@@ -21,8 +21,8 @@ velocity     (0, 0, 0)
 accel        (0, 0, 0)
 rot_velocity (0, 0, 0)
 rot_accel    (0, 0, 0)
-mass         1000
-elasticity   0.2
+mass         1
+elasticity   0.6
 kinetic_fric 0.3
 static_fric  0.3
 air_fric     0.1
@@ -39,7 +39,7 @@ collider_half_dims (0.5, 0.5, 0.5)
 ]1
 type     2 #Physics
 name     "hull1"
-position (2.1, 5, 2)
+position (2.1, 5, 2.1)
 rotation (45, 45, 0)
 scale    (1, 1, 1)
 attributes 1 2
@@ -47,15 +47,15 @@ attributes 1 2
 model   "box_flat"
 visible true
 :2 #Physics
-position     (2.1, 5, 2)
+position     (2.1, 5, 2.1)
 rotation     (45, 45, 0)
 scale        (1, 1, 1)
-velocity     (-5, 0, -5)
+velocity     (-1, 0, -1)
 accel        (0, 0, 0)
 rot_velocity (0, 0, 0)
 rot_accel    (0, 0, 0)
 mass         1
-elasticity   0.2
+elasticity   0.6
 kinetic_fric 0.3
 static_fric  0.3
 air_fric     0.1

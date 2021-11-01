@@ -85,7 +85,6 @@ void Admin::PostRenderUpdate(){
 }
 
 void Admin::Reset(){
-	camera = CameraInstance(90);
 	editor.Reset();
 	
 	for(Entity* e : entities){ delete e; }
