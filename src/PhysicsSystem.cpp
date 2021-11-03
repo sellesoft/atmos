@@ -51,12 +51,18 @@ local void ComputeNormalBasis(const vec3& a, vec3* b, vec3* c){
 	*c = b->cross(a);
 }
 
+//mix elasticity while allowing super bouncy objects
 local f32 MixElasticity(Physics* p0, Physics* p1){
 	if(p0->elasticity > p1->elasticity){
 		return p0->elasticity;
 	}else{
 		return p1->elasticity;
 	}
+}
+
+//mix friction while allowing for zero friction
+local f32 MixFriction(Physics* p0, Physics* p1){
+	return sqrt(p0->kineticFricCoef * p1->kineticFricCoef);
 }
 
 ////////////// //!ref: https://www.gdcvault.com/play/1017646/Physics-for-Game-Programmers-The
@@ -696,8 +702,6 @@ void PhysicsSystem::Init(f32 fixedUpdatesPerSecond){
 	
 	velocityIterations  = 8;
 	positionIterations  = 3;
-	effectiveMassBoost  = 0.0f;
-	elasticityBoost     = 0.0f;
 	baumgarte           = 0.2f;
 	linearSlop          = 0.005f;
 	angularSlop         = (2.0f / 180.0f * M_PI); //2 degrees in radians
@@ -800,6 +804,7 @@ void PhysicsSystem::Update(){
 		}
 		
 		//// initialize contact velocity contraints ////
+		//!ref: https://github.com/bulletphysics/bullet3/blob/master/src/Bullet3Dynamics/ConstraintSolver/b3PgsJacobiSolver.cpp solveGroupCacheFriendlySetup()
 		forE(manifolds){
 			if(it->contactCount == 0 || it->contactCount == -1) continue; //skip when specified (no collide or static)
 			
@@ -808,42 +813,49 @@ void PhysicsSystem::Update(){
 			if(it->c1->isTrigger) it->c1->triggerActive = true;
 			
 			forE(manifolds){
-				mat4 rotation0 = mat4::RotationMatrix(it->p0->rotation);
-				mat4 rotation1 = mat4::RotationMatrix(it->p1->rotation);
+				mat4 transform0 = mat4::TransformationMatrix(it->p0->position + it->c0->offset, it->p0->rotation, it->p0->scale);
+				mat4 transform1 = mat4::TransformationMatrix(it->p1->position + it->c1->offset, it->p1->rotation, it->p1->scale);
 				it->invMass0 = 1.f / it->p0->mass;
 				it->invMass1 = 1.f / it->p1->mass;
-				//convert inertia tensors to world space, ignoring translation since tensors deal with rotation //TODO figure this out
-				//it->invInertia0 = rotation0.Transpose() * it->c0->tensor.Inverse() * rotation0;
-				//it->invInertia1 = rotation1.Transpose() * it->c1->tensor.Inverse() * rotation1;
-				it->invInertia0 = it->c0->tensor.Inverse() * mat4::TransformationMatrix(it->p0->position + it->c0->offset, it->p0->rotation, it->p0->scale);
-				it->invInertia1 = it->c1->tensor.Inverse() * mat4::TransformationMatrix(it->p1->position + it->c1->offset, it->p1->rotation, it->p1->scale);
-				it->friction = sqrt(it->p0->kineticFricCoef * it->p1->kineticFricCoef); //mix friction while allowing for zero friction
+				it->invInertia0 = it->c0->tensor.Inverse() * transform0;
+				it->invInertia1 = it->c1->tensor.Inverse() * transform1;
+				it->friction = MixFriction(it->p0, it->p1);
 				
 				forI(it->contactCount){
-					//compute effective mass for tangents
-					vec3 r0t0 = it->tangent0.cross(it->contacts[i].local0);
-					vec3 r1t0 = it->tangent0.cross(it->contacts[i].local1);
-					vec3 r0t1 = it->tangent1.cross(it->contacts[i].local0);
-					vec3 r1t1 = it->tangent1.cross(it->contacts[i].local1);
-					f32  kTangent0 = it->invMass0 + it->invMass1 + it->tangent0.dot(  it->contacts[i].local0.cross(r0t0 * it->invInertia0) 
-																					+ it->contacts[i].local1.cross(r1t0 * it->invInertia1));
-					f32  kTangent1 = it->invMass0 + it->invMass1 + it->tangent1.dot(  it->contacts[i].local0.cross(r0t1 * it->invInertia0) 
-																					+ it->contacts[i].local1.cross(r1t1 * it->invInertia1));
-					it->contacts[i].tangentMass0 = (kTangent0 > 0.0f) ? (1.0f / kTangent0) + effectiveMassBoost : 0.0f;
-					it->contacts[i].tangentMass1 = (kTangent1 > 0.0f) ? (1.0f / kTangent1) + effectiveMassBoost : 0.0f;
+					//compute angular components
+					it->contacts[i].local0CrossNormal = it->normal.cross(it->contacts[i].local0);
+					it->contacts[i].local1CrossNormal = it->normal.cross(it->contacts[i].local1);
+					it->contacts[i].local0CrossTangent0 = it->tangent0.cross(it->contacts[i].local0);
+					it->contacts[i].local1CrossTangent0 = it->tangent0.cross(it->contacts[i].local1);
+					it->contacts[i].local0CrossTangent1 = it->tangent1.cross(it->contacts[i].local0);
+					it->contacts[i].local1CrossTangent1 = it->tangent1.cross(it->contacts[i].local1);
 					
-					//compute effective mass for normal
-					vec3 r0n = it->normal.cross(it->contacts[i].local0);
-					vec3 r1n = it->normal.cross(it->contacts[i].local1);
-					f32  kNormal = it->invMass0 + it->invMass1 + it->normal.dot(  it->contacts[i].local0.cross(r0n * it->invInertia0) 
-																				+ it->contacts[i].local1.cross(r1n * it->invInertia1));
-					it->contacts[i].normalMass = (kNormal > 0.0f) ? (1.0f / kNormal) + effectiveMassBoost : 0.0f; 
+					//compute effective mass for tangents  //TODO maybe scale effective mass by number of manifolds its in
+					vec3 linearInvMassJacobian0t0  = it->tangent0 * it->invMass0;
+					vec3 linearInvMassJacobian0t1  = it->tangent1 * it->invMass0;
+					vec3 linearInvMassJacobian1t0  = it->tangent0 * it->invMass1;
+					vec3 linearInvMassJacobian1t1  = it->tangent1 * it->invMass1;
+					vec3 angularInvMassJacobian0t0 = it->contacts[i].local0CrossTangent0 * it->invInertia0;
+					vec3 angularInvMassJacobian0t1 = it->contacts[i].local0CrossTangent1 * it->invInertia0;
+					vec3 angularInvMassJacobian1t0 = it->contacts[i].local1CrossTangent0 * it->invInertia1;
+					vec3 angularInvMassJacobian1t1 = it->contacts[i].local1CrossTangent1 * it->invInertia1;
+					f32  kTangent0 = it->normal.dot(linearInvMassJacobian0t0) + it->normal.dot(linearInvMassJacobian1t0) + it->normal.dot(angularInvMassJacobian0t0) + it->normal.dot(angularInvMassJacobian1t0);
+					f32  kTangent1 = it->normal.dot(linearInvMassJacobian0t0) + it->normal.dot(linearInvMassJacobian1t0) + it->normal.dot(angularInvMassJacobian0t0) + it->normal.dot(angularInvMassJacobian1t0);
+					it->contacts[i].tangentMass0 = (kTangent0 > M_EPSILON) ? (1.0f / kTangent0): 0.0f;
+					it->contacts[i].tangentMass1 = (kTangent1 > M_EPSILON) ? (1.0f / kTangent1) : 0.0f;
+					
+					//compute effective mass for normal 
+					vec3 linearInvMassJacobian0  = it->normal * it->invMass0;
+					vec3 linearInvMassJacobian1  = it->normal * it->invMass1;
+					vec3 angularInvMassJacobian0 = it->contacts[i].local0CrossNormal * it->invInertia0;
+					vec3 angularInvMassJacobian1 = it->contacts[i].local1CrossNormal * it->invInertia1;
+					f32  kNormal = it->normal.dot(linearInvMassJacobian0) + it->normal.dot(linearInvMassJacobian1) + it->normal.dot(angularInvMassJacobian0) + it->normal.dot(angularInvMassJacobian1);
+					it->contacts[i].normalMass = (kNormal > M_EPSILON) ? (1.0f / kNormal) : 0.0f; 
 					
 					//compute velocity bias for restitution
-					vec3 relVel = it->p1->velocity + it->contacts[i].local1.cross(it->p1->rotVelocity) 
-						- it->p0->velocity - it->contacts[i].local0.cross(it->p0->rotVelocity);
-					f32 vn = relVel.dot(it->normal);
-					it->contacts[i].velocityBias = (vn < -minVelocity) ? vn * -(elasticityBoost + MixElasticity(it->p0, it->p1)) : 0.0f;
+					f32 relVel = it->normal.dot(it->p1->velocity) - it->normal.dot(it->p0->velocity) + it->contacts[i].local0CrossNormal.dot(it->p1->rotVelocity) + it->contacts[i].local1CrossNormal.dot(it->p0->rotVelocity);
+					it->contacts[i].velocityBias = (relVel < -minVelocity) ? relVel * -MixElasticity(it->p0, it->p1) : 0.0f;
+					if(it->contacts[i].velocityBias < 0.0f) it->contacts[i].velocityBias = 0.0f;
 				}
 			}
 		}
@@ -854,50 +866,14 @@ void PhysicsSystem::Update(){
 				forE(manifolds){
 					if(it->contactCount == 0 || it->contactCount == -1) continue; //skip when specified (no collide or static)
 					
-					/*
-										//solve tangent contact contraints (friction) 
-										//TODO figure out why we are doing this before normal despite using normal impulse
-										forI(it->contactCount){
-											//relative velocity at contact
-											vec3 relVel = it->p1->velocity + it->contacts[i].local1.cross(it->p1->rotVelocity) 
-												- it->p0->velocity - it->contacts[i].local0.cross(it->p0->rotVelocity);
-											
-											//compute tangent force  //TODO factor tangent speed with conveyer belts
-											f32 lambda0 = -(relVel.dot(it->tangent0)) * it->contacts[i].tangentMass0;
-											f32 lambda1 = -(relVel.dot(it->tangent1)) * it->contacts[i].tangentMass1;
-											
-											//clamp the accumulated impulse  //NOTE this allows solving the constraint across multiple iterations
-											f32 maxFriction = it->friction * it->contacts[i].normalImpulse;
-											f32 newImpulse0 = Clamp(it->contacts[i].tangentImpulse0 + lambda0, -maxFriction, -maxFriction);
-											f32 newImpulse1 = Clamp(it->contacts[i].tangentImpulse1 + lambda1, -maxFriction, -maxFriction);
-											lambda0 = newImpulse0 - it->contacts[i].tangentImpulse0;
-											lambda1 = newImpulse1 - it->contacts[i].tangentImpulse1;
-											it->contacts[i].tangentImpulse0 = newImpulse0;
-											it->contacts[i].tangentImpulse1 = newImpulse1;
-											
-											//apply contact impulse
-											vec3 impulse0 = it->tangent0 * lambda0;
-											vec3 impulse1 = it->tangent1 * lambda1;
-											it->p0->velocity -= impulse0 * it->invMass0;
-											it->p0->velocity -= impulse1 * it->invMass0;
-											it->p1->velocity += impulse0 * it->invMass1;
-											it->p1->velocity += impulse1 * it->invMass1;
-											it->p0->rotVelocity -= impulse0.cross(it->contacts[i].local0) * it->invInertia0;
-											it->p0->rotVelocity -= impulse1.cross(it->contacts[i].local0) * it->invInertia0;
-											it->p1->rotVelocity += impulse0.cross(it->contacts[i].local1) * it->invInertia1;
-											it->p1->rotVelocity += impulse1.cross(it->contacts[i].local1) * it->invInertia1;
-										}
-										*/
-					
-					//solve normal contact constraints //TODO block solve with multiple contact points
+					//solve normal contact constraints
 					if(true || it->contactCount == 1){
 						forI(it->contactCount){
 							//relative velocity at contact
-							vec3 relVel = it->p1->velocity + it->contacts[i].local1.cross(it->p1->rotVelocity) 
-								- it->p0->velocity - it->contacts[i].local0.cross(it->p0->rotVelocity);
+							f32 relVel = it->normal.dot(it->p1->velocity) - it->normal.dot(it->p0->velocity) + it->contacts[i].local0CrossNormal.dot(it->p1->rotVelocity) + it->contacts[i].local1CrossNormal.dot(it->p0->rotVelocity);
 							
 							//compute normal force
-							f32 lambda = -(relVel.dot(it->normal) - it->contacts[i].velocityBias) * it->contacts[i].normalMass;
+							f32 lambda = (it->contacts[i].velocityBias - relVel) * it->contacts[i].normalMass;
 							
 							//clamp the accumulated impulse  //NOTE this allows solving the constraint across multiple iterations
 							f32 newImpulse = Max(0.0f, it->contacts[i].normalImpulse + lambda);
@@ -908,11 +884,42 @@ void PhysicsSystem::Update(){
 							vec3 impulse = it->normal * lambda;
 							it->p0->velocity -= impulse * it->invMass0;
 							it->p1->velocity += impulse * it->invMass1;
-							it->p0->rotVelocity -= impulse.cross(it->contacts[i].local0) * it->invInertia0;
+							it->p0->rotVelocity -= impulse.cross(it->contacts[i].local0) * it->invInertia0; //TODO y valuess are wrong?
 							it->p1->rotVelocity += impulse.cross(it->contacts[i].local1) * it->invInertia1;
 						}
 					}else{
+						//TODO block solve with multiple contact points
+					}
+					
+					//solve tangent contact contraints (friction) 
+					forI(it->contactCount){
+						//relative velocity at contact
+						f32 relVel = it->normal.dot(it->p1->velocity) - it->normal.dot(it->p0->velocity) + it->contacts[i].local0CrossNormal.dot(it->p1->rotVelocity) + it->contacts[i].local1CrossNormal.dot(it->p0->rotVelocity);
 						
+						//compute tangent force  //TODO factor tangent speed with conveyer belts
+						f32 lambda0 = -relVel * it->contacts[i].tangentMass0;
+						f32 lambda1 = -relVel * it->contacts[i].tangentMass1;
+						
+						//clamp the accumulated impulse  //NOTE this allows solving the constraint across multiple iterations
+						f32 maxFriction = it->friction * it->contacts[i].normalImpulse;
+						f32 newImpulse0 = Clamp(it->contacts[i].tangentImpulse0 + lambda0, -maxFriction, maxFriction);
+						f32 newImpulse1 = Clamp(it->contacts[i].tangentImpulse1 + lambda1, -maxFriction, maxFriction);
+						lambda0 = newImpulse0 - it->contacts[i].tangentImpulse0;
+						lambda1 = newImpulse1 - it->contacts[i].tangentImpulse1;
+						it->contacts[i].tangentImpulse0 = newImpulse0;
+						it->contacts[i].tangentImpulse1 = newImpulse1;
+						
+						//apply contact impulse
+						vec3 impulse0 = it->tangent0 * lambda0;
+						vec3 impulse1 = it->tangent1 * lambda1;
+						it->p0->velocity -= impulse0 * it->invMass0;
+						it->p0->velocity -= impulse1 * it->invMass0;
+						it->p1->velocity += impulse0 * it->invMass1;
+						it->p1->velocity += impulse1 * it->invMass1;
+						it->p0->rotVelocity -= impulse0.cross(it->contacts[i].local0) * it->invInertia0;
+						it->p0->rotVelocity -= impulse1.cross(it->contacts[i].local0) * it->invInertia0;
+						it->p1->rotVelocity += impulse0.cross(it->contacts[i].local1) * it->invInertia1;
+						it->p1->rotVelocity += impulse1.cross(it->contacts[i].local1) * it->invInertia1;
 					}
 				}
 			}

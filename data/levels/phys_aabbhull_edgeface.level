@@ -26,8 +26,8 @@ elasticity   0.2
 kinetic_fric 0.3
 static_fric  0.3
 air_fric     0.1
-static_pos   true
-static_rot   true
+static_pos   false
+static_rot   false
 collider_type       1 #AABB
 collider_offset     (0, 0, 0)
 collider_layer      0
@@ -39,7 +39,7 @@ collider_half_dims (0.5, 0.5, 0.5)
 ]1
 type     2 #Physics
 name     "hull1"
-position (2.5, 5, 0)
+position (5, 5, 0)
 rotation (45, 90, 0)
 scale    (1, 1, 1)
 attributes 1 2
@@ -47,7 +47,7 @@ attributes 1 2
 model   "box_flat"
 visible true
 :2 #Physics
-position     (2.5, 5, 0)
+position     (5, 5, 0)
 rotation     (45, 90, 0)
 scale        (1, 1, 1)
 velocity     (-5, 0, 0)

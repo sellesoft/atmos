@@ -17,13 +17,19 @@ struct Contact{
 	f32  penetration; //always negative
 	
 	//computed during resolution
-	f32  normalImpulse; //non-penetration impulse
-	f32  tangentImpulse0; //friction impulses
-	f32  tangentImpulse1;
+	vec3 local0CrossNormal;
+	vec3 local0CrossTangent0;
+	vec3 local0CrossTangent1;
+	vec3 local1CrossNormal;
+	vec3 local1CrossTangent0;
+	vec3 local1CrossTangent1;
 	f32  normalMass; //effective mass along normal
 	f32  tangentMass0; //effective mass along tangents
 	f32  tangentMass1;
 	f32  velocityBias; //restitution based bias
+	f32  normalImpulse; //non-penetration impulse
+	f32  tangentImpulse0; //friction impulses
+	f32  tangentImpulse1;
 };
 
 struct Manifold{
@@ -43,12 +49,12 @@ struct Manifold{
 	mat3 invInertia1;
 };
 
-enum ConstraintType{ //DOF = degrees of freedom
+enum ConstraintType{
 	ConstraintType_NONE,
 	ConstraintType_Friction,
 	ConstraintType_Distance,
-	ConstraintType_Revolute,  //rotation around a single point, 1 DOF
-	ConstraintType_Prismatic, //sliding along a single axis, 1 DOF
+	ConstraintType_Revolute,  //rotation around a single point
+	ConstraintType_Prismatic, //sliding along a single axis
 	ConstraintType_Pulley,    //idealized pulley
 	ConstraintType_COUNT
 };
@@ -84,8 +90,6 @@ struct PhysicsSystem {
 	//solving tweaks
 	u32 velocityIterations;
 	u32 positionIterations;
-	f32 effectiveMassBoost; //HACK artificially decreases effective mass
-	f32 elasticityBoost; //HACK artificially increases elasticity after mixing
 	f32 baumgarte;
 	f32 linearSlop; //linear collision and constraint tolerance
 	f32 angularSlop; //in radians
