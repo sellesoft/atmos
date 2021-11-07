@@ -17,12 +17,12 @@ struct Contact{
 	f32  penetration; //always negative
 	
 	//computed during resolution
-	vec3 local0CrossNormal;
-	vec3 local0CrossTangent0;
-	vec3 local0CrossTangent1;
-	vec3 local1CrossNormal;
-	vec3 local1CrossTangent0;
-	vec3 local1CrossTangent1;
+	vec3 normalCrossLocal0;
+	vec3 normalCrossLocal1;
+	vec3 tangent0CrossLocal0;
+	vec3 tangent0CrossLocal1;
+	vec3 tangent1CrossLocal0;
+	vec3 tangent1CrossLocal1;
 	f32  normalMass; //effective mass along normal
 	f32  tangentMass0; //effective mass along tangents
 	f32  tangentMass1;
@@ -43,10 +43,8 @@ struct Manifold{
 	
 	//computed during resolution
 	f32  friction; //mixed friction between both bodies
-	f32  invMass0;
-	f32  invMass1;
-	mat3 invInertia0; //in world space
-	mat3 invInertia1;
+	f32  invMass0, invMass1;
+	mat3 invInertia0, invInertia1; //in world space
 };
 
 enum ConstraintType{

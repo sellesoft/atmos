@@ -55,7 +55,7 @@ accel        (0, 0, 0)
 rot_velocity (0, 0, 0)
 rot_accel    (0, 0, 0)
 mass         1
-elasticity   0.6
+elasticity   1
 kinetic_fric 0.3
 static_fric  0.3
 air_fric     0.1
