@@ -2738,11 +2738,11 @@ local b32 TransformGizmo(){
 				mouse_world = ((mouse_world - cam->position).normalized() * 1000.f) + cam->position;
 				if(Math::AngBetweenVectors(cam->forward.yZero(), cam->forward) > 60.f){
 					sel->transform.scale.x = Math::VectorPlaneIntersect(initial, vec3::UP, cam->position, mouse_world).x;
-					sel->transform.scale.x = Max(0, sel->transform.scale.x);
+					sel->transform.scale.x = Max(0.0f, sel->transform.scale.x);
 					if(sel->physics) sel->physics->scale.x = sel->transform.scale.x;
 				}else{
 					sel->transform.scale.x = Math::VectorPlaneIntersect(initial, vec3::FORWARD, cam->position, mouse_world).x;
-					sel->transform.scale.x = Max(0, sel->transform.scale.x);
+					sel->transform.scale.x = Max(0.0f, sel->transform.scale.x);
 					if(sel->physics) sel->physics->scale.x = sel->transform.scale.x;
 				}
 			}else if(undo){
@@ -2764,11 +2764,11 @@ local b32 TransformGizmo(){
 				mouse_world = ((mouse_world - cam->position).normalized() * 1000.f) + cam->position;
 				if(Math::AngBetweenVectors(cam->forward.yZero(), cam->forward) > 60.f){
 					sel->transform.scale.y = Math::VectorPlaneIntersect(initial, vec3::RIGHT, cam->position, mouse_world).y;
-					sel->transform.scale.y = Max(0, sel->transform.scale.y);
+					sel->transform.scale.y = Max(0.0f, sel->transform.scale.y);
 					if(sel->physics) sel->physics->scale.y = sel->transform.scale.y;
 				}else{
 					sel->transform.scale.y = Math::VectorPlaneIntersect(initial, vec3::FORWARD, cam->position, mouse_world).y;
-					sel->transform.scale.y = Max(0, sel->transform.scale.y);
+					sel->transform.scale.y = Max(0.0f, sel->transform.scale.y);
 					if(sel->physics) sel->physics->scale.y = sel->transform.scale.y;
 				}
 			}else if(undo){
@@ -2790,11 +2790,11 @@ local b32 TransformGizmo(){
 				mouse_world = ((mouse_world - cam->position).normalized() * 1000.f) + cam->position;
 				if(Math::AngBetweenVectors(cam->forward.yZero(), cam->forward) > 60.f){
 					sel->transform.scale.z = Math::VectorPlaneIntersect(initial, vec3::UP, cam->position, mouse_world).z;
-					sel->transform.scale.z = Max(0, sel->transform.scale.z);
+					sel->transform.scale.z = Max(0.0f, sel->transform.scale.z);
 					if(sel->physics) sel->physics->scale.z = sel->transform.scale.z;
 				}else{
 					sel->transform.scale.z = Math::VectorPlaneIntersect(initial, vec3::RIGHT, cam->position, mouse_world).z;
-					sel->transform.scale.z = Max(0, sel->transform.scale.z);
+					sel->transform.scale.z = Max(0.0f, sel->transform.scale.z);
 					if(sel->physics) sel->physics->scale.z = sel->transform.scale.z;
 				}
 			}else if(undo){
@@ -2814,9 +2814,9 @@ local b32 TransformGizmo(){
 		case TransformType_ScaleFree:{
 			if(dragging){
 				sel->transform.scale = initial * (mouse_world.distanceTo(sel->transform.position));
-				sel->transform.scale.x = Max(0, sel->transform.scale.x);
-				sel->transform.scale.y = Max(0, sel->transform.scale.y);
-				sel->transform.scale.z = Max(0, sel->transform.scale.z);
+				sel->transform.scale.x = Max(0.0f, sel->transform.scale.x);
+				sel->transform.scale.y = Max(0.0f, sel->transform.scale.y);
+				sel->transform.scale.z = Max(0.0f, sel->transform.scale.z);
 				if(sel->physics) sel->physics->scale = sel->transform.scale;
 			}else if(undo){
 				AddUndoScale(&sel->transform, &initial, &sel_scale);
@@ -2877,7 +2877,7 @@ void Editor::Update(){
 	if(!hit_gizmo && !WinHovFlag && DeshInput->KeyPressed(MouseButton::LEFT)){
 		//NOTE adjusting the projection matrix so the nearZ is at least .1, produces bad results if less
 		mat4 adjusted_proj = Camera::MakePerspectiveProjectionMatrix(DeshWindow->width, DeshWindow->height, AtmoAdmin->camera.fov, 
-																	 AtmoAdmin->camera.farZ, Max(.1, AtmoAdmin->camera.nearZ));
+																	 AtmoAdmin->camera.farZ, Max(.1f, AtmoAdmin->camera.nearZ));
 		vec3 direction = (Math::ScreenToWorld(DeshInput->mousePos, adjusted_proj, AtmoAdmin->camera.viewMat, DeshWindow->dimensions) 
 						  - AtmoAdmin->camera.position).normalized();
 		
