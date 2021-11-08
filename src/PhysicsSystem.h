@@ -17,19 +17,15 @@ struct Contact{
 	f32  penetration; //always negative
 	
 	//computed during resolution
-	vec3 normalCrossLocal0;
-	vec3 normalCrossLocal1;
-	vec3 tangent0CrossLocal0;
-	vec3 tangent0CrossLocal1;
-	vec3 tangent1CrossLocal0;
-	vec3 tangent1CrossLocal1;
+	vec3 tangent0, tangent1;
+	vec3 normalCrossLocal0, normalCrossLocal1;
+	vec3 tangent0CrossLocal0, tangent0CrossLocal1;
+	vec3 tangent1CrossLocal0, tangent1CrossLocal1;
 	f32  normalMass; //effective mass along normal
-	f32  tangentMass0; //effective mass along tangents
-	f32  tangentMass1;
+	f32  tangentMass0, tangentMass1; //effective mass along tangents
 	f32  velocityBias; //restitution based bias
 	f32  normalImpulse; //non-penetration impulse
-	f32  tangentImpulse0; //friction impulses
-	f32  tangentImpulse1;
+	f32  tangentImpulse0, tangentImpulse1; //friction impulses
 };
 
 struct Manifold{
@@ -37,7 +33,6 @@ struct Manifold{
 	Physics  *p0, *p1;
 	Collider *c0, *c1;
 	vec3 normal; //from p0 to p1
-	vec3 tangent0, tangent1;
 	u32 contactCount; //collision exists if -1, but dont resolve
 	Contact contacts[4]; //four contact points should be stable enough
 	
@@ -91,6 +86,7 @@ struct PhysicsSystem {
 	f32 baumgarte;
 	f32 linearSlop; //linear collision and constraint tolerance
 	f32 angularSlop; //in radians
+	f32 restitutionSlop; //max allowed restitution velocity
 	f32 maxLinearCorrection;
 	
 	void Init(f32 fixedUpdatesPerSecond);

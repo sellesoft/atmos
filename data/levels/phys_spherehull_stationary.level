@@ -1,5 +1,5 @@
 >level
-name         "phys_spherehull_face"
+name         "phys_spherehull_stationary"
 last_updated 0
 
 >entities
@@ -8,7 +8,7 @@ type     2 #Physics
 name     "hull0"
 position (0, -1, 0)
 rotation (0, 0, 0)
-scale    (40, 2, 40)
+scale    (10, 2, 10)
 attributes 1 2
 :1 #ModelInstance
 model   "null"
@@ -16,7 +16,7 @@ visible true
 :2 #Physics
 position     (0, -1, 0)
 rotation     (0, 0, 0)
-scale        (40, 2, 40)
+scale        (10, 2, 10)
 velocity     (0, 0, 0)
 accel        (0, 0, 0)
 rot_velocity (0, 0, 0)
@@ -39,7 +39,7 @@ collider_mesh      "null"
 ]1
 type     2 #Physics
 name     "sphere1"
-position (15, 1.5, 0)
+position (0, 2, 0)
 rotation (0, 0, 0)
 scale    (1, 1, 1)
 attributes 1 2
@@ -47,10 +47,10 @@ attributes 1 2
 model   "sphere"
 visible true
 :2 #Physics
-position     (15, 1.5, 0)
+position     (0, 2, 0)
 rotation     (0, 0, 0)
 scale        (1, 1, 1)
-velocity     (-1, 0, 0)
+velocity     (0, 0, 0)
 accel        (0, 0, 0)
 rot_velocity (0, 0, 0)
 rot_accel    (0, 0, 0)
