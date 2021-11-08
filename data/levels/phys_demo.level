@@ -1,0 +1,268 @@
+>level
+name         "phys_demo"
+last_updated 0
+
+>entities
+]0
+type     2 #Physics
+name     "floor"
+position (0, -1, 0)
+rotation (0, 0, 0)
+scale    (50, 2, 50)
+attributes 1 2
+:1 #ModelInstance
+model   "box_flat"
+visible true
+:2 #Physics
+position     (0, -1, 0)
+rotation     (0, 0, 0)
+scale        (50, 2, 50)
+velocity     (0, 0, 0)
+accel        (0, 0, 0)
+rot_velocity (0, 0, 0)
+rot_accel    (0, 0, 0)
+mass         1000
+elasticity   0.2
+kinetic_fric 0.1
+static_fric  0.3
+air_fric     0.1
+static_pos   true
+static_rot   true
+collider_type       3 #Hull
+collider_offset     (0, 0, 0)
+collider_layer      0
+collider_nocollide  false
+collider_trigger    false
+collider_playeronly false
+collider_mesh      "box"
+
+]1
+type     2 #Physics
+name     "monkey_sphere"
+position (20, 13, 0)
+rotation (0, 0, 0)
+scale    (1, 1, 1)
+attributes 1 2
+:1 #ModelInstance
+model   "bmonkey_pbr"
+visible true
+:2 #Physics
+position     (20, 13, 0)
+rotation     (0, 0, 0)
+scale        (1, 1, 1)
+velocity     (0, 0, 0)
+accel        (0, 0, 0)
+rot_velocity (0, 0, 0)
+rot_accel    (0, 0, 0)
+mass         1
+elasticity   0.6
+kinetic_fric 0.1
+static_fric  0.3
+air_fric     1
+static_pos   false
+static_rot   false
+collider_type       2 #Sphere
+collider_offset     (0, 0, 0)
+collider_layer      0
+collider_nocollide  false
+collider_trigger    false
+collider_playeronly false
+collider_radius    1
+
+]2
+type     2 #Physics
+name     "lava0"
+position (17.6645, 7.12192, 0)
+rotation (0, 0, 15)
+scale    (10, 1, 5)
+attributes 1 2
+:1 #ModelInstance
+model   "lava_box"
+visible true
+:2 #Physics
+position     (17.6645, 7.12192, 0)
+rotation     (0, 0, 15)
+scale        (10, 1, 5)
+velocity     (0, 0, 0)
+accel        (0, 0, 0)
+rot_velocity (0, 0, 0)
+rot_accel    (0, 0, 0)
+mass         1
+elasticity   0.6
+kinetic_fric 0.3
+static_fric  0.3
+air_fric     0.1
+static_pos   true
+static_rot   true
+collider_type       3 #Hull
+collider_offset     (0, 0, 0)
+collider_layer      0
+collider_nocollide  false
+collider_trigger    false
+collider_playeronly false
+collider_mesh      "null"
+
+]3
+type     2 #Physics
+name     "lava1"
+position (6.46732, 4.87506, 0)
+rotation (0, 0, 0)
+scale    (10, 1, 5)
+attributes 1 2
+:1 #ModelInstance
+model   "lava_box"
+visible true
+:2 #Physics
+position     (6.46732, 4.87506, 0)
+rotation     (0, 0, 0)
+scale        (10, 1, 5)
+velocity     (0, 0, 0)
+accel        (0, 0, 0)
+rot_velocity (0, 0, 0)
+rot_accel    (0, 0, 0)
+mass         1
+elasticity   0.6
+kinetic_fric 0.3
+static_fric  0.3
+air_fric     0.1
+static_pos   true
+static_rot   true
+collider_type       3 #Hull
+collider_offset     (0, 0, 0)
+collider_layer      0
+collider_nocollide  false
+collider_trigger    false
+collider_playeronly false
+collider_mesh      "null"
+
+]4
+type     2 #Physics
+name     "lava2"
+position (-3.86048, 2.79708, 0)
+rotation (0, 0, -15)
+scale    (10, 1, 5)
+attributes 1 2
+:1 #ModelInstance
+model   "lava_box"
+visible true
+:2 #Physics
+position     (-3.86048, 2.79708, 0)
+rotation     (0, 0, -15)
+scale        (10, 1, 5)
+velocity     (0, 0, 0)
+accel        (0, 0, 0)
+rot_velocity (0, 0, 0)
+rot_accel    (0, 0, 0)
+mass         1
+elasticity   0.6
+kinetic_fric 0.3
+static_fric  0.3
+air_fric     0.1
+static_pos   true
+static_rot   true
+collider_type       3 #Hull
+collider_offset     (0, 0, 0)
+collider_layer      0
+collider_nocollide  false
+collider_trigger    false
+collider_playeronly false
+collider_mesh      "null"
+
+]5
+type     2 #Physics
+name     "sphere2"
+position (-20, 3, 0)
+rotation (0, 0, 0)
+scale    (1, 1, 1)
+attributes 1 2
+:1 #ModelInstance
+model   "sphere"
+visible true
+:2 #Physics
+position     (-20, 3, 0)
+rotation     (0, 0, 0)
+scale        (1, 1, 1)
+velocity     (0, 0, 0)
+accel        (0, 0, 0)
+rot_velocity (0, 0, 0)
+rot_accel    (0, 0, 0)
+mass         1
+elasticity   0.6
+kinetic_fric 0.1
+static_fric  0.3
+air_fric     1
+static_pos   false
+static_rot   false
+collider_type       2 #Sphere
+collider_offset     (0, 0, 0)
+collider_layer      0
+collider_nocollide  false
+collider_trigger    false
+collider_playeronly false
+collider_radius    1
+
+]6
+type     2 #Physics
+name     "sphere3"
+position (-20, 8, 0)
+rotation (0, 0, 0)
+scale    (1, 1, 1)
+attributes 1 2
+:1 #ModelInstance
+model   "sphere"
+visible true
+:2 #Physics
+position     (-20, 8, 0)
+rotation     (0, 0, 0)
+scale        (1, 1, 1)
+velocity     (0, 0, 0)
+accel        (0, 0, 0)
+rot_velocity (0, 0, 0)
+rot_accel    (0, 0, 0)
+mass         3
+elasticity   1
+kinetic_fric 0.1
+static_fric  0.3
+air_fric     1
+static_pos   false
+static_rot   false
+collider_type       2 #Sphere
+collider_offset     (0, 0, 0)
+collider_layer      0
+collider_nocollide  false
+collider_trigger    false
+collider_playeronly false
+collider_radius    1
+
+]7
+type     2 #Physics
+name     "sphere4"
+position (-20, 15, 0)
+rotation (0, 0, 0)
+scale    (1, 1, 1)
+attributes 1 2
+:1 #ModelInstance
+model   "sphere"
+visible true
+:2 #Physics
+position     (-20, 15, 0)
+rotation     (0, 0, 0)
+scale        (1, 1, 1)
+velocity     (0, 0, 0)
+accel        (0, 0, 0)
+rot_velocity (0, 0, 0)
+rot_accel    (0, 0, 0)
+mass         1
+elasticity   1
+kinetic_fric 0.1
+static_fric  0.3
+air_fric     1
+static_pos   false
+static_rot   false
+collider_type       2 #Sphere
+collider_offset     (0, 0, 0)
+collider_layer      0
+collider_nocollide  false
+collider_trigger    false
+collider_playeronly false
+collider_radius    1

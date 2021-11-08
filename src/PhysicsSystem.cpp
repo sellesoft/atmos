@@ -395,7 +395,7 @@ local void GenerateHullFaceCollisionManifoldSAT(Mesh* ref_mesh, mat3& ref_rotati
 		Render::DrawBox(mat4::TransformationMatrix(m->contacts[i].world, vec3::ZERO, vec3{.05f,.05f,.05f}), Color_Green);
 	}
 #endif
-#if 1
+#if 0
 	Log("phys","Hull-Hull face collision between ",m->p0->attribute.entity->name," and ",m->p1->attribute.entity->name,"."
 		"\n  reference: ", m->p1->attribute.entity->name,
 		"\n  normal:    ", m->normal,
@@ -453,7 +453,7 @@ local void GenerateHullEdgeCollisionManifoldSAT(Mesh* mesh0, mat3& rotation0, ma
 	Render::DrawBox(mat4::TransformationMatrix(edge1_point*transform1, vec3::ZERO, vec3{.05f,.05f,.05f}), Color_Red);
 	Render::DrawBox(mat4::TransformationMatrix(m->contacts[0].position, vec3::ZERO, vec3{.05f,.05f,.05f}), Color_Green);
 #endif
-#if 1
+#if 0
 	Log("phys","Hull-Hull edge collision between ",m->p0->attribute.entity->name," and ",m->p1->attribute.entity->name,"."
 		"\n  normal:      ", m->normal,
 		"\n  position:    ", m->contacts[0].world,
@@ -498,7 +498,7 @@ void AABBAABBCollision(Physics* p0, Collider* c0, Physics* p1, Collider* c1, Man
 		m->normal = normal;
 		//ComputeNormalBasis(m->normal, &m->tangent0, &m->tangent1);
 		m->contacts[0].penetration = penetration; 
-#if 1
+#if 0
 		Log("phys","AABB-AABB collision between ",p0->attribute.entity->name," and ",p1->attribute.entity->name,"."
 			"\n  normal:      ", m->normal,
 			"\n  position:    ", m->contacts[0].world,
@@ -531,7 +531,7 @@ void AABBSphereCollision(Physics* p0, Collider* c0, Physics* p1, Collider* c1, M
 		m->contacts[0].local1 = -normal * c1->radius;
 		m->contacts[0].world  = aabbPoint;
 		m->contacts[0].penetration = penetration;
-#if 1
+#if 0
 		Log("phys","AABB-Sphere collision between ",p0->attribute.entity->name," and ",p1->attribute.entity->name,"."
 			"\n  normal:      ", m->normal,
 			"\n  position:    ", m->contacts[0].world,
@@ -596,7 +596,7 @@ void SphereSphereCollision(Physics* p0, Collider* c0, Physics* p1, Collider* c1,
 		m->contacts[0].local1 = -normal * c1->radius;
 		m->contacts[0].world  = (m->contacts[0].local0 + position0).midpoint(m->contacts[0].local1 + position1);
 		m->contacts[0].penetration = penetration;
-#if 1
+#if 0
 		Log("phys","Sphere-Sphere collision between ",p0->attribute.entity->name," and ",p1->attribute.entity->name,"."
 			"\n  normal:      ", m->normal,
 			"\n  position:    ", m->contacts[0].world,
@@ -639,7 +639,7 @@ void SphereHullCollision(Physics* p0, Collider* c0, Physics* p1, Collider* c1, M
 		Render::DrawLine(m->contacts[0].position, m->contacts[0].position+(normal*penetration), Color_Yellow);
 		Render::DrawBox(mat4::TransformationMatrix(m->contacts[0].position, vec3::ZERO, vec3{.05f,.05f,.05f}), Color_Green);
 #endif
-#if 1
+#if 0
 		Log("phys","Sphere-Hull collision between ",p0->attribute.entity->name," and ",p1->attribute.entity->name,"."
 			"\n  normal:      ", m->normal,
 			"\n  position:    ", m->contacts[0].world,
