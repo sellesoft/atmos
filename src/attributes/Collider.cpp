@@ -1,5 +1,4 @@
 #include "Collider.h"
-#include "math/InertiaTensors.h"
 #include "core/model.h"
 
 Collider::Collider(const Collider& rhs){
