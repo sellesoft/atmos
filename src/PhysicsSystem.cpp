@@ -108,7 +108,7 @@ local EdgeQuerySAT HullEdgeQuerySAT(Mesh* m0, mat3& rotation0, mat4& transform0,
 	//transform local p0 into local p1 space
 	mat3 rotation = rotation0 * rotation1.Inverse();
 	mat4 transform = transform0 * transform1.Inverse();
-	vec3 m0_center = {transform.data[12], transform.data[13], transform.data[14]};
+	vec3 m0_center = transform.Translation();
 	
 	//NOTE cross all edge combinations, check if the axis makes minkowski difference face, check for penetration
 	for(MeshFace& face0 : m0->faces){ //iterate mesh1 edges
@@ -718,8 +718,7 @@ void PhysicsSystem::Update(){
 	
 	fixedAccumulator += DeshTime->deltaTime;
 	if(AtmoAdmin->simulateInEditor) fixedAccumulator = fixedDeltaTime;
-	while(fixedAccumulator >= fixedDeltaTime){
-		
+	while(fixedAccumulator - fixedDeltaTime > M_EPSILON){
 		//// broad collision detection //// (filter manifolds)
 		manifolds.clear();
 		for(Physics* p0 = AtmoAdmin->physicsArr.begin(); p0 != AtmoAdmin->physicsArr.end(); ++p0){
@@ -885,42 +884,6 @@ void PhysicsSystem::Update(){
 							if(!it->p1->staticPosition) it->p1->velocity += impulse * it->invMass1;
 							if(!it->p0->staticRotation) it->p0->rotVelocity -= it->contacts[i].local0.cross(impulse) * it->invInertia0;
 							if(!it->p1->staticRotation) it->p1->rotVelocity += it->contacts[i].local1.cross(impulse) * it->invInertia1;
-							/*
-							if(it->contacts[i].tangent0 == vec3::ZERO || it->contacts[i].normalImpulse < M_EPSILON) continue;
-							
-							//relative velocity at contact
-							f32 relVel0 = it->contacts[i].tangent0.dot(it->p1->velocity) - it->contacts[i].tangent0.dot(it->p0->velocity)
-								- it->contacts[i].tangent0CrossLocal1.dot(RADIANS(it->p1->rotVelocity)) 
-								- it->contacts[i].tangent0CrossLocal0.dot(RADIANS(it->p0->rotVelocity));
-							f32 relVel1 = it->contacts[i].tangent1.dot(it->p1->velocity) - it->contacts[i].tangent1.dot(it->p0->velocity)
-								- it->contacts[i].tangent1CrossLocal1.dot(RADIANS(it->p1->rotVelocity))
-								- it->contacts[i].tangent1CrossLocal0.dot(RADIANS(it->p0->rotVelocity));
-							
-							//compute tangent force  //TODO factor tangent speed with conveyer belts
-							f32 lambda0 = -relVel0 * it->contacts[i].tangentMass0;
-							f32 lambda1 = -relVel1 * it->contacts[i].tangentMass1;
-							
-							//clamp the accumulated impulse  //NOTE this allows solving the constraint across multiple iterations
-							f32 maxFriction = it->friction * it->contacts[i].normalImpulse;
-							f32 newImpulse0 = Clamp(it->contacts[i].tangentImpulse0 + lambda0, -maxFriction, maxFriction);
-							f32 newImpulse1 = Clamp(it->contacts[i].tangentImpulse1 + lambda1, -maxFriction, maxFriction);
-							lambda0 = newImpulse0 - it->contacts[i].tangentImpulse0;
-							lambda1 = newImpulse1 - it->contacts[i].tangentImpulse1;
-							it->contacts[i].tangentImpulse0 = newImpulse0;
-							it->contacts[i].tangentImpulse1 = newImpulse1;
-							
-							//apply contact impulse
-							vec3 impulse0 = it->contacts[i].tangent0 * lambda0;
-							vec3 impulse1 = it->contacts[i].tangent1 * lambda1;
-							if(!it->p0->staticPosition) it->p0->velocity -= impulse0 * it->invMass0;
-							if(!it->p0->staticPosition) it->p0->velocity -= impulse1 * it->invMass0;
-							if(!it->p1->staticPosition) it->p1->velocity += impulse0 * it->invMass1;
-							if(!it->p1->staticPosition) it->p1->velocity += impulse1 * it->invMass1;
-							if(!it->p0->staticRotation) it->p0->rotVelocity -= it->contacts[i].local0.cross(impulse0) * it->invInertia0;
-							if(!it->p0->staticRotation) it->p0->rotVelocity -= it->contacts[i].local0.cross(impulse1) * it->invInertia0;
-							if(!it->p1->staticRotation) it->p1->rotVelocity += it->contacts[i].local1.cross(impulse0) * it->invInertia1;
-							if(!it->p1->staticRotation) it->p1->rotVelocity += it->contacts[i].local1.cross(impulse1) * it->invInertia1;
-							*/
 						}
 					}else{
 						//TODO block solve with multiple contact points

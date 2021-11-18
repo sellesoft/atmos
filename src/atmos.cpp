@@ -12,6 +12,8 @@ ____{} or something
 
 Entity TODOs
 ------------
+add special transform inverse matrix calculation since it can be alot faster than generalized
+____https://lxjk.github.io/2017/09/03/Fast-4x4-Matrix-Inverse-with-SSE-SIMD-Explained.html
 
 Controller TODOs
 ----------------
@@ -94,35 +96,6 @@ local Admin admin; Admin* g_admin = &admin;
 int main() {
 	//init deshi
 	deshi::init();
-	
-	/*
-	//SSE testing
-	{
-		__m128 var0 = FillSSE(5);                //var0 = 5, 5, 5, 5
-		__m128 var1 = FillSSE(-5.0f);            //var1 = -5, -5, -5, -5
-		var0 = NegateSSE(var0);                  //var0 = -5, -5, -5, -5
-		b32 test0 = EpsilonEqualSSE(var0, var1); //test0 = true
-		Assert(test0);
-		var0 = AbsoluteSSE(var0);                //var0 = 5, 5, 5, 5
-		vec4 var2{2, 2, 2, 2};                   //var2 = 2, 2, 2, 2
-		vec4 var3(var2);                         //var3 = 2, 2, 2, 2
-		vec4 var4(&var2.x);                      //var4 = 2, 2, 2, 2
-		b32 test1 = (var2 == var3);              //test1 = true
-		Assert(test0);
-		var3.set(5, 5, 5, 5);                    //var3 = 5, 5, 5, 5
-		var3 *= 2.0f;                            //var3 = 10, 10, 10, 10
-		var4 = var3 / var2;                      //var4 = 5, 5, 5, 5
-		var4 -= vec4{1, 1, 1, 1};                //var4 = 4, 4, 4, 4
-		var4 = -var4;                            //var4 = -4, -4, -4, -4
-		var4 = var4.absV();                      //var4 = 4, 4, 4, 4
-		f32 var5 = var4.dot(var4);               //var5 = 64
-		Assert(EpsilonEqual(var5, 64.0f));
-		f32 var6 = Sqrt(var5);                   //var6 = 8
-		Assert(EpsilonEqual(var6, 8.0f));
-		var6 = Rsqrt(var5);                      //var6 = 0.125
-		Assert(abs(var6 - 0.125f) < 10*M_EPSILON);
-	}
-	*/
 	
 	//init atmos
 	AddAtmosCommands();
