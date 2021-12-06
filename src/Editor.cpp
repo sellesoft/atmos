@@ -503,20 +503,17 @@ void EntitiesTab(){
 	//TODO(delle) repair this to work with array
 	if(selected_entities.count && DeshInput->KeyPressed(Key::F2)){
 		rename_ent = true;
-		DeshConsole->IMGUI_KEY_CAPTURE = true;
 		//if(selected_entities.size > 1) selected_entities.remove(selected_entities.end());
 		memcpy(rename_buffer, selected_entities[0]->name.str, selected_entities[0]->name.count*sizeof(char));
 	}
 	//submit renaming entity
 	if(rename_ent && DeshInput->KeyPressed(Key::ENTER)){
 		rename_ent = false;
-		DeshConsole->IMGUI_KEY_CAPTURE = false;
 		selected_entities[0]->name = rename_buffer;
 	}
 	//stop renaming entity
 	if(rename_ent && DeshInput->KeyPressed(Key::ESCAPE)){
 		rename_ent = false;
-		DeshConsole->IMGUI_KEY_CAPTURE = false;
 	}
 	//delete selected entities
 	if(selected_entities.count && DeshInput->KeyPressed(Key::DELETE)){
@@ -584,7 +581,6 @@ void EntitiesTab(){
 							}
 						}
 						rename_ent = false;
-						DeshConsole->IMGUI_KEY_CAPTURE = false;
 					}
 					
 					//// name text ////
@@ -1087,19 +1083,16 @@ void MeshesTab(){
 	//start renaming mesh
 	if(selected && DeshInput->KeyPressed(Key::F2)){
 		rename_mesh = true;
-		DeshConsole->IMGUI_KEY_CAPTURE = true;
 		cpystr(rename_buffer, selected->name, DESHI_NAME_SIZE);
 	}
 	//submit renaming mesh
 	if(selected && rename_mesh && DeshInput->KeyPressed(Key::ENTER)){
 		rename_mesh = false;
-		DeshConsole->IMGUI_KEY_CAPTURE = false;
 		cpystr(selected->name, rename_buffer, DESHI_NAME_SIZE);
 	}
 	//stop renaming mesh
 	if(rename_mesh && DeshInput->KeyPressed(Key::ESCAPE)){
 		rename_mesh = false;
-		DeshConsole->IMGUI_KEY_CAPTURE = false;
 	}
 	//delete mesh
 	if(selected && DeshInput->KeyPressed(Key::DELETE)){
@@ -1126,7 +1119,6 @@ void MeshesTab(){
 				if(ImGui::Selectable(label, sel_mesh_idx == mesh_idx, ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowItemOverlap)){
 					sel_mesh_idx = (ImGui::GetIO().KeyCtrl) ? -1 : mesh_idx; //deselect if CTRL held
 					rename_mesh = false;
-					DeshConsole->IMGUI_KEY_CAPTURE = false;
 					sel_vertex_idx = -1;
 					sel_triangle_idx = -1;
 					sel_face_idx = -1;
@@ -1523,19 +1515,16 @@ void MaterialsTab(){
 	//start renaming material
 	if(selected && DeshInput->KeyPressed(Key::F2)){
 		rename_mat = true;
-		DeshConsole->IMGUI_KEY_CAPTURE = true;
 		cpystr(rename_buffer, selected->name, DESHI_NAME_SIZE);
 	}
 	//submit renaming material
 	if(selected && rename_mat && DeshInput->KeyPressed(Key::ENTER)){
 		rename_mat = false;
-		DeshConsole->IMGUI_KEY_CAPTURE = false;
 		cpystr(selected->name, rename_buffer, DESHI_NAME_SIZE);
 	}
 	//stop renaming material
 	if(rename_mat && DeshInput->KeyPressed(Key::ESCAPE)){
 		rename_mat = false;
-		DeshConsole->IMGUI_KEY_CAPTURE = false;
 	}
 	//delete material
 	if(selected && DeshInput->KeyPressed(Key::DELETE)){
@@ -1563,7 +1552,6 @@ void MaterialsTab(){
 				if(ImGui::Selectable(label, sel_mat_idx == mat_idx, ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowItemOverlap)){
 					sel_mat_idx = (ImGui::GetIO().KeyCtrl) ? -1 : mat_idx; //deselect if CTRL held
 					rename_mat = false;
-					DeshConsole->IMGUI_KEY_CAPTURE = false;
 				}
 				
 				//// name text ////
@@ -1680,19 +1668,16 @@ void ModelsTab(){
 	//start renaming model
 	if(selected && DeshInput->KeyPressed(Key::F2)){
 		rename_model = true;
-		DeshConsole->IMGUI_KEY_CAPTURE = true;
 		cpystr(rename_buffer, selected->name, DESHI_NAME_SIZE);
 	}
 	//submit renaming model
 	if(selected && rename_model && DeshInput->KeyPressed(Key::ENTER)){
 		rename_model = false;
-		DeshConsole->IMGUI_KEY_CAPTURE = false;
 		cpystr(selected->name, rename_buffer, DESHI_NAME_SIZE);
 	}
 	//stop renaming model
 	if(rename_model && DeshInput->KeyPressed(Key::ESCAPE)){
 		rename_model = false;
-		DeshConsole->IMGUI_KEY_CAPTURE = false;
 	}
 	//delete model
 	if(selected && DeshInput->KeyPressed(Key::DELETE)){
@@ -1720,7 +1705,6 @@ void ModelsTab(){
 				if(ImGui::Selectable(label, sel_model_idx == model_idx, ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowItemOverlap)){
 					sel_model_idx = (ImGui::GetIO().KeyCtrl) ? -1 : model_idx; //deselect if CTRL held
 					rename_model = false;
-					DeshConsole->IMGUI_KEY_CAPTURE = false;
 				}
 				
 				//// name text ////
@@ -1809,7 +1793,6 @@ void ModelsTab(){
 				if(ImGui::Selectable(label, sel_batch_idx == batch_idx, ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowItemOverlap)){
 					sel_batch_idx = (ImGui::GetIO().KeyCtrl) ? -1 : batch_idx; //deselect if CTRL held
 					rename_model = false;
-					DeshConsole->IMGUI_KEY_CAPTURE = false;
 				}
 				
 				//// name text ////
@@ -2199,8 +2182,9 @@ void DebugBar(){
 			ImGui::PopStyleColor();
 		}
 		
-		//Middle Empty ImGui::Separator (alert box)
-		if(ImGui::TableNextColumn()){
+		//Middle Empty (alert box) //TODO show last error
+		/*
+if(ImGui::TableNextColumn()){
 			if(DeshConsole->show_alert){
 				f32 flicker = (sinf(M_2PI * DeshTotalTime + cosf(M_2PI * DeshTotalTime)) + 1) / 2;
 				color col_bg = DeshConsole->alert_color * flicker;    col_bg.a = 255;
@@ -2221,6 +2205,7 @@ void DebugBar(){
 				ImGui::PopStyleColor();
 			}
 		}
+*/
 		
 		//Show Time
 		if(ImGui::TableNextColumn()){
@@ -2233,7 +2218,6 @@ void DebugBar(){
 		//Context menu for toggling parts of the bar
 		if(ImGui::IsMouseReleased(1) && ImGui::IsWindowHovered()) ImGui::OpenPopup("Context");
 		if(ImGui::BeginPopup("Context")){
-			DeshConsole->IMGUI_MOUSE_CAPTURE = true;
 			ImGui::Separator();
 			if(ImGui::Button("Open Debug Menu")){
 				//showDebugTools = true;
@@ -2320,9 +2304,9 @@ void ShowWorldAxis(){
 	
 	vec2 offset = vec2(DeshWindow->width - 50, DeshWindow->height - debugbarheight - 50);
 	
-	Render::DrawLineUI(offset, spx + offset, 1, Color_Red);
-	Render::DrawLineUI(offset, spy + offset, 1, Color_Green);
-	Render::DrawLineUI(offset, spz + offset, 1, Color_Blue);
+	Render::DrawLine2D(offset, spx + offset, 1, Color_Red);
+	Render::DrawLine2D(offset, spy + offset, 1, Color_Green);
+	Render::DrawLine2D(offset, spz + offset, 1, Color_Blue);
 }
 
 //////////////////////////@@
@@ -2947,7 +2931,6 @@ void Editor::Update(){
 	}
 	
 	//// interface ////
-	if(DeshInput->KeyPressed(AtmoAdmin->controller.toggleConsole))   DeshConsole->dispcon = !DeshConsole->dispcon;
 	if(DeshInput->KeyPressed(AtmoAdmin->controller.toggleDebugMenu)) showInspector = !showInspector;
 	if(DeshInput->KeyPressed(AtmoAdmin->controller.toggleDebugBar))  showDebugBar = !showDebugBar;
 	if(DeshInput->KeyPressed(AtmoAdmin->controller.toggleMenuBar))   showMenuBar = !showMenuBar;

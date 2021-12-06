@@ -78,14 +78,16 @@ void UpdateMenu(){
 	f32 stride = option_font->max_height * 1.5f;
 	
 	text = cstr_lit("Resume");
-	UI::Text(text.str, {center_x-(UI::CalcTextSize(text).x/2.f),cursor_y}, 
-			 (active_option == MenuOption_Resume) ? selected_color : regular_color);
+	UI::PushColor(UIStyleCol_Text, (active_option == MenuOption_Resume) ? selected_color : regular_color);
+	UI::Text(text.str, {center_x-(UI::CalcTextSize(text).x/2.f),cursor_y});
+	UI::PopColor();
 	cursor_y += stride;
 	
 	text = cstr_lit("Quit");
 	if(ask_for_quit_confirmation) text = cstr_lit("Quit? Are you sure?");
-	UI::Text(text.str, {center_x-(UI::CalcTextSize(text).x/2.f),cursor_y}, 
-			 (active_option == MenuOption_Quit) ? selected_color : regular_color);
+	UI::PushColor(UIStyleCol_Text, (active_option == MenuOption_Quit) ? selected_color : regular_color);
+	UI::Text(text.str, {center_x-(UI::CalcTextSize(text).x/2.f),cursor_y});
+	UI::PopColor();
 	cursor_y += stride;
 	
 	UI::End();
