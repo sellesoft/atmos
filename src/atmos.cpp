@@ -79,6 +79,7 @@ binary file saving/loading
 Bug Board       //NOTE mark these with a last-known active date (M/D/Y)
 ---------
 (10/18/21) entities renamed in the editor often get their name scuffed when saving them
+(12/08/21) phys_demo isnt working (physics positions are wrong on load)
 
 */
 
@@ -96,6 +97,7 @@ local Admin admin; Admin* g_admin = &admin;
 int main() {
 	//init deshi
 	deshi::init();
+	Memory::Init(Gigabytes(3), Gigabytes(1));
 	
 	//init atmos
 	AddAtmosCommands();
