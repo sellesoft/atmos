@@ -2,16 +2,20 @@
 
 Admin TODOs
 -----------
-reimplement timers
+reimplement system timers
 save gravity with levels
+change entity and admin LoadTEXT to be character based rather than std::string based
+pool/arena components and entities for better performance
 
 Attribute TODOs
 ---------------
+reimplement several missing attributes (audio, light, player, etc)
 once we reimplement saving/loading, stop using big ass constructors to load everything into an object and just use
 ____{} or something
 
 Entity TODOs
 ------------
+rework and simplify entity creation so there is a distinction between development and gameplay creation
 add special transform inverse matrix calculation since it can be alot faster than generalized
 ____https://lxjk.github.io/2017/09/03/Fast-4x4-Matrix-Inverse-with-SSE-SIMD-Explained.html
 
@@ -20,6 +24,7 @@ Controller TODOs
 
  Editor TODOs
 ------------
+reimplement editor with UI
 rework undoing (physics isnt updated by it currently)
 safety check on renaming things so no things have same name
 fix mesh viewing bools mixing?
@@ -66,14 +71,7 @@ add ability for colliders to modify physics in that space (lower gravity in fiel
 
 Ungrouped TODOs
 ---------------
-fully reimplement admin
-reimplement editor
-reimplement several missing attributes (audio, light, player, etc)
-reimplement physics system
 create a demo level
-rework and simplify entity creation so there is a distinction between development and gameplay creation
-change entity and admin LoadTEXT to be character based rather than std::string based
-pool/arena components and entities for better performance
 binary file saving/loading
 
 Bug Board       //NOTE mark these with a last-known active date (M/D/Y)
@@ -84,30 +82,54 @@ Bug Board       //NOTE mark these with a last-known active date (M/D/Y)
 */
 
 #include "deshi.h"
+#include "defines.h"
+#include "core/memory.h"
+#include "core/assets.h"
+#include "core/console.h"
+#include "core/console2.h"
+#include "core/logging.h"
+#include "core/imgui.h"
+#include "core/camera.h"
+#include "core/input.h"
+#include "core/renderer.h"
+#include "core/time.h"
+#include "core/ui.h"
+#include "core/window.h"
+#include "core/storage.h"
 #include "core/commands.h"
 
 #define ATMOS_IMPLEMENTATION
 #include "Admin.h"
 #include "menu.h"
 #include "atmos_commands.cpp"
-//#include "menu.cpp"
 
 local Admin admin; Admin* g_admin = &admin;
 
-int main() {
+int main(){
 	//init deshi
-	deshi::init();
+	Assets::enforceDirectories();
 	Memory::Init(Gigabytes(3), Gigabytes(1));
+	Console2::Init();
+	Logging::Init(5);
+	DeshTime->Init();
+	DeshWindow->Init("atmos", 1280, 720);
+	DeshConsole->Init();
+	Render::Init();
+	Storage::Init(Megabytes(128));
+	DeshiImGui::Init();
+	UI::Init();
+	Cmd::Init();
+	DeshWindow->ShowWindow();
 	
 	//init atmos
 	AddAtmosCommands();
 	AtmoAdmin->Init();
 	
-	TIMER_START(t_d); TIMER_START(t_f);
-	while (!deshi::shouldClose()) {
+	TIMER_START(t_f);
+	while(!DeshWindow->ShouldClose()){
+		DeshWindow-> Update();
 		DeshiImGui::NewFrame();                    //place imgui calls after this
 		DeshTime->   Update();
-		DeshWindow-> Update();
 	    DeshInput->  Update();
 		AtmoAdmin->  Update();
 		DeshConsole->Update(); Console2::Update();
@@ -118,6 +140,13 @@ int main() {
 		DeshTime->frameTime = TIMER_END(t_f); TIMER_RESET(t_f);
 	}
 	
-	deshi::cleanup();
+	//cleanup atmos
 	AtmoAdmin->Cleanup();
+	
+	//cleanup deshi
+	DeshiImGui::Cleanup();
+	Render::Cleanup();
+	DeshWindow->Cleanup();
+	DeshConsole->Cleanup(); Console2::Cleanup();
+	Logging::Cleanup();
 }
