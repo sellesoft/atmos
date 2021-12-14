@@ -404,7 +404,7 @@ local void CutEntities(){
 
 local void CopyEntities(){
 	copied_entities.clear();
-	copied_entities.add(selected_entities);
+	copied_entities.add_array(selected_entities);
 }
 
 local void PasteEntities(){
