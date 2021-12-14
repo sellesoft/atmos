@@ -94,11 +94,6 @@ void Admin::Reset(){
 	physicsArr.clear();
 	modelArr.clear();
 	interpTransformArr.clear();
-	
-	//NOTE temp reserves before we arena them so their pointers dont change
-	physicsArr.reserve(1024);
-	modelArr.reserve(1024);
-	interpTransformArr.reserve(1024);
 }
 
 void Admin::Cleanup(){

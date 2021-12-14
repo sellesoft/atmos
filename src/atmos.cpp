@@ -71,6 +71,7 @@ add ability for colliders to modify physics in that space (lower gravity in fiel
 
 Ungrouped TODOs
 ---------------
+add Transform::ZERO and change usages of default constructor
 create a demo level
 binary file saving/loading
 
@@ -81,7 +82,6 @@ Bug Board       //NOTE mark these with a last-known active date (M/D/Y)
 
 */
 
-#include "deshi.h"
 #include "defines.h"
 #include "core/memory.h"
 #include "core/assets.h"
@@ -115,7 +115,7 @@ int main(){
 	DeshWindow->Init("atmos", 1280, 720);
 	DeshConsole->Init();
 	Render::Init();
-	Storage::Init(Megabytes(128));
+	Storage::Init();
 	DeshiImGui::Init();
 	UI::Init();
 	Cmd::Init();
