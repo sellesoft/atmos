@@ -83,6 +83,16 @@ local f32 fontsize = 0;
 
 //functions to simplify the usage of our DebugLayer
 namespace ImGui {
+	
+	static ImVec4 ColorToImVec4(color _color) {
+		return ImVec4((float)_color.r / 255.0f, (float)_color.g / 255.0f, (float)_color.b / 255.0f, _color.a / 255.0f);
+	}
+	
+	static ImVec2 vec2ToImVec2(vec2 v){
+		return ImVec2(v.x, v.y);
+	}
+	
+	
 	void BeginDebugLayer(){
 		//ImGui::SetNextWindowSize(ImVec2(DeshWindow->width, DeshWindow->height));
 		ImGui::SetNextWindowPos(ImVec2(0, 0));
@@ -98,7 +108,6 @@ namespace ImGui {
 	
 	void DebugDrawText(const char* text, vec2 pos, color color = Color_White){
 		ImGui::SetCursorPos(ImGui::vec2ToImVec2(pos));
-		
 		ImGui::PushStyleColor(ImGuiCol_Text, ImGui::ColorToImVec4(color));
 		ImGui::TextEx(text);
 		ImGui::PopStyleColor();
@@ -120,6 +129,59 @@ namespace ImGui {
 	void AddPadding(float x){
 		ImGui::SetCursorPosX(ImGui::GetCursorPosX() + x);
 	}
+	
+	static void HelpMarker(const char* symbol, const char* desc){
+		ImGui::TextDisabled(symbol);
+		if (ImGui::IsItemHovered()){
+			ImGui::BeginTooltip();
+			ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+			ImGui::TextUnformatted(desc);
+			ImGui::PopTextWrapPos();
+			ImGui::EndTooltip();
+		}
+	}
+	
+	static void TextCentered(const char* text){
+		size_t text_length = strlen(text);
+		ImGui::SetCursorPosX((ImGui::GetWindowWidth() - ImGui::CalcTextSize(text, text+text_length).x) / 2.f);
+		ImGui::TextEx(text, text+text_length);
+	}
+	
+	static void CopyButton(const char* text) {
+		if(ImGui::Button("Copy")){ ImGui::LogToClipboard(); ImGui::LogText(text); ImGui::LogFinish(); }
+	}
+	
+	static bool Inputvec2(const char* id, vec2* vecPtr, bool inputUpdate = false) {
+		ImGui::SetNextItemWidth(-FLT_MIN);
+		if(inputUpdate) {
+			return ImGui::InputFloat2(id, (float*)vecPtr); 
+		} else {
+			return ImGui::InputFloat2(id, (float*)vecPtr, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue);
+		}
+	}
+	
+	static bool Inputvec3(const char* id, vec3* vecPtr, bool inputUpdate = false) {
+		ImGui::SetNextItemWidth(-FLT_MIN);
+		if(inputUpdate) {
+			return ImGui::InputFloat3(id, (float*)vecPtr); 
+		} else {
+			return ImGui::InputFloat3(id, (float*)vecPtr, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue); 
+		}
+	}
+	
+	static bool Inputvec4(const char* id, vec4* vecPtr, bool inputUpdate = false) {
+		ImGui::SetNextItemWidth(-FLT_MIN);
+		if(inputUpdate) {
+			return ImGui::InputFloat4(id, (float*)vecPtr);
+		} else {
+			return ImGui::InputFloat4(id, (float*)vecPtr, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue); 
+		}
+	}
+	
+	static bool SliderUInt32(const char* label, u32* v, int v_min, int v_max, const char* format = "%d", ImGuiSliderFlags flags = 0){
+		return SliderScalar(label, ImGuiDataType_U32, v, &v_min, &v_max, format, flags);
+	}
+	
 } //namespace ImGui
 
 #define BoolButton(value, tag) ImGui::Button((value) ? "True##"tag : "False##"tag, ImVec2(-FLT_MIN, 0))
