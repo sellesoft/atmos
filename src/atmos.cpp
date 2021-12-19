@@ -136,7 +136,7 @@ int main(){
 		UI::         Update();
 		Render::     Update();                     //place imgui calls before this
 		AtmoAdmin->  PostRenderUpdate();
-		
+		Memory::     Update();
 		DeshTime->frameTime = TIMER_END(t_f); TIMER_RESET(t_f);
 	}
 	
