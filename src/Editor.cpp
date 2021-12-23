@@ -10,7 +10,7 @@
 #include "attributes/ModelInstance.h"
 #include "core/imgui.h"
 #include "core/io.h"
-#include "core/logging.h"
+#include "core/logger.h"
 #include "core/assets.h"
 #include "core/console.h"
 #include "core/renderer.h"
@@ -679,7 +679,7 @@ void EntitiesTab(){
 	if(ImGui::Button("New Entity")){
 		Entity* ent = 0;
 		
-		string ent_name = TOSTRING(presets[current_preset], AtmoAdmin->entities.count);
+		string ent_name = toStr(presets[current_preset], AtmoAdmin->entities.count);
 		switch (current_preset){
 			case(0):default:{ //Empty
 				LogE("editor","Creating empty entities not setup yet.");
@@ -1281,11 +1281,11 @@ void MeshesTab(){
 		ImGui::TextEx("Stats"); ImGui::SameLine();
 		int planar_vertex_count = 0;
 		forI(selected->faceCount){ planar_vertex_count += selected->faces[i].vertexCount; }
-		ImGui::HelpMarker("(+)", TOSTRING("Vertex   Count: ", selected->vertexCount,
-										  "\nIndex    Count: ", selected->indexCount,
-										  "\nTriangle Count: ", selected->triangleCount,
-										  "\nFace     Count: ", selected->faceCount,
-										  "\nPlanar Vertex Count: ", planar_vertex_count).str);
+		ImGui::HelpMarker("(+)", toStr("Vertex   Count: ", selected->vertexCount,
+									   "\nIndex    Count: ", selected->indexCount,
+									   "\nTriangle Count: ", selected->triangleCount,
+									   "\nFace     Count: ", selected->faceCount,
+									   "\nPlanar Vertex Count: ", planar_vertex_count).str);
 		ImGui::TextEx("Draw Scale"); ImGui::SameLine(); ImGui::SetNextItemWidth(-1);
 		ImGui::InputFloat("##mi_scale", &scale, 0, 0);
 		ImGui::TextEx("Normal Scale"); ImGui::SameLine(); ImGui::SetNextItemWidth(-1);
@@ -1375,7 +1375,7 @@ void MeshesTab(){
 		if(sel_vertex_idx != -1){
 			Mesh::Vertex* sel_vertex = &selected->vertexes[sel_vertex_idx];
 			Render::DrawBoxFilled(mat4::TransformationMatrix(sel_vertex->pos * scale, vec3::ZERO, vec3{ .05f,.05f,.05f }), selected_color);
-			if(vertex_indexes) ImGui::DebugDrawText3(TOSTRING("V", sel_vertex_idx).str, sel_vertex->pos * scale, text_color, vec2{ -5,-5 });
+			if(vertex_indexes) ImGui::DebugDrawText3(toStr("V", sel_vertex_idx).str, sel_vertex->pos * scale, text_color, vec2{ -5,-5 });
 			if(vertex_normals) Render::DrawLine(sel_vertex->pos * scale, sel_vertex->pos * scale + sel_vertex->normal * normal_scale, selected_color);
 		}
 		if(vertex_all){
@@ -1383,7 +1383,7 @@ void MeshesTab(){
 				if(i == sel_vertex_idx) continue;
 				Mesh::Vertex* sel_vertex = &selected->vertexes[i];
 				if(vertex_draw) Render::DrawBoxFilled(mat4::TransformationMatrix(sel_vertex->pos * scale, vec3::ZERO, vec3{ .03f,.03f,.03f }), vertex_color);
-				if(vertex_indexes) ImGui::DebugDrawText3(TOSTRING("V", i).str, sel_vertex->pos * scale, text_color, vec2{ -5,-5 });
+				if(vertex_indexes) ImGui::DebugDrawText3(toStr("V", i).str, sel_vertex->pos * scale, text_color, vec2{ -5,-5 });
 				if(vertex_normals) Render::DrawLine(sel_vertex->pos * scale, sel_vertex->pos * scale + sel_vertex->normal * normal_scale, vertex_color);
 			}
 		}
@@ -1393,16 +1393,16 @@ void MeshesTab(){
 			Mesh::Triangle* sel_triangle = &selected->triangles[sel_triangle_idx];
 			vec3 tri_center = MeshTriangleMidpoint(sel_triangle) * scale;
 			Render::DrawTriangleFilled(sel_triangle->p[0] * scale, sel_triangle->p[1] * scale, sel_triangle->p[2] * scale, selected_color);
-			if(triangle_indexes) ImGui::DebugDrawText3(TOSTRING("T", sel_triangle_idx).str, tri_center, text_color, vec2{ -5,-5 });
+			if(triangle_indexes) ImGui::DebugDrawText3(toStr("T", sel_triangle_idx).str, tri_center, text_color, vec2{ -5,-5 });
 			if(triangle_centers) Render::DrawBoxFilled(mat4::TransformationMatrix(tri_center, vec3::ZERO, vec3{ .05f,.05f,.05f }), selected_color);
 			if(triangle_normals) Render::DrawLine(tri_center, tri_center + sel_triangle->normal * normal_scale, selected_color);
 			forX(tni, sel_triangle->neighbors.count){
 				Mesh::Triangle* tri_nei = &selected->triangles[sel_triangle->neighbors[tni]];
-				if(trinei_indexes) ImGui::DebugDrawText3(TOSTRING("TN", tni).str, MeshTriangleMidpoint(tri_nei) * scale, text_color, vec2{ 10,10 });
+				if(trinei_indexes) ImGui::DebugDrawText3(toStr("TN", tni).str, MeshTriangleMidpoint(tri_nei) * scale, text_color, vec2{ 10,10 });
 				if(triangle_neighbors) Render::DrawTriangleFilled(tri_nei->p[0] * scale, tri_nei->p[1] * scale, tri_nei->p[2] * scale, neighbor_color);
 				int e0 = (sel_triangle->edges[tni] == 0) ? 0 : (sel_triangle->edges[tni] == 1) ? 1 : 2;
 				int e1 = (sel_triangle->edges[tni] == 0) ? 1 : (sel_triangle->edges[tni] == 1) ? 2 : 0;
-				if(triedge_indexes) ImGui::DebugDrawText3(TOSTRING("TE", sel_triangle->edges[tni]).str, Math::LineMidpoint(sel_triangle->p[e0], sel_triangle->p[e1]) * scale, text_color, vec2{ -5,-5 });
+				if(triedge_indexes) ImGui::DebugDrawText3(toStr("TE", sel_triangle->edges[tni]).str, Math::LineMidpoint(sel_triangle->p[e0], sel_triangle->p[e1]) * scale, text_color, vec2{ -5,-5 });
 			}
 		}
 		if(triangle_all){
@@ -1411,7 +1411,7 @@ void MeshesTab(){
 				Mesh::Triangle* sel_triangle = &selected->triangles[i];
 				vec3 tri_center = MeshTriangleMidpoint(sel_triangle) * scale;
 				if(triangle_draw) Render::DrawTriangle(sel_triangle->p[0] * scale, sel_triangle->p[1] * scale, sel_triangle->p[2] * scale, triangle_color);
-				if(triangle_indexes) ImGui::DebugDrawText3(TOSTRING("T", i).str, tri_center, text_color, vec2{ -5,-5 });
+				if(triangle_indexes) ImGui::DebugDrawText3(toStr("T", i).str, tri_center, text_color, vec2{ -5,-5 });
 				if(triangle_centers) Render::DrawBoxFilled(mat4::TransformationMatrix(tri_center, vec3::ZERO, vec3{ .03f,.03f,.03f }), triangle_color);
 				if(triangle_normals) Render::DrawLine(tri_center, tri_center + sel_triangle->normal * normal_scale, triangle_color);
 			}
@@ -1420,29 +1420,29 @@ void MeshesTab(){
 		//// faces ////
 		if(sel_face_idx != -1){
 			Mesh::Face* sel_face = &selected->faces[sel_face_idx];
-			if(face_indexes) ImGui::DebugDrawText3(TOSTRING("F", sel_face_idx).str, sel_face->center * scale, text_color, vec2{ -5,-5 });
+			if(face_indexes) ImGui::DebugDrawText3(toStr("F", sel_face_idx).str, sel_face->center * scale, text_color, vec2{ -5,-5 });
 			if(face_centers) Render::DrawBoxFilled(mat4::TransformationMatrix(sel_face->center * scale, vec3::ZERO, vec3{ .05f,.05f,.05f }), selected_color);
 			if(face_normals) Render::DrawLine(sel_face->center * scale, sel_face->center * scale + sel_face->normal * normal_scale, selected_color);
 			forX(fvi, sel_face->vertexCount){
 				MeshVertex* fv = &selected->vertexes[sel_face->vertexes[fvi]];
 				if(face_vertexes) Render::DrawBoxFilled(mat4::TransformationMatrix(fv->pos * scale, vec3::ZERO, vec3{ .05f,.05f,.05f }), edge_color);
-				if(face_vertex_indexes) ImGui::DebugDrawText3(TOSTRING("FV", fvi).str, fv->pos * scale, text_color, vec2{ -5,-5 });
+				if(face_vertex_indexes) ImGui::DebugDrawText3(toStr("FV", fvi).str, fv->pos * scale, text_color, vec2{ -5,-5 });
 			}
 			forX(fvi, sel_face->outerVertexCount){
 				MeshVertex* fv = &selected->vertexes[sel_face->outerVertexes[fvi]];
 				if(face_outer_vertexes) Render::DrawBoxFilled(mat4::TransformationMatrix(fv->pos * scale, vec3::ZERO, vec3{ .05f,.05f,.05f }), edge_color);
-				if(face_outvertex_indexes) ImGui::DebugDrawText3(TOSTRING("FOV", fvi).str, fv->pos * scale, text_color, vec2{ 10,10 });
+				if(face_outvertex_indexes) ImGui::DebugDrawText3(toStr("FOV", fvi).str, fv->pos * scale, text_color, vec2{ 10,10 });
 			}
 			forX(fti, sel_face->triangleCount){
 				MeshTriangle* ft = &selected->triangles[sel_face->triangles[fti]];
 				Render::DrawTriangleFilled(ft->p[0] * scale, ft->p[1] * scale, ft->p[2] * scale, selected_color);
 				if(face_triangles) Render::DrawTriangle(ft->p[0] * scale, ft->p[1] * scale, ft->p[2] * scale, text_color);
-				if(face_triangle_indexes) ImGui::DebugDrawText3(TOSTRING("FT", fti).str, MeshTriangleMidpoint(ft) * scale, text_color, vec2{ -10,-10 });
+				if(face_triangle_indexes) ImGui::DebugDrawText3(toStr("FT", fti).str, MeshTriangleMidpoint(ft) * scale, text_color, vec2{ -10,-10 });
 			}
 			forX(fnti, sel_face->neighborTriangleCount){
 				MeshTriangle* ft = &selected->triangles[sel_face->triangleNeighbors[fnti]];
 				if(face_tri_neighbors) Render::DrawTriangleFilled(ft->p[0] * scale, ft->p[1] * scale, ft->p[2] * scale, neighbor_color);
-				if(face_trinei_indexes) ImGui::DebugDrawText3(TOSTRING("FTN", fnti).str, MeshTriangleMidpoint(ft) * scale, text_color, vec2{ 10,10 });
+				if(face_trinei_indexes) ImGui::DebugDrawText3(toStr("FTN", fnti).str, MeshTriangleMidpoint(ft) * scale, text_color, vec2{ 10,10 });
 			}
 			forX(fnfi, sel_face->neighborFaceCount){
 				MeshFace* ff = &selected->faces[sel_face->faceNeighbors[fnfi]];
@@ -1452,7 +1452,7 @@ void MeshesTab(){
 						Render::DrawTriangleFilled(fft->p[0] * scale, fft->p[1] * scale, fft->p[2] * scale, edge_color);
 					}
 				}
-				if(face_facenei_indexes) ImGui::DebugDrawText3(TOSTRING("FFN", fnfi).str, ff->center * scale, text_color, vec2{ 10,10 });
+				if(face_facenei_indexes) ImGui::DebugDrawText3(toStr("FFN", fnfi).str, ff->center * scale, text_color, vec2{ 10,10 });
 			}
 		}
 		if(face_all){
@@ -1469,7 +1469,7 @@ void MeshesTab(){
 						Render::DrawTriangle(ft->p[0] * scale - off, ft->p[1] * scale - off, ft->p[2] * scale - off, face_color);
 					}
 				}
-				if(face_indexes) ImGui::DebugDrawText3(TOSTRING("F", fi).str, sel_face->center * scale, text_color, vec2{ -5,-5 });
+				if(face_indexes) ImGui::DebugDrawText3(toStr("F", fi).str, sel_face->center * scale, text_color, vec2{ -5,-5 });
 				if(face_centers) Render::DrawBoxFilled(mat4::TransformationMatrix(sel_face->center * scale, vec3::ZERO, vec3{ .05f,.05f,.05f }), face_color);
 				if(face_normals) Render::DrawLine(sel_face->center * scale, sel_face->center * scale + sel_face->normal * normal_scale, face_color);
 			}
@@ -1650,7 +1650,7 @@ void MaterialsTab(){
 	//// create new material button ////
 	ImGui::SetCursorPosX(ImGui::GetWindowWidth() * 0.025); //half of 1 - 0.95
 	if(ImGui::Button("Create New Material", ImVec2(ImGui::GetWindowWidth() * 0.95, 0.0f))){
-		auto new_mat = Storage::CreateMaterial(TOSTRING("material", Storage::MaterialCount()).str, Shader_PBR);
+		auto new_mat = Storage::CreateMaterial(toStr("material", Storage::MaterialCount()).str, Shader_PBR);
 		sel_mat_idx = new_mat.first;
 		selected = new_mat.second;
 	}
@@ -1691,8 +1691,8 @@ void MaterialsTab(){
 			//TODO(Ui) add texture image previews
 			case Shader_PBR:default: {
 				forX(mti, selected->textures.count){
-					ImGui::TextEx(TOSTRING("Texture ", mti).str); ImGui::SameLine(); ImGui::SetNextItemWidth(-1);
-					if(ImGui::BeginCombo(TOSTRING("##mat_texture_combo", mti).str, Storage::TextureName(selected->textures[mti]))){
+					ImGui::TextEx(toStr("Texture ", mti).str); ImGui::SameLine(); ImGui::SetNextItemWidth(-1);
+					if(ImGui::BeginCombo(toStr("##mat_texture_combo", mti).str, Storage::TextureName(selected->textures[mti]))){
 						dir_textures = Assets::iterateDirectory(Assets::dirTextures());
 						forX(ti, dir_textures.count){
 							if(ImGui::Selectable(dir_textures[ti].str, strcmp(Storage::TextureName(selected->textures[mti]), dir_textures[ti].str) == 0)){
@@ -2256,7 +2256,7 @@ if(ImGui::TableNextColumn()){
 				
 				string str6;
 				if(DeshConsole->alert_count > 1){
-					str6 = TOSTRING("(", DeshConsole->alert_count, ") ", string(DeshConsole->alert_message.c_str()));
+					str6 = toStr("(", DeshConsole->alert_count, ") ", string(DeshConsole->alert_message.c_str()));
 				}else{
 					str6 = string(DeshConsole->alert_message.c_str());
 				}
@@ -2714,7 +2714,7 @@ local b32 TransformGizmo(){
 				f32  ratio = dist / vec3(DeshWindow->width, 0).mag();
 				f32  angle = 360.f*ratio;
 				
-				sel->transform.rotation = DEGREES(mat4::AxisAngleRotationMatrix(angle, vec4((sel_pos - cam->position).normalized(), 0)).Rotation());
+				sel->transform.rotation = Degrees(mat4::AxisAngleRotationMatrix(angle, vec4((sel_pos - cam->position).normalized(), 0)).Rotation());
 				if(sel->physics) sel->physics->rotation = sel->transform.rotation;
 			}else if(undo){
 				AddUndoRotate(&sel->transform, &initial, &sel_rot);

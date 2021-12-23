@@ -815,14 +815,14 @@ void PhysicsSystem::Update(){
 					it->contacts[i].normalMass = 1.0f / (denom0 + denom1);
 					
 					//compute velocity bias from restitution //TODO maybe factor in positional error here?
-					f32 relVel = it->normal.dot(it->p1->velocity) - it->contacts[i].normalCrossLocal1.dot(RADIANS(it->p1->rotVelocity))
-						- it->normal.dot(it->p0->velocity) - it->contacts[i].normalCrossLocal0.dot(RADIANS(it->p0->rotVelocity));
+					f32 relVel = it->normal.dot(it->p1->velocity) - it->contacts[i].normalCrossLocal1.dot(Radians(it->p1->rotVelocity))
+						- it->normal.dot(it->p0->velocity) - it->contacts[i].normalCrossLocal0.dot(Radians(it->p0->rotVelocity));
 					it->contacts[i].velocityBias = Max(0.0f, (-relVel * MixElasticity(it->p0, it->p1)) - restitutionSlop) / it->contactCount;
 				}
 				
 				{//// contact friction ////
-					vec3 vel0 = it->p0->velocity + it->contacts[i].local0.cross(RADIANS(it->p0->rotVelocity));
-					vec3 vel1 = it->p1->velocity + it->contacts[i].local1.cross(RADIANS(it->p1->rotVelocity));
+					vec3 vel0 = it->p0->velocity + it->contacts[i].local0.cross(Radians(it->p0->rotVelocity));
+					vec3 vel1 = it->p1->velocity + it->contacts[i].local1.cross(Radians(it->p1->rotVelocity));
 					vec3 vel = vel0 - vel1;
 					f32  relVel = vel.dot(it->normal);
 					
@@ -867,8 +867,8 @@ void PhysicsSystem::Update(){
 					if(true || it->contactCount == 1){
 						forI(it->contactCount){
 							//relative velocity at contact
-							f32 relVel = it->normal.dot(it->p1->velocity) - it->contacts[i].normalCrossLocal1.dot(RADIANS(it->p1->rotVelocity))
-								- it->normal.dot(it->p0->velocity) - it->contacts[i].normalCrossLocal0.dot(RADIANS(it->p0->rotVelocity));
+							f32 relVel = it->normal.dot(it->p1->velocity) - it->contacts[i].normalCrossLocal1.dot(Radians(it->p1->rotVelocity))
+								- it->normal.dot(it->p0->velocity) - it->contacts[i].normalCrossLocal0.dot(Radians(it->p0->rotVelocity));
 							
 							//compute normal force
 							f32 lambda = (it->contacts[i].velocityBias - relVel) * it->contacts[i].normalMass;
@@ -895,11 +895,11 @@ void PhysicsSystem::Update(){
 						
 						//relative velocity at contact
 						f32 relVel0 = it->contacts[i].tangent0.dot(it->p1->velocity) - it->contacts[i].tangent0.dot(it->p0->velocity)
-							- it->contacts[i].tangent0CrossLocal1.dot(RADIANS(it->p1->rotVelocity)) 
-							- it->contacts[i].tangent0CrossLocal0.dot(RADIANS(it->p0->rotVelocity));
+							- it->contacts[i].tangent0CrossLocal1.dot(Radians(it->p1->rotVelocity)) 
+							- it->contacts[i].tangent0CrossLocal0.dot(Radians(it->p0->rotVelocity));
 						f32 relVel1 = it->contacts[i].tangent1.dot(it->p1->velocity) - it->contacts[i].tangent1.dot(it->p0->velocity)
-							- it->contacts[i].tangent1CrossLocal1.dot(RADIANS(it->p1->rotVelocity))
-							- it->contacts[i].tangent1CrossLocal0.dot(RADIANS(it->p0->rotVelocity));
+							- it->contacts[i].tangent1CrossLocal1.dot(Radians(it->p1->rotVelocity))
+							- it->contacts[i].tangent1CrossLocal0.dot(Radians(it->p0->rotVelocity));
 						
 						//compute tangent force  //TODO factor tangent speed with conveyer belts
 						f32 lambda0 = -relVel0 * it->contacts[i].tangentMass0;

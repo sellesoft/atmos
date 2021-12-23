@@ -7,7 +7,7 @@
 #include "attributes/Collider.h"
 #include "attributes/ModelInstance.h"
 #include "math/math.h"
-#include "core/logging.h"
+#include "core/logger.h"
 
 struct PlayerEntity : public Entity {
 	f32 standHeight    = 2.0;

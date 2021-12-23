@@ -87,7 +87,7 @@ Bug Board       //NOTE mark these with a last-known active date (M/D/Y)
 #include "core/assets.h"
 #include "core/console.h"
 #include "core/console2.h"
-#include "core/logging.h"
+#include "core/logger.h"
 #include "core/imgui.h"
 #include "core/camera.h"
 #include "core/input.h"
@@ -110,7 +110,7 @@ int main(){
 	Assets::enforceDirectories();
 	Memory::Init(Gigabytes(1), Gigabytes(1));
 	Console2::Init();
-	Logging::Init(5);
+	Logger::Init(5);
 	DeshTime->Init();
 	DeshWindow->Init("atmos", 1280, 720);
 	DeshConsole->Init();
@@ -148,5 +148,5 @@ int main(){
 	Render::Cleanup();
 	DeshWindow->Cleanup();
 	DeshConsole->Cleanup(); Console2::Cleanup();
-	Logging::Cleanup();
+	Logger::Cleanup();
 }

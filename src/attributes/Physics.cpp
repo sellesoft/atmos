@@ -52,38 +52,38 @@ void Physics::AddImpulseNomass(vec3 impulse) {
 }
 
 void Physics::SaveText(Physics* p, string& level){
-	level += TOSTRING("\n:",AttributeType_Physics," #",AttributeTypeStrings[AttributeType_Physics],
-					  "\nposition     ",p->position,
-					  "\nrotation     ",p->rotation,
-					  "\nscale        ",p->scale,
-					  "\nvelocity     ",p->velocity,
-					  "\naccel        ",p->acceleration,
-					  "\nrot_velocity ",p->rotVelocity,
-					  "\nrot_accel    ",p->rotAcceleration,
-					  "\nmass         ",p->mass,
-					  "\nelasticity   ",p->elasticity,
-					  "\nkinetic_fric ",p->kineticFricCoef,
-					  "\nstatic_fric  ",p->staticFricCoef,
-					  "\nair_fric     ",p->airFricCoef,
-					  "\nstatic_pos   ",(p->staticPosition) ? "true" : "false",
-					  "\nstatic_rot   ",(p->staticRotation) ? "true" : "false");
+	level += toStr("\n:",AttributeType_Physics," #",AttributeTypeStrings[AttributeType_Physics],
+				   "\nposition     ",p->position,
+				   "\nrotation     ",p->rotation,
+				   "\nscale        ",p->scale,
+				   "\nvelocity     ",p->velocity,
+				   "\naccel        ",p->acceleration,
+				   "\nrot_velocity ",p->rotVelocity,
+				   "\nrot_accel    ",p->rotAcceleration,
+				   "\nmass         ",p->mass,
+				   "\nelasticity   ",p->elasticity,
+				   "\nkinetic_fric ",p->kineticFricCoef,
+				   "\nstatic_fric  ",p->staticFricCoef,
+				   "\nair_fric     ",p->airFricCoef,
+				   "\nstatic_pos   ",(p->staticPosition) ? "true" : "false",
+				   "\nstatic_rot   ",(p->staticRotation) ? "true" : "false");
 	if(p->collider.type != ColliderType_NONE){
-		level += TOSTRING("\ncollider_type       ",p->collider.type," #",ColliderTypeStrings[p->collider.type],
-						  "\ncollider_offset     ",p->collider.offset,
-						  "\ncollider_layer      ",p->collider.layer,
-						  "\ncollider_nocollide  ",(p->collider.noCollide) ? "true" : "false",
-						  "\ncollider_trigger    ",(p->collider.isTrigger) ? "true" : "false",
-						  "\ncollider_playeronly ",(p->collider.playerOnly) ? "true" : "false");
+		level += toStr("\ncollider_type       ",p->collider.type," #",ColliderTypeStrings[p->collider.type],
+					   "\ncollider_offset     ",p->collider.offset,
+					   "\ncollider_layer      ",p->collider.layer,
+					   "\ncollider_nocollide  ",(p->collider.noCollide) ? "true" : "false",
+					   "\ncollider_trigger    ",(p->collider.isTrigger) ? "true" : "false",
+					   "\ncollider_playeronly ",(p->collider.playerOnly) ? "true" : "false");
 		switch(p->collider.type){
 			case ColliderType_AABB:{
-				level += TOSTRING("\ncollider_half_dims ",p->collider.halfDims);
+				level += toStr("\ncollider_half_dims ",p->collider.halfDims);
 			}break;
 			case ColliderType_Sphere:{
-				level += TOSTRING("\ncollider_radius    ",p->collider.radius);
+				level += toStr("\ncollider_radius    ",p->collider.radius);
 			}break;
 			case ColliderType_Hull:{
 				Storage::SaveMesh(p->collider.mesh);
-				level += TOSTRING("\ncollider_mesh      \"",p->collider.mesh->name,"\"");
+				level += toStr("\ncollider_mesh      \"",p->collider.mesh->name,"\"");
 			}break;
 		}
 	}

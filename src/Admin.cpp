@@ -7,7 +7,7 @@
 #include "entities/SceneryEntity.h"
 #include "entities/DoorEntity.h"
 #include "core/storage.h"
-#include "core/logging.h"
+#include "core/logger.h"
 #include "core/window.h"
 
 void Admin::Init(){
@@ -161,24 +161,24 @@ void Admin::SaveLevel(cstring level_name){
 	//level
 	//TODO add last_updated once diff checking is setup
 	//TODO maybe add attribute counts to reserve array sizes to
-	level += TOSTRING(">level"
-					  "\nname         \"",level_name,"\""
-					  "\nlast_updated ",0);
+	level += toStr(">level"
+				   "\nname         \"",level_name,"\""
+				   "\nlast_updated ",0);
 	
 	//entities
 	level += "\n\n>entities";
 	forX(ent_idx,entities.count){
 		//generic entity parts
-		level += TOSTRING("\n]",entities[ent_idx]->id,
-						  "\ntype     ",entities[ent_idx]->type," #",EntityTypeStrings[entities[ent_idx]->type],
-						  "\nname     \"",entities[ent_idx]->name,"\""
-						  "\nposition ",entities[ent_idx]->transform.position,
-						  "\nrotation ",entities[ent_idx]->transform.rotation,
-						  "\nscale    ",entities[ent_idx]->transform.scale);
+		level += toStr("\n]",entities[ent_idx]->id,
+					   "\ntype     ",entities[ent_idx]->type," #",EntityTypeStrings[entities[ent_idx]->type],
+					   "\nname     \"",entities[ent_idx]->name,"\""
+					   "\nposition ",entities[ent_idx]->transform.position,
+					   "\nrotation ",entities[ent_idx]->transform.rotation,
+					   "\nscale    ",entities[ent_idx]->transform.scale);
 		level += "\nattributes";
-		if(entities[ent_idx]->model)    level += TOSTRING(" ",AttributeType_ModelInstance);
-		if(entities[ent_idx]->physics)  level += TOSTRING(" ",AttributeType_Physics);
-		if(entities[ent_idx]->interp)   level += TOSTRING(" ",AttributeType_InterpTransform);
+		if(entities[ent_idx]->model)    level += toStr(" ",AttributeType_ModelInstance);
+		if(entities[ent_idx]->physics)  level += toStr(" ",AttributeType_Physics);
+		if(entities[ent_idx]->interp)   level += toStr(" ",AttributeType_InterpTransform);
 		if(entities[ent_idx]->connections.count){
 			level += "\nconnections";
 			for(Entity* e : entities[ent_idx]->connections){

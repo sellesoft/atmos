@@ -49,7 +49,7 @@ void ModelInstance::Update(){
 
 void ModelInstance::SaveText(ModelInstance* m, string& level){
 	Storage::SaveModel(m->model);
-	level += TOSTRING("\n:",AttributeType_ModelInstance," #",AttributeTypeStrings[AttributeType_ModelInstance],
-					  "\nmodel   \"",m->model->name,"\""
-					  "\nvisible ",(m->visible) ? "true" : "false");
+	level += toStr("\n:",AttributeType_ModelInstance," #",AttributeTypeStrings[AttributeType_ModelInstance],
+				   "\nmodel   \"",m->model->name,"\""
+				   "\nvisible ",(m->visible) ? "true" : "false");
 }

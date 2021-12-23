@@ -94,16 +94,16 @@ struct InterpTransform{
 	}
 	
 	static void SaveText(InterpTransform* interp, string& level){
-		level += TOSTRING("\n:",AttributeType_InterpTransform," #",AttributeTypeStrings[AttributeType_InterpTransform],
-						  "\ntype        ",interp->type,
-						  "\nduration    ",interp->duration,
-						  "\ncurrent     ",interp->current,
-						  "\nactive      ",(interp->active) ? "true" : "false",
-						  "\nstage_count ",interp->stages.count);
+		level += toStr("\n:",AttributeType_InterpTransform," #",AttributeTypeStrings[AttributeType_InterpTransform],
+					   "\ntype        ",interp->type,
+					   "\nduration    ",interp->duration,
+					   "\ncurrent     ",interp->current,
+					   "\nactive      ",(interp->active) ? "true" : "false",
+					   "\nstage_count ",interp->stages.count);
 		forI(interp->stages.count){
-			level += TOSTRING("\nstage_position ",interp->stages[i].position,
-							  "\nstage_rotation ",interp->stages[i].rotation,
-							  "\nstage_scale    ",interp->stages[i].scale);
+			level += toStr("\nstage_position ",interp->stages[i].position,
+						   "\nstage_rotation ",interp->stages[i].rotation,
+						   "\nstage_scale    ",interp->stages[i].scale);
 		}
 	}
 };
