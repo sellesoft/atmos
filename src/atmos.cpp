@@ -85,18 +85,16 @@ Bug Board       //NOTE mark these with a last-known active date (M/D/Y)
 #include "defines.h"
 #include "core/memory.h"
 #include "core/assets.h"
+#include "core/commands.h"
 #include "core/console.h"
-#include "core/console2.h"
 #include "core/logger.h"
 #include "core/imgui.h"
-#include "core/camera.h"
 #include "core/input.h"
 #include "core/renderer.h"
+#include "core/storage.h"
 #include "core/time.h"
 #include "core/ui.h"
 #include "core/window.h"
-#include "core/storage.h"
-#include "core/commands.h"
 
 #define ATMOS_IMPLEMENTATION
 #include "Admin.h"
@@ -109,7 +107,6 @@ int main(){
 	//init deshi
 	Assets::enforceDirectories();
 	Memory::Init(Gigabytes(1), Gigabytes(1));
-	Console2::Init();
 	Logger::Init(5);
 	DeshTime->Init();
 	DeshWindow->Init("atmos", 1280, 720);
@@ -132,7 +129,7 @@ int main(){
 		DeshTime->   Update();
 	    DeshInput->  Update();
 		AtmoAdmin->  Update();
-		DeshConsole->Update(); Console2::Update();
+		DeshConsole->Update();
 		UI::         Update();
 		Render::     Update();                     //place imgui calls before this
 		AtmoAdmin->  PostRenderUpdate();
@@ -147,6 +144,6 @@ int main(){
 	DeshiImGui::Cleanup();
 	Render::Cleanup();
 	DeshWindow->Cleanup();
-	DeshConsole->Cleanup(); Console2::Cleanup();
+	DeshConsole->Cleanup(); 
 	Logger::Cleanup();
 }

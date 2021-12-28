@@ -269,8 +269,8 @@ void Admin::LoadLevel(cstring level_name){
 		
 		//check for headers
 		if      (*info_start == '>'){ //section
-			if     (info == cstr_lit(">level"))   { parse_section = PARSE_LEVEL; }
-			else if(info == cstr_lit(">entities")){ parse_section = PARSE_ENTITIES; }
+			if     (equals(info, cstr_lit(">level")))   { parse_section = PARSE_LEVEL; }
+			else if(equals(info, cstr_lit(">entities"))){ parse_section = PARSE_ENTITIES; }
 			else                                  { parse_section = PARSE_INVALID; }
 			continue;
 		}else if(*info_start == ']'){ //entity
@@ -303,10 +303,10 @@ void Admin::LoadLevel(cstring level_name){
 		//utility parsing funcs
 		auto parse_b32 = [level_name,line_number](cstring s){
 			b32 result = false;
-			if     (s == cstr_lit("true"))  result = true;
-			else if(s == cstr_lit("1"))     result = true;
-			else if(s == cstr_lit("false")) result = false;
-			else if(s == cstr_lit("0"))     result = false;
+			if     (equals(s, cstr_lit("true")))  result = true;
+			else if(equals(s, cstr_lit("1")))     result = true;
+			else if(equals(s, cstr_lit("false"))) result = false;
+			else if(equals(s, cstr_lit("0")))     result = false;
 			else ParseError("Invalid boolean value: ",s);
 			return result;
 		};
@@ -322,9 +322,9 @@ void Admin::LoadLevel(cstring level_name){
 		//parse the key-value pair
 		switch(parse_section){
 			case PARSE_LEVEL:{
-				if      (key == cstr_lit("name")){
+				if      (equals(key, cstr_lit("name"))){
 					//TODO send level name to editor
-				}else if(key == cstr_lit("last_updated")){
+				}else if(equals(key, cstr_lit("last_updated"))){
 					//TODO check time when doing diff checking
 				}else{ ParseError("Unhandled LEVEL key."); }
 			}break;
@@ -332,7 +332,7 @@ void Admin::LoadLevel(cstring level_name){
 				//NOTE do nothing currently
 			}break;
 			case PARSE_ENTITY:{
-				if(key == cstr_lit("type")){
+				if(equals(key, cstr_lit("type"))){
 					switch(b10tou64(value)){
 						case EntityType_Player:{ 
 							player = new PlayerEntity;
@@ -373,15 +373,15 @@ void Admin::LoadLevel(cstring level_name){
 						default:{ ParseError("Unhandled entity type: ",value); }break;
 					}
 				}else if(entity){
-					if      (key == cstr_lit("name")){
+					if      (equals(key, cstr_lit("name"))){
 						entity->name = string(value_start+1, value_end-value_start-2);
-					}else if(key == cstr_lit("position")){
+					}else if(equals(key, cstr_lit("position"))){
 						entity->transform.position = parse_vec3(value);
-					}else if(key == cstr_lit("rotation")){
+					}else if(equals(key, cstr_lit("rotation"))){
 						entity->transform.rotation = parse_vec3(value);
-					}else if(key == cstr_lit("scale")){
+					}else if(equals(key, cstr_lit("scale"))){
 						entity->transform.scale = parse_vec3(value);
-					}else if(key == cstr_lit("attributes")){
+					}else if(equals(key, cstr_lit("attributes"))){
 						cstring s = value;
 						while(s){ 
 							switch(u32(b10tou64(s, &s))){
@@ -409,12 +409,12 @@ void Admin::LoadLevel(cstring level_name){
 								}break;
 							}
 						}
-					}else if(key == cstr_lit("connections")){
+					}else if(equals(key, cstr_lit("connections"))){
 						u32 x = entity_connections.count;
 						entity_connections.add({entity_id,{}});
 						cstring s = value;
 						while(s){ entity_connections[x].second.add(u32(b10tou64(s, &s))); }
-					}else if(key == cstr_lit("events")){
+					}else if(equals(key, cstr_lit("events"))){
 						TriggerEntity* e = (TriggerEntity*)entity;
 						cstring s = value;
 						while(s){ e->events.add(u32(b10tou64(s, &s))); }
@@ -424,65 +424,65 @@ void Admin::LoadLevel(cstring level_name){
 			case PARSE_ATTRIBUTE:{
 				switch(attribute_type){
 					case AttributeType_ModelInstance:{
-						if      (key == cstr_lit("model")){
+						if      (equals(key, cstr_lit("model"))){
 							entity->model->ChangeModel(Storage::CreateModelFromFile((to_string(cstring{value_start+1,u64(value_end-value_start-2)}) + ".model").str).second);
-						}else if(key == cstr_lit("visible")){
+						}else if(equals(key, cstr_lit("visible"))){
 							entity->model->visible = parse_b32(value);
 						}else{ ParseError("Unhandled ModelInstance key: ",key); }
 					}break;
 					case AttributeType_Physics:{
-						if      (key == cstr_lit("position")){
+						if      (equals(key, cstr_lit("position"))){
 							entity->physics->position = parse_vec3(value);
-						}else if(key == cstr_lit("rotation")){
+						}else if(equals(key, cstr_lit("rotation"))){
 							entity->physics->rotation = parse_vec3(value);
-						}else if(key == cstr_lit("scale")){
+						}else if(equals(key, cstr_lit("scale"))){
 							entity->physics->scale = parse_vec3(value);
-						}else if(key == cstr_lit("velocity")){
+						}else if(equals(key, cstr_lit("velocity"))){
 							entity->physics->velocity = parse_vec3(value);
-						}else if(key == cstr_lit("accel")){
+						}else if(equals(key, cstr_lit("accel"))){
 							entity->physics->acceleration = parse_vec3(value);
-						}else if(key == cstr_lit("rot_velocity")){
+						}else if(equals(key, cstr_lit("rot_velocity"))){
 							entity->physics->rotVelocity = parse_vec3(value);
-						}else if(key == cstr_lit("rot_accel")){
+						}else if(equals(key, cstr_lit("rot_accel"))){
 							entity->physics->rotAcceleration = parse_vec3(value);
-						}else if(key == cstr_lit("mass")){
+						}else if(equals(key, cstr_lit("mass"))){
 							entity->physics->mass = (f32)atof(value_start);
-						}else if(key == cstr_lit("elasticity")){
+						}else if(equals(key, cstr_lit("elasticity"))){
 							entity->physics->elasticity = (f32)atof(value_start);
-						}else if(key == cstr_lit("kinetic_fric")){
+						}else if(equals(key, cstr_lit("kinetic_fric"))){
 							entity->physics->kineticFricCoef = (f32)atof(value_start);
-						}else if(key == cstr_lit("static_fric")){
+						}else if(equals(key, cstr_lit("static_fric"))){
 							entity->physics->staticFricCoef = (f32)atof(value_start);
-						}else if(key == cstr_lit("air_fric")){
+						}else if(equals(key, cstr_lit("air_fric"))){
 							entity->physics->airFricCoef = (f32)atof(value_start);
-						}else if(key == cstr_lit("static_pos")){
+						}else if(equals(key, cstr_lit("static_pos"))){
 							entity->physics->staticPosition = parse_b32(value);
-						}else if(key == cstr_lit("static_rot")){
+						}else if(equals(key, cstr_lit("static_rot"))){
 							entity->physics->staticRotation = parse_b32(value);
-						}else if(key == cstr_lit("collider_type")){
+						}else if(equals(key, cstr_lit("collider_type"))){
 							switch(Type(b10tou64(value))){
 								case ColliderType_AABB:{ entity->physics->collider = AABBCollider(vec3::ONE, entity->physics->mass); }break;
 								case ColliderType_Sphere:{ entity->physics->collider = SphereCollider(1.f, entity->physics->mass); }break;
 								case ColliderType_Hull:{ entity->physics->collider = HullCollider(Storage::NullMesh(), entity->physics->mass); }break;
 								default:{ ParseError("Unhandled Collider shape: ",value); }break;
 							}
-						}else if(key == cstr_lit("collider_offset")){
+						}else if(equals(key, cstr_lit("collider_offset"))){
 							entity->physics->collider.offset = parse_vec3(value);
-						}else if(key == cstr_lit("collider_layer")){
+						}else if(equals(key, cstr_lit("collider_layer"))){
 							entity->physics->collider.layer = atoi(value_start);
-						}else if(key == cstr_lit("collider_nocollide")){
+						}else if(equals(key, cstr_lit("collider_nocollide"))){
 							entity->physics->collider.noCollide = parse_b32(value);
-						}else if(key == cstr_lit("collider_trigger")){
+						}else if(equals(key, cstr_lit("collider_trigger"))){
 							entity->physics->collider.isTrigger = parse_b32(value);
-						}else if(key == cstr_lit("collider_playeronly")){
+						}else if(equals(key, cstr_lit("collider_playeronly"))){
 							entity->physics->collider.playerOnly = parse_b32(value);
-						}else if(key == cstr_lit("collider_half_dims")){
+						}else if(equals(key, cstr_lit("collider_half_dims"))){
 							entity->physics->collider.halfDims = parse_vec3(value);
 							entity->physics->collider.RecalculateTensor(entity->physics->mass);
-						}else if(key == cstr_lit("collider_radius")){
+						}else if(equals(key, cstr_lit("collider_radius"))){
 							entity->physics->collider.radius = (f32)atof(value_start);
 							entity->physics->collider.RecalculateTensor(entity->physics->mass);
-						}else if(key == cstr_lit("collider_mesh")){
+						}else if(equals(key, cstr_lit("collider_mesh"))){
 							entity->physics->collider.mesh = Storage::CreateMeshFromFile((string(value_start+1,value_end-value_start-2) + ".mesh").str).second;
 							entity->physics->collider.RecalculateTensor(entity->physics->mass);
 						}else{ ParseError("Unhandled Physics key: ",key); }
@@ -494,22 +494,22 @@ void Admin::LoadLevel(cstring level_name){
 						Assert(!"not implemented");
 					}break;
 					case AttributeType_InterpTransform:{
-						if      (key == cstr_lit("type")){
+						if      (equals(key, cstr_lit("type"))){
 							entity->interp->type = Type(b10tou64(value));
 							interp_stage = 0;
-						}else if(key == cstr_lit("duration")){
+						}else if(equals(key, cstr_lit("duration"))){
 							entity->interp->duration = (f32)atof(value_start);
-						}else if(key == cstr_lit("current")){
+						}else if(equals(key, cstr_lit("current"))){
 							entity->interp->current = (f32)atof(value_start);
-						}else if(key == cstr_lit("active")){
+						}else if(equals(key, cstr_lit("active"))){
 							entity->interp->active = parse_b32(value);
-						}else if(key == cstr_lit("stage_count")){
+						}else if(equals(key, cstr_lit("stage_count"))){
 							entity->interp->stages.resize(b10tou64(value));
-						}else if(key == cstr_lit("stage_position")){
+						}else if(equals(key, cstr_lit("stage_position"))){
 							entity->interp->stages[interp_stage].position = parse_vec3(value);
-						}else if(key == cstr_lit("stage_rotation")){
+						}else if(equals(key, cstr_lit("stage_rotation"))){
 							entity->interp->stages[interp_stage].rotation = parse_vec3(value);
-						}else if(key == cstr_lit("stage_scale")){
+						}else if(equals(key, cstr_lit("stage_scale"))){
 							entity->interp->stages[interp_stage].scale = parse_vec3(value);
 							interp_stage += 1;
 						}else{ ParseError("Unhandled InterpTransform key: ",key); }
