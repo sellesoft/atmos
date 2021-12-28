@@ -2102,7 +2102,7 @@ void Inspector(){
 		window_flags = ImGuiWindowFlags_None;
 	}else{
 		//resize tool menu if main menu bar is open
-		ImGui::SetNextWindowSize(ImVec2(DeshWindow->width / 5, DeshWindow->height - (menubarheight + debugbarheight)));
+		ImGui::SetNextWindowSize(ImVec2((f32)DeshWindow->width / 5, (f32)DeshWindow->height - (menubarheight + debugbarheight)));
 		ImGui::SetNextWindowPos(ImVec2(0, menubarheight));
 		window_flags = ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove
 			| ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar;
@@ -2169,8 +2169,8 @@ void DebugBar(){
 	ImGui::PushStyleColor(ImGuiCol_Border,           0x00000000);
 	ImGui::PushStyleColor(ImGuiCol_WindowBg,         0xff141414);
 	ImGui::PushStyleColor(ImGuiCol_TableBorderLight, 0xff2d2d2d);
-	ImGui::SetNextWindowSize(ImVec2(DeshWindow->width, 20));
-	ImGui::SetNextWindowPos(ImVec2(0, DeshWindow->height - 20));
+	ImGui::SetNextWindowSize(ImVec2((f32)DeshWindow->width, 20));
+	ImGui::SetNextWindowPos(ImVec2(0, (f32)DeshWindow->height - 20));
 	ImGui::Begin("DebugBar", (bool*)1, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
 	debugbarheight = 20;
 	//capture mouse if hovering over this window
@@ -2184,7 +2184,7 @@ void DebugBar(){
 		ImGui::TableSetupColumn("Time",           ImGuiTableColumnFlags_WidthFixed, 64);
 		
 		//FPS
-		int FPS = floor(io.Framerate);
+		int FPS = (int)floor(io.Framerate);
 		if(ImGui::TableNextColumn() && show_fps){
 			ImGui::Text("FPS:%4d", FPS);
 		}
@@ -2224,7 +2224,7 @@ void DebugBar(){
 			
 			//update real set if we're not updating yet or update the graph if we are
 			if(frame_count < fupdate){
-				values[values.size() - 1] = FPS;
+				values[values.size() - 1] = (f32)FPS;
 				frame_count++;
 			}
 			else{
@@ -2238,7 +2238,7 @@ void DebugBar(){
 			ImGui::PushStyleColor(ImGuiCol_PlotLines, ImGui::ColorToImVec4(color(0, 255, 200, 255)));
 			ImGui::PushStyleColor(ImGuiCol_FrameBg, ImGui::ColorToImVec4(color(20, 20, 20, 255)));
 			
-			ImGui::PlotLines("", &pvalues[0], pvalues.size(), 0, 0, 0, maxval, ImVec2(64, 20));
+			ImGui::PlotLines("", &pvalues[0], pvalues.size(), 0, 0, 0, (f32)maxval, ImVec2(64, 20));
 			
 			ImGui::PopStyleColor();
 			ImGui::PopStyleColor();
@@ -2355,16 +2355,16 @@ void WorldGrid(){
 ///////////////
 void ShowWorldAxis(){
 	vec3
-		x = AtmoAdmin->camera.position + AtmoAdmin->camera.forward + vec3::RIGHT * 0.1,
-	y = AtmoAdmin->camera.position + AtmoAdmin->camera.forward + vec3::UP * 0.1,
-	z = AtmoAdmin->camera.position + AtmoAdmin->camera.forward + vec3::FORWARD * 0.1;
+		x = AtmoAdmin->camera.position + AtmoAdmin->camera.forward + vec3::RIGHT * 0.1f,
+	y = AtmoAdmin->camera.position + AtmoAdmin->camera.forward + vec3::UP * 0.1f,
+	z = AtmoAdmin->camera.position + AtmoAdmin->camera.forward + vec3::FORWARD * 0.1f;
 	
 	vec2
 		spx = Math::WorldToScreen2(x, AtmoAdmin->camera.projMat, AtmoAdmin->camera.viewMat, DeshWindow->dimensions) - DeshWindow->dimensions / 2,
 	spy = Math::WorldToScreen2(y, AtmoAdmin->camera.projMat, AtmoAdmin->camera.viewMat, DeshWindow->dimensions) - DeshWindow->dimensions / 2,
 	spz = Math::WorldToScreen2(z, AtmoAdmin->camera.projMat, AtmoAdmin->camera.viewMat, DeshWindow->dimensions) - DeshWindow->dimensions / 2;
 	
-	vec2 offset = vec2(DeshWindow->width - 50, DeshWindow->height - debugbarheight - 50);
+	vec2 offset = vec2((f32)DeshWindow->width - 50, (f32)DeshWindow->height - debugbarheight - 50);
 	
 	Render::DrawLine2D(offset, spx + offset, 1, Color_Red);
 	Render::DrawLine2D(offset, spy + offset, 1, Color_Green);
@@ -2661,7 +2661,7 @@ local b32 TransformGizmo(){
 		
 		case TransformType_RotateX:{
 			if(dragging){
-				vec2 center(DeshWindow->centerX, DeshWindow->centerY);
+				vec2 center((f32)DeshWindow->centerX, (f32)DeshWindow->centerY);
 				vec2 diff = DeshInput->mousePos - center;
 				f32 angle = Math::AngBetweenVectors(diff, mouse_initial - center);
 				sel->transform.rotation.x = initial.x - angle;
@@ -2676,7 +2676,7 @@ local b32 TransformGizmo(){
 		
 		case TransformType_RotateY:{
 			if(dragging){
-				vec2 center(DeshWindow->centerX, DeshWindow->centerY);
+				vec2 center((f32)DeshWindow->centerX, (f32)DeshWindow->centerY);
 				vec2 diff = DeshInput->mousePos - center;
 				f32 angle = Math::AngBetweenVectors(diff, mouse_initial - center);
 				sel->transform.rotation.y = initial.y - angle;
@@ -2691,7 +2691,7 @@ local b32 TransformGizmo(){
 		
 		case TransformType_RotateZ:{
 			if(dragging){
-				vec2 center(DeshWindow->centerX, DeshWindow->centerY);
+				vec2 center((f32)DeshWindow->centerX, (f32)DeshWindow->centerY);
 				vec2 diff = DeshInput->mousePos - center;
 				f32 angle = Math::AngBetweenVectors(diff, mouse_initial - center);
 				sel->transform.rotation.z = initial.z - angle;
@@ -2706,12 +2706,12 @@ local b32 TransformGizmo(){
 		
 		case TransformType_RotateFree:{//TODO fix free rotation
 			if(dragging){
-				vec2 center(DeshWindow->centerX, DeshWindow->centerY);
-				vec2 cleft(0, DeshWindow->height/2.f);
-				vec2 cright(DeshWindow->width, DeshWindow->height/2.f);
+				vec2 center((f32)DeshWindow->centerX, (f32)DeshWindow->centerY);
+				vec2 cleft(0, (f32)DeshWindow->height / 2.f);
+				vec2 cright((f32)DeshWindow->width, (f32)DeshWindow->height / 2.f);
 				vec2 diff = DeshInput->mousePos - cleft;
-				f32  dist = vec2(-DeshWindow->width, 0).normalized().dot(diff);
-				f32  ratio = dist / vec3(DeshWindow->width, 0).mag();
+				f32  dist = vec2(-(f32)DeshWindow->width, 0).normalized().dot(diff);
+				f32  ratio = dist / vec3((f32)DeshWindow->width, 0).mag();
 				f32  angle = 360.f*ratio;
 				
 				sel->transform.rotation = Degrees(mat4::AxisAngleRotationMatrix(angle, vec4((sel_pos - cam->position).normalized(), 0)).Rotation());
@@ -2922,7 +2922,7 @@ void Editor::Update(){
 	b32 hit_gizmo = TransformGizmo();
 	if(!hit_gizmo && !WinHovFlag && DeshInput->KeyPressed(MouseButton::LEFT)){
 		//NOTE adjusting the projection matrix so the nearZ is at least .1, produces bad results if less
-		mat4 adjusted_proj = Camera::MakePerspectiveProjectionMatrix(DeshWindow->width, DeshWindow->height, AtmoAdmin->camera.fov, 
+		mat4 adjusted_proj = Camera::MakePerspectiveProjectionMatrix((f32)DeshWindow->width, (f32)DeshWindow->height, AtmoAdmin->camera.fov, 
 																	 AtmoAdmin->camera.farZ, Max(.1f, AtmoAdmin->camera.nearZ));
 		vec3 direction = (Math::ScreenToWorld(DeshInput->mousePos, adjusted_proj, AtmoAdmin->camera.viewMat, DeshWindow->dimensions) 
 						  - AtmoAdmin->camera.position).normalized();

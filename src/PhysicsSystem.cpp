@@ -775,9 +775,9 @@ void PhysicsSystem::Update(){
 				//rotational motion
 				if(!it->staticRotation){
 					if(it->rotVelocity != vec3::ZERO){  //fake rotational air friction
-						it->rotAcceleration += vec3(it->rotVelocity.x > 0 ? -1 : 1, 
-													it->rotVelocity.y > 0 ? -1 : 1, 
-													it->rotVelocity.z > 0 ? -1 : 1) * it->airFricCoef * it->mass;
+						it->rotAcceleration += vec3(it->rotVelocity.x > 0.f ? -1.f : 1.f, 
+													it->rotVelocity.y > 0.f ? -1.f : 1.f, 
+													it->rotVelocity.z > 0.f ? -1.f : 1.f) * it->airFricCoef * it->mass;
 					}
 					
 					it->rotVelocity += it->rotAcceleration * fixedDeltaTime;

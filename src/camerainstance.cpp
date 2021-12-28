@@ -12,10 +12,10 @@ CameraInstance::CameraInstance(float fov, float nearZ, float farZ, bool freeCam)
 	this->farZ = farZ;
 	this->fov = fov;
 	this->freeCamera = freeCam;
-
+	
 	position = { 4.f,   3.f,-4.f };
 	rotation = { 28.f, -45.f, 0.f };
-
+	
 	this->forward = (vec3::FORWARD * mat4::RotationMatrix(rotation)).normalized();
 	this->right = vec3::UP.cross(forward).normalized();
 	this->up = right.cross(forward).normalized();
@@ -29,47 +29,47 @@ void CameraInstance::Update() {
 		//of this scope once we implement that
 		persist int wwidth = DeshWindow->width;
 		persist int wheight = DeshWindow->height;
-
+		
 		//clamp camera crotation
 		Math::clamp(rotation.x, -89.9f, 89.9f);
 		if (rotation.y > 1440.f || rotation.y < -1440.f) { rotation.y = 0.f; }
-
+		
 		//update direction vectors
 		forward = (vec3::FORWARD * mat4::RotationMatrix(rotation)).normalized();
 		right = vec3::UP.cross(forward).normalized();
 		up = right.cross(forward).normalized();
-
+		
 		viewMat = Math::LookAtMatrix(position, position + forward).Inverse();
-
+		
 		//update renderer camera properties
 		if (mode == CameraMode_Orthographic) {
 			switch (orthoview) {
-			case OrthoView_Front:  position = vec3(0, 0, -999); rotation = vec3(0, 0, 0);     break;
-			case OrthoView_Back:   position = vec3(0, 0, 999);  rotation = vec3(0, 180, 0);   break;
-			case OrthoView_Right:  position = vec3(999, 0, 0);  rotation = vec3(0, -90, 0);   break;
-			case OrthoView_Left:   position = vec3(-999, 0, 0); rotation = vec3(0, 90, 0);    break;
-			case OrthoView_Top:    position = vec3(0, 999, 0);  rotation = vec3(89.9, 0, 0);  break;
-			case OrthoView_Bottom: position = vec3(0, -999, 0); rotation = vec3(-89.9, 0, 0); break;
+				case OrthoView_Front:  position = vec3(0, 0, -999); rotation = vec3(0, 0, 0);     break;
+				case OrthoView_Back:   position = vec3(0, 0, 999);  rotation = vec3(0, 180, 0);   break;
+				case OrthoView_Right:  position = vec3(999, 0, 0);  rotation = vec3(0, -90, 0);   break;
+				case OrthoView_Left:   position = vec3(-999, 0, 0); rotation = vec3(0, 90, 0);    break;
+				case OrthoView_Top:    position = vec3(0, 999, 0);  rotation = vec3(89.9f, 0, 0);  break;
+				case OrthoView_Bottom: position = vec3(0, -999, 0); rotation = vec3(-89.9f, 0, 0); break;
 			}
 			
 			UpdateProjectionMatrix();
 		}
-
+		
 		//redo projection matrix is window size changes
 		if (DeshWindow->width != wwidth || DeshWindow->height != wheight) {
 			wwidth = DeshWindow->width;
 			wheight = DeshWindow->height;
 			UpdateProjectionMatrix();
 		}
-
+		
 		Render::UpdateCameraViewMatrix(viewMat);
 		Render::UpdateCameraPosition(position);
-
+		
 	}
 }
 
 mat4 CameraInstance::MakePerspectiveProjection() {
-	return Camera::MakePerspectiveProjectionMatrix(DeshWindow->width, DeshWindow->height, fov, farZ, nearZ);
+	return Camera::MakePerspectiveProjectionMatrix((f32)DeshWindow->width, (f32)DeshWindow->height, fov, farZ, nearZ);
 }
 
 mat4 CameraInstance::MakeOrthographicProjection() {
@@ -130,8 +130,8 @@ mat4 CameraInstance::MakeOrthographicProjection() {
 
 void CameraInstance::UpdateProjectionMatrix() {
 	switch (mode) {
-	case(CameraMode_Perspective):default: { projMat = MakePerspectiveProjection(); } break;
-	case(CameraMode_Orthographic):        { projMat = MakeOrthographicProjection(); }break;
+		case(CameraMode_Perspective):default: { projMat = MakePerspectiveProjection(); } break;
+		case(CameraMode_Orthographic):        { projMat = MakeOrthographicProjection(); }break;
 	}
 	Render::UpdateCameraProjectionMatrix(projMat);
 }

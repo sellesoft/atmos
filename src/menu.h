@@ -64,7 +64,7 @@ void UpdateMenu(){
 	UI::PushColor(UIStyleCol_WindowBg, PackColorU32(128,128,255,64));
 	UI::Begin("atmos_menu", vec2::ZERO, DeshWindow->dimensions, UIWindowFlags_NoMove|UIWindowFlags_NoTitleBar|UIWindowFlags_NoResize);
 	
-	f32 center_x = DeshWindow->centerX;
+	f32 center_x = (f32)DeshWindow->centerX;
 	cstring text;
 	
 	//draw title

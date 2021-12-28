@@ -10,19 +10,19 @@
 #include "core/logger.h"
 
 struct PlayerEntity : public Entity {
-	f32 standHeight    = 2.0;
-	f32 standEyeLevel  = 1.8;
-	f32 crouchHeight   = 1.2;
-	f32 crouchEyeLevel = 1.1;
-	f32 timeToCrouch   = 0.1;
-	f32 crouchTimer    = 0.0;
-	f32 walkSpeed      = 5.0;
-	f32 runMult        = 2.0;
-	f32 crouchMult     = 0.5;
-	f32 jumpHeight     = 2.0;
-	f32 groundAccel    = 10.0;
-	f32 airAccel       = 10.0;
-	f32 minSpeed       = 0.3;
+	f32 standHeight    = 2.0f;
+	f32 standEyeLevel  = 1.8f;
+	f32 crouchHeight   = 1.2f;
+	f32 crouchEyeLevel = 1.1f;
+	f32 timeToCrouch   = 0.1f;
+	f32 crouchTimer    = 0.0f;
+	f32 walkSpeed      = 5.0f;
+	f32 runMult        = 2.0f;
+	f32 crouchMult     = 0.5f;
+	f32 jumpHeight     = 2.0f;
+	f32 groundAccel    = 10.0f;
+	f32 airAccel       = 10.0f;
+	f32 minSpeed       = 0.3f;
 	
 	b32 isJumping   = false;
 	b32 isCrouching = false;
@@ -43,12 +43,12 @@ struct PlayerEntity : public Entity {
 		AtmoAdmin->physicsArr.add(Physics());
 		physics = AtmoAdmin->physicsArr.last;
 		physics->attribute.entity = this;
-		physics->collider   = AABBCollider(vec3(.5f,standHeight/2.f,.5f), 1.0);
+		physics->collider   = AABBCollider(vec3(.5f,standHeight/2.f,.5f), 1.0f);
 		physics->position   = _transform.position;
 		physics->rotation   = _transform.rotation;
 		physics->scale      = _transform.scale;
-		physics->mass       = 1.0;
-		physics->elasticity = 0.01;
+		physics->mass       = 1.0f;
+		physics->elasticity = 0.01f;
 		physics->collider.offset = vec3(0,standHeight/2.f,0);
 		spawnpoint = _transform;
 		

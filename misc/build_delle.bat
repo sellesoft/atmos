@@ -11,15 +11,15 @@ REM ____________________________________________________________________________
 
 @set INCLUDES=/I"..\src" /I"..\deshi\src" /I"..\deshi\src\external" /I"C:\src\glfw-3.3.2.bin.WIN64\include" /I"%VULKAN_SDK%\include"
 @set SOURCES=..\deshi\src\deshi.cpp attributes\*.cpp atmos.cpp admin.cpp camerainstance.cpp controller.cpp editor.cpp physicssystem.cpp
-@set LIBS=/LIBPATH:C:\src\glfw-3.3.2.bin.WIN64\lib-vc2019 /libpath:%VULKAN_SDK%\lib glfw3.lib opengl32.lib gdi32.lib shell32.lib vulkan-1.lib shaderc_combined.lib
+@set LIBS=/libpath:C:\src\glfw-3.3.2.bin.WIN64\lib-vc2019 /libpath:%VULKAN_SDK%\lib glfw3.lib opengl32.lib gdi32.lib shell32.lib vulkan-1.lib shaderc_combined.lib
 
 REM _____________________________________________________________________________________________________
 REM                                      Compiler and Linker Flags
 REM _____________________________________________________________________________________________________
 
-@set WARNINGS=/W1 /wd4201 /wd4100 /wd4189 /wd4706 /wd4311 /w14996 /D"_CRT_SECURE_NO_WARNINGS"
-@set COMPILE_FLAGS=/diagnostics:column /EHsc /nologo /MD /MP /Oi /Gm- /Fm /std:c++17 %WARNINGS%
-@set LINK_FLAGS=/nologo /opt:ref
+@set WARNINGS=/W2 /wd4201 /wd4100 /wd4189 /wd4706 /wd4311 /w14996 /D"_CRT_SECURE_NO_WARNINGS"
+@set COMPILE_FLAGS=/diagnostics:column /EHsc /nologo /MD /MP /Oi /GR /Gm- /Fm /std:c++17 %WARNINGS%
+@set LINK_FLAGS=/nologo /opt:ref /incremental:no
 @set OUT_EXE=atmos.exe
 
 REM _____________________________________________________________________________________________________
