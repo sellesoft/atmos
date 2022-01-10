@@ -106,17 +106,18 @@ local Admin admin; Admin* g_admin = &admin;
 int main(){
 	//init deshi
 	Assets::enforceDirectories();
-	Memory::Init(Gigabytes(1), Gigabytes(1));
-	Logger::Init(5);
-	DeshTime->Init();
-	DeshWindow->Init("atmos", 1280, 720);
+	memory_init(Gigabytes(1), Gigabytes(4));
+	Logger::Init(5, true);
 	DeshConsole->Init();
+	DeshTime->Init();
+	DeshWindow->Init("deshi", 1280, 720);
 	Render::Init();
-	Storage::Init();
 	DeshiImGui::Init();
+	Storage::Init();
 	UI::Init();
 	Cmd::Init();
 	DeshWindow->ShowWindow();
+	Render::UseDefaultViewProjMatrix();
 	
 	//init atmos
 	AddAtmosCommands();
@@ -133,7 +134,7 @@ int main(){
 		UI::         Update();
 		Render::     Update();                     //place imgui calls before this
 		AtmoAdmin->  PostRenderUpdate();
-		Memory::     Update();
+		memory_clear_temp();
 		DeshTime->frameTime = TIMER_END(t_f); TIMER_RESET(t_f);
 	}
 	
@@ -144,6 +145,5 @@ int main(){
 	DeshiImGui::Cleanup();
 	Render::Cleanup();
 	DeshWindow->Cleanup();
-	DeshConsole->Cleanup(); 
 	Logger::Cleanup();
 }

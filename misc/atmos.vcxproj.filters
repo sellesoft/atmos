@@ -58,34 +58,16 @@
     <Filter Include="src\atmos\entities">
       <UniqueIdentifier>{31f312bc-962f-416c-9162-681f9a860304}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\deshi\external\glad">
+      <UniqueIdentifier>{56bf64fa-60d1-432c-ac2f-f5ee98fa1f23}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\deshi\external\d3dx12">
+      <UniqueIdentifier>{65ed978a-c24d-4871-8ead-4c3f96145271}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="atmos.vcxproj">
       <Filter>extra\misc</Filter>
-    </None>
-    <None Include="build_delle.bat">
-      <Filter>extra\misc</Filter>
-    </None>
-    <None Include="build_shaders.bat">
-      <Filter>extra\misc</Filter>
-    </None>
-    <None Include="..\data\cfg\aliases.cfg">
-      <Filter>extra\cfg</Filter>
-    </None>
-    <None Include="..\data\cfg\binds.cfg">
-      <Filter>extra\cfg</Filter>
-    </None>
-    <None Include="..\data\cfg\imgui.ini">
-      <Filter>extra\cfg</Filter>
-    </None>
-    <None Include="..\data\cfg\keybinds.cfg">
-      <Filter>extra\cfg</Filter>
-    </None>
-    <None Include="..\data\cfg\render.cfg">
-      <Filter>extra\cfg</Filter>
-    </None>
-    <None Include="..\data\fonts\gohufont-11.bdf">
-      <Filter>extra\fonts</Filter>
     </None>
     <None Include="..\data\shaders\utils.glsl">
       <Filter>extra\shaders</Filter>
@@ -200,31 +182,8 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Natvis Include="customvis.natvis">
-      <Filter>extra\misc</Filter>
-    </Natvis>
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="..\deshi\src\core\renderers\opengl.cpp">
       <Filter>src\deshi\core\renderers</Filter>
-    </ClCompile>
-    <ClCompile Include="..\deshi\src\core\console2.cpp">
-      <Filter>src\deshi\core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\deshi\src\core\storage.cpp">
-      <Filter>src\deshi\core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\deshi\src\core\ui.cpp">
-      <Filter>src\deshi\core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\deshi\src\core\window.cpp">
-      <Filter>src\deshi\core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\deshi\src\core\assets.cpp">
-      <Filter>src\deshi\core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\deshi\src\core\console.cpp">
-      <Filter>src\deshi\core</Filter>
     </ClCompile>
     <ClCompile Include="..\deshi\src\core\renderers\vulkan.cpp">
       <Filter>src\deshi\core\renderers</Filter>
@@ -253,14 +212,44 @@
     <ClCompile Include="..\deshi\src\deshi.cpp">
       <Filter>src\deshi</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\attributes\ModelInstance.cpp">
-      <Filter>src\atmos\attributes</Filter>
+    <ClCompile Include="..\deshi\src\core\renderers\directx.cpp">
+      <Filter>src\deshi\core\renderers</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\Admin.cpp">
-      <Filter>src\atmos</Filter>
+    <ClCompile Include="..\deshi\src\core\commands.cpp">
+      <Filter>src\deshi\core</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\atmos.cpp">
-      <Filter>src\atmos</Filter>
+    <ClCompile Include="..\deshi\src\core\console.cpp">
+      <Filter>src\deshi\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\deshi\src\core\deshi_core_tests.cpp">
+      <Filter>src\deshi\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\deshi\src\core\io.cpp">
+      <Filter>src\deshi\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\deshi\src\core\logger.cpp">
+      <Filter>src\deshi\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\deshi\src\core\memory.cpp">
+      <Filter>src\deshi\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\deshi\src\core\storage.cpp">
+      <Filter>src\deshi\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\deshi\src\core\ui.cpp">
+      <Filter>src\deshi\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\deshi\src\core\window.cpp">
+      <Filter>src\deshi\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\deshi\src\core\assets.cpp">
+      <Filter>src\deshi\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\deshi\src\utils\deshi_utils_tests.cpp">
+      <Filter>src\deshi\utils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\deshi\src\utils\misc_testing.cpp">
+      <Filter>src\deshi\utils</Filter>
     </ClCompile>
     <ClCompile Include="..\src\camerainstance.cpp">
       <Filter>src\atmos</Filter>
@@ -271,74 +260,35 @@
     <ClCompile Include="..\src\Editor.cpp">
       <Filter>src\atmos</Filter>
     </ClCompile>
-    <ClCompile Include="..\deshi\src\core\commands.cpp">
-      <Filter>src\deshi\core</Filter>
+    <ClCompile Include="..\src\PhysicsSystem.cpp">
+      <Filter>src\atmos</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Admin.cpp">
+      <Filter>src\atmos</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\atmos.cpp">
+      <Filter>src\atmos</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\atmos_commands.cpp">
+      <Filter>src\atmos</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\attributes\Physics.cpp">
+      <Filter>src\atmos\attributes</Filter>
     </ClCompile>
     <ClCompile Include="..\src\attributes\Player.cpp">
+      <Filter>src\atmos\attributes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\attributes\Collider.cpp">
+      <Filter>src\atmos\attributes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\attributes\ModelInstance.cpp">
       <Filter>src\atmos\attributes</Filter>
     </ClCompile>
     <ClCompile Include="..\src\attributes\Movement.cpp">
       <Filter>src\atmos\attributes</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\attributes\Physics.cpp">
-      <Filter>src\atmos\attributes</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\PhysicsSystem.cpp">
-      <Filter>src\atmos</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\attributes\Collider.cpp">
-      <Filter>src\atmos\attributes</Filter>
-    </ClCompile>
-    <ClCompile Include="..\deshi\src\core\renderers\directx.cpp">
-      <Filter>src\deshi\core\renderers</Filter>
-    </ClCompile>
-    <ClCompile Include="..\deshi\src\core\io.cpp">
-      <Filter>src\deshi\core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\deshi\src\core\logging.cpp">
-      <Filter>src\deshi\core</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\deshi\src\core\console2.h">
-      <Filter>src\deshi\core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\deshi\src\core\imgui.h">
-      <Filter>src\deshi\core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\deshi\src\core\input.h">
-      <Filter>src\deshi\core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\deshi\src\core\model.h">
-      <Filter>src\deshi\core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\deshi\src\core\renderer.h">
-      <Filter>src\deshi\core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\deshi\src\core\storage.h">
-      <Filter>src\deshi\core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\deshi\src\core\time.h">
-      <Filter>src\deshi\core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\deshi\src\core\ui.h">
-      <Filter>src\deshi\core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\deshi\src\core\window.h">
-      <Filter>src\deshi\core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\deshi\src\core\armature.h">
-      <Filter>src\deshi\core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\deshi\src\core\assets.h">
-      <Filter>src\deshi\core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\deshi\src\core\camera.h">
-      <Filter>src\deshi\core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\deshi\src\core\console.h">
-      <Filter>src\deshi\core</Filter>
-    </ClInclude>
     <ClInclude Include="..\deshi\src\external\draudio\dr_flac.h">
       <Filter>src\deshi\external\draudio</Filter>
     </ClInclude>
@@ -381,9 +331,6 @@
     <ClInclude Include="..\deshi\src\geometry\Geometry.h">
       <Filter>src\deshi\geometry</Filter>
     </ClInclude>
-    <ClInclude Include="..\deshi\src\math\InertiaTensors.h">
-      <Filter>src\deshi\math</Filter>
-    </ClInclude>
     <ClInclude Include="..\deshi\src\math\Math.h">
       <Filter>src\deshi\math</Filter>
     </ClInclude>
@@ -399,16 +346,82 @@
     <ClInclude Include="..\deshi\src\math\vector.h">
       <Filter>src\deshi\math</Filter>
     </ClInclude>
-    <ClInclude Include="..\deshi\src\math\VectorMatrix.h">
-      <Filter>src\deshi\math</Filter>
+    <ClInclude Include="..\deshi\src\defines.h">
+      <Filter>src\deshi</Filter>
     </ClInclude>
-    <ClInclude Include="..\deshi\src\utils\array.h">
+    <ClInclude Include="..\deshi\src\deshi.h">
+      <Filter>src\deshi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\deshi\src\core\commands.h">
+      <Filter>src\deshi\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\deshi\src\core\console.h">
+      <Filter>src\deshi\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\deshi\src\core\font.h">
+      <Filter>src\deshi\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\deshi\src\core\imgui.h">
+      <Filter>src\deshi\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\deshi\src\core\input.h">
+      <Filter>src\deshi\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\deshi\src\core\io.h">
+      <Filter>src\deshi\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\deshi\src\core\logger.h">
+      <Filter>src\deshi\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\deshi\src\core\memory.h">
+      <Filter>src\deshi\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\deshi\src\core\model.h">
+      <Filter>src\deshi\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\deshi\src\core\renderer.h">
+      <Filter>src\deshi\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\deshi\src\core\storage.h">
+      <Filter>src\deshi\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\deshi\src\core\texture.h">
+      <Filter>src\deshi\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\deshi\src\core\time.h">
+      <Filter>src\deshi\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\deshi\src\core\ui.h">
+      <Filter>src\deshi\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\deshi\src\core\window.h">
+      <Filter>src\deshi\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\deshi\src\core\armature.h">
+      <Filter>src\deshi\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\deshi\src\core\assets.h">
+      <Filter>src\deshi\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\deshi\src\core\camera.h">
+      <Filter>src\deshi\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\deshi\src\external\d3dx12\d3d12.h">
+      <Filter>src\deshi\external\d3dx12</Filter>
+    </ClInclude>
+    <ClInclude Include="..\deshi\src\external\d3dx12\d3dx12.h">
+      <Filter>src\deshi\external\d3dx12</Filter>
+    </ClInclude>
+    <ClInclude Include="..\deshi\src\external\glad\gl.h">
+      <Filter>src\deshi\external\glad</Filter>
+    </ClInclude>
+    <ClInclude Include="..\deshi\src\external\stb\stb_truetype.h">
+      <Filter>src\deshi\external\stb</Filter>
+    </ClInclude>
+    <ClInclude Include="..\deshi\src\utils\container_manager.h">
       <Filter>src\deshi\utils</Filter>
     </ClInclude>
-    <ClInclude Include="..\deshi\src\utils\Color.h">
-      <Filter>src\deshi\utils</Filter>
-    </ClInclude>
-    <ClInclude Include="..\deshi\src\utils\Command.h">
+    <ClInclude Include="..\deshi\src\utils\cstring.h">
       <Filter>src\deshi\utils</Filter>
     </ClInclude>
     <ClInclude Include="..\deshi\src\utils\Debug.h">
@@ -423,35 +436,35 @@
     <ClInclude Include="..\deshi\src\utils\optional.h">
       <Filter>src\deshi\utils</Filter>
     </ClInclude>
+    <ClInclude Include="..\deshi\src\utils\ring_array.h">
+      <Filter>src\deshi\utils</Filter>
+    </ClInclude>
     <ClInclude Include="..\deshi\src\utils\string.h">
+      <Filter>src\deshi\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\deshi\src\utils\string_conversion.h">
       <Filter>src\deshi\utils</Filter>
     </ClInclude>
     <ClInclude Include="..\deshi\src\utils\tuple.h">
       <Filter>src\deshi\utils</Filter>
     </ClInclude>
+    <ClInclude Include="..\deshi\src\utils\type.h">
+      <Filter>src\deshi\utils</Filter>
+    </ClInclude>
     <ClInclude Include="..\deshi\src\utils\utils.h">
       <Filter>src\deshi\utils</Filter>
     </ClInclude>
-    <ClInclude Include="..\deshi\src\utils\view.h">
+    <ClInclude Include="..\deshi\src\utils\array.h">
       <Filter>src\deshi\utils</Filter>
     </ClInclude>
-    <ClInclude Include="..\deshi\src\defines.h">
-      <Filter>src\deshi</Filter>
+    <ClInclude Include="..\deshi\src\utils\array_algorithms.h">
+      <Filter>src\deshi\utils</Filter>
     </ClInclude>
-    <ClInclude Include="..\deshi\src\deshi.h">
-      <Filter>src\deshi</Filter>
+    <ClInclude Include="..\deshi\src\utils\carray.h">
+      <Filter>src\deshi\utils</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\attributes\Attribute.h">
-      <Filter>src\atmos\attributes</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\attributes\ModelInstance.h">
-      <Filter>src\atmos\attributes</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\entities\Entity.h">
-      <Filter>src\atmos\entities</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\Admin.h">
-      <Filter>src\atmos</Filter>
+    <ClInclude Include="..\deshi\src\utils\Color.h">
+      <Filter>src\deshi\utils</Filter>
     </ClInclude>
     <ClInclude Include="..\src\camerainstance.h">
       <Filter>src\atmos</Filter>
@@ -462,23 +475,35 @@
     <ClInclude Include="..\src\Editor.h">
       <Filter>src\atmos</Filter>
     </ClInclude>
-    <ClInclude Include="..\deshi\src\utils\container_manager.h">
-      <Filter>src\deshi\utils</Filter>
+    <ClInclude Include="..\src\menu.h">
+      <Filter>src\atmos</Filter>
     </ClInclude>
-    <ClInclude Include="..\deshi\src\utils\ring_array.h">
-      <Filter>src\deshi\utils</Filter>
+    <ClInclude Include="..\src\PhysicsSystem.h">
+      <Filter>src\atmos</Filter>
     </ClInclude>
-    <ClInclude Include="..\deshi\src\core\commands.h">
-      <Filter>src\deshi\core</Filter>
+    <ClInclude Include="..\src\transform.h">
+      <Filter>src\atmos</Filter>
     </ClInclude>
-    <ClInclude Include="..\deshi\src\core\font.h">
-      <Filter>src\deshi\core</Filter>
+    <ClInclude Include="..\src\Admin.h">
+      <Filter>src\atmos</Filter>
     </ClInclude>
-    <ClInclude Include="..\deshi\src\core\memory.h">
-      <Filter>src\deshi\core</Filter>
+    <ClInclude Include="..\src\entities\PhysicsEntity.h">
+      <Filter>src\atmos\entities</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\attributes\Player.h">
-      <Filter>src\atmos\attributes</Filter>
+    <ClInclude Include="..\src\entities\PlayerEntity.h">
+      <Filter>src\atmos\entities</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\entities\SceneryEntity.h">
+      <Filter>src\atmos\entities</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\entities\TriggerEntity.h">
+      <Filter>src\atmos\entities</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\entities\DoorEntity.h">
+      <Filter>src\atmos\entities</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\entities\Entity.h">
+      <Filter>src\atmos\entities</Filter>
     </ClInclude>
     <ClInclude Include="..\src\attributes\Movement.h">
       <Filter>src\atmos\attributes</Filter>
@@ -486,26 +511,20 @@
     <ClInclude Include="..\src\attributes\Physics.h">
       <Filter>src\atmos\attributes</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\entities\PlayerEntity.h">
-      <Filter>src\atmos\entities</Filter>
+    <ClInclude Include="..\src\attributes\Player.h">
+      <Filter>src\atmos\attributes</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\PhysicsSystem.h">
-      <Filter>src\atmos</Filter>
+    <ClInclude Include="..\src\attributes\Attribute.h">
+      <Filter>src\atmos\attributes</Filter>
     </ClInclude>
     <ClInclude Include="..\src\attributes\Collider.h">
       <Filter>src\atmos\attributes</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\entities\PhysicsEntity.h">
-      <Filter>src\atmos\entities</Filter>
+    <ClInclude Include="..\src\attributes\InterpTransform.h">
+      <Filter>src\atmos\attributes</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\entities\StaticEntity.h">
-      <Filter>src\atmos\entities</Filter>
-    </ClInclude>
-    <ClInclude Include="..\deshi\src\core\io.h">
-      <Filter>src\deshi\core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\deshi\src\core\logging.h">
-      <Filter>src\deshi\core</Filter>
+    <ClInclude Include="..\src\attributes\ModelInstance.h">
+      <Filter>src\atmos\attributes</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

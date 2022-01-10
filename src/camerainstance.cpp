@@ -5,7 +5,7 @@
 #include "math/Math.h"
 #include "utils/debug.h"
 
-#include <cstring>
+//#include <cstring>
 
 CameraInstance::CameraInstance(float fov, float nearZ, float farZ, bool freeCam) {
 	this->nearZ = nearZ;
@@ -31,7 +31,7 @@ void CameraInstance::Update() {
 		persist int wheight = DeshWindow->height;
 		
 		//clamp camera crotation
-		Math::clamp(rotation.x, -89.9f, 89.9f);
+		rotation.x = Clamp(rotation.x, -89.9f, 89.9f);
 		if (rotation.y > 1440.f || rotation.y < -1440.f) { rotation.y = 0.f; }
 		
 		//update direction vectors
