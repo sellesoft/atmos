@@ -146,4 +146,5 @@ int main(){
 	Render::Cleanup();
 	DeshWindow->Cleanup();
 	Logger::Cleanup();
+	memory_cleanup();
 }
