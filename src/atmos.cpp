@@ -106,7 +106,7 @@ local Admin admin; Admin* g_admin = &admin;
 int main(){
 	//init deshi
 	Assets::enforceDirectories();
-	memory_init(Gigabytes(1), Gigabytes(4));
+	memory_init(Gigabytes(1), Gigabytes(1));
 	Logger::Init(5, true);
 	DeshConsole->Init();
 	DeshTime->Init();

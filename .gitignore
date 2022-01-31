@@ -16,6 +16,7 @@
 *.tmp
 *.ctm
 *.diagsession
+*.code-workspace
 
 #folders
 .vs/
