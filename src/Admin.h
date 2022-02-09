@@ -6,13 +6,13 @@
 #include "camerainstance.h"
 #include "editor.h"
 #include "physicssystem.h"
-#include "attributes/Movement.h"
-#include "attributes/ModelInstance.h"
-#include "attributes/Physics.h"
-#include "attributes/InterpTransform.h"
-#include "utils/array.h"
-#include "utils/string.h"
-#include "utils/cstring.h"
+#include "Movement.h"
+#include "ModelInstance.h"
+#include "Physics.h"
+#include "InterpTransform.h"
+#include "kigu/array.h"
+#include "kigu/cstring.h"
+#include "kigu/string.h"
 
 enum GameState_{
 	GameState_Play,

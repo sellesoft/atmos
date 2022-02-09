@@ -2,8 +2,8 @@
 #ifndef ATMOS_ATTRIBUTE_H
 #define ATMOS_ATTRIBUTE_H
 
-#include "defines.h"
-#include "utils/string.h"
+#include "kigu/common.h"
+#include "kigu/string.h"
 
 enum AttributeType_{
 	AttributeType_NONE,

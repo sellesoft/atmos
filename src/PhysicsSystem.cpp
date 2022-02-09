@@ -1,13 +1,3 @@
-#include "Admin.h"
-#include "PhysicsSystem.h"
-#include "core/storage.h"
-#include "utils/array.h"
-#include "entities/Entity.h"
-#include "entities/PlayerEntity.h"
-#include "attributes/Physics.h"
-#include "attributes/Collider.h"
-#include "geometry/geometry.h"
-
 //////////////////
 //// @storage ////
 //////////////////

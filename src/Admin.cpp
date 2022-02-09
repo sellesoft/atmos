@@ -1,25 +1,13 @@
-#include "Admin.h"
-#include "menu.h"
-#include "entities/Entity.h"
-#include "entities/PlayerEntity.h"
-#include "entities/PhysicsEntity.h"
-#include "entities/TriggerEntity.h"
-#include "entities/SceneryEntity.h"
-#include "entities/DoorEntity.h"
-#include "core/storage.h"
-#include "core/logger.h"
-#include "core/window.h"
-
 void Admin::Init(){
-#if      ATMOS_RELEASE
+#if      BUILD_RELEASE
 	AtmoAdmin->LoadLevel(AtmoAdmin->levelList[AtmoAdmin->levelListIdx]);
 	state = GameState_Editor;
 	ChangeState(GameState_Play);
-#else  //ATMOS_RELEASE
+#else  //BUILD_RELEASE
 	state = GameState_Editor;
 	simulateInEditor = false;
 	levelName = "";
-#endif //ATMOS_RELEASE
+#endif //BUILD_RELEASE
 	
 	camera = CameraInstance(90);
 	InitMenu();

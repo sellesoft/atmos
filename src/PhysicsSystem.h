@@ -2,9 +2,9 @@
 #ifndef ATMOS_PHYSICSSYSTEM_H
 #define ATMOS_PHYSICSSYSTEM_H
 
-#include "defines.h"
+#include "kigu/array.h"
+#include "kigu/common.h"
 #include "math/math.h"
-#include "utils/array.h"
 
 struct Physics;
 struct Collider;

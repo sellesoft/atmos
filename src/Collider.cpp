@@ -1,6 +1,3 @@
-#include "Collider.h"
-#include "core/model.h"
-
 Collider::Collider(const Collider& rhs){
 	memcpy(this, &rhs, sizeof(Collider));
 }

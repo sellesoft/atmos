@@ -4,10 +4,10 @@
 
 #include "Attribute.h"
 #include "Physics.h"
-#include "../transform.h"
+#include "transform.h"
 #include "math/math.h"
-#include "utils/array.h"
-#include "utils/string_utils.h"
+#include "kigu/array.h"
+#include "kigu/string_utils.h"
 
 enum InterpTransformType{
 	InterpTransformType_Once,

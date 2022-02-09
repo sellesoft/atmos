@@ -1,28 +1,3 @@
-#include "Editor.h"
-#include "admin.h"
-#include "camerainstance.h"
-#include "entities/Entity.h"
-#include "entities/PlayerEntity.h"
-#include "entities/PhysicsEntity.h"
-#include "entities/TriggerEntity.h"
-#include "entities/SceneryEntity.h"
-#include "entities/DoorEntity.h"
-#include "attributes/ModelInstance.h"
-#include "core/imgui.h"
-#include "core/io.h"
-#include "core/logger.h"
-#include "core/assets.h"
-#include "core/console.h"
-#include "core/renderer.h"
-#include "core/window.h"
-#include "core/input.h"
-#include "core/time.h"
-#include "core/storage.h"
-#include "utils/array.h"
-#include "math/Math.h"
-#include "geometry/geometry.h"
-#include "geometry/Edge.h"
-
 /////////////////////////
 //// @editor structs ////
 /////////////////////////
@@ -557,7 +532,7 @@ local void PasteEntities(){
 
 void EntitiesTab(){
 	persist bool rename_ent = false;
-	persist char rename_buffer[DESHI_NAME_SIZE] = {};
+	persist char rename_buffer[64] = {};
 	persist Entity* events_ent = 0;
 	
 	//// selected entity keybinds ////
@@ -649,7 +624,7 @@ void EntitiesTab(){
 					ImGui::TableSetColumnIndex(2);
 					if(rename_ent && selected_idx == ent_idx){
 						ImGui::PushStyleColor(ImGuiCol_FrameBg, ImColor(0xff203c56).Value);
-						ImGui::InputText("##ent_rename_input", rename_buffer, DESHI_NAME_SIZE, ImGuiInputTextFlags_AutoSelectAll | ImGuiInputTextFlags_EnterReturnsTrue);
+						ImGui::InputText("##ent_rename_input", rename_buffer, 64, ImGuiInputTextFlags_AutoSelectAll | ImGuiInputTextFlags_EnterReturnsTrue);
 						ImGui::PopStyleColor();
 					}else{
 						ImGui::TextEx(ent->name.str);
@@ -739,7 +714,7 @@ void EntitiesTab(){
 	if(ImGui::BeginChild("##ent_inspector", ImVec2(ImGui::GetWindowWidth() * 0.95f, ImGui::GetWindowHeight()*.9f - 100), true, ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoCollapse)){
 		//// name ////
 		SetPadding; ImGui::TextEx("Name:"); ImGui::SameLine(); ImGui::SetNextItemWidth(-FLT_MIN);
-		ImGui::InputText("##ent_name_input", sel->name.str, DESHI_NAME_SIZE, ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_AutoSelectAll);
+		ImGui::InputText("##ent_name_input", sel->name.str, 64, ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_AutoSelectAll);
 		
 		//// transform ////
 		int tree_flags = ImGuiTreeNodeFlags_DefaultOpen;
@@ -1133,7 +1108,7 @@ void EntitiesTab(){
 /////////////////
 void MeshesTab(){
 	persist bool rename_mesh = false;
-	persist char rename_buffer[DESHI_NAME_SIZE] = {};
+	persist char rename_buffer[64] = {};
 	persist u32  sel_mesh_idx = -1;
 	persist int sel_vertex_idx = -1;
 	persist int sel_triangle_idx = -1;
@@ -1145,12 +1120,12 @@ void MeshesTab(){
 	//start renaming mesh
 	if(selected && DeshInput->KeyPressed(Key::F2)){
 		rename_mesh = true;
-		cpystr(rename_buffer, selected->name, DESHI_NAME_SIZE);
+		cpystr(rename_buffer, selected->name, 64);
 	}
 	//submit renaming mesh
 	if(selected && rename_mesh && DeshInput->KeyPressed(Key::ENTER)){
 		rename_mesh = false;
-		cpystr(selected->name, rename_buffer, DESHI_NAME_SIZE);
+		cpystr(selected->name, rename_buffer, 64);
 	}
 	//stop renaming mesh
 	if(rename_mesh && DeshInput->KeyPressed(Key::ESCAPE)){
@@ -1190,7 +1165,7 @@ void MeshesTab(){
 				ImGui::TableSetColumnIndex(1);
 				if(rename_mesh && sel_mesh_idx == mesh_idx){
 					ImGui::PushStyleColor(ImGuiCol_FrameBg, ImColor(0xff203c56).Value);
-					ImGui::InputText("##mesh_rename_input", rename_buffer, DESHI_NAME_SIZE, ImGuiInputTextFlags_AutoSelectAll | ImGuiInputTextFlags_EnterReturnsTrue);
+					ImGui::InputText("##mesh_rename_input", rename_buffer, 64, ImGuiInputTextFlags_AutoSelectAll | ImGuiInputTextFlags_EnterReturnsTrue);
 					ImGui::PopStyleColor();
 				}
 				else{
@@ -1274,7 +1249,7 @@ void MeshesTab(){
 	if(ImGui::BeginChild("##mesh_inspector", ImVec2(ImGui::GetWindowWidth() * .95f, ImGui::GetWindowHeight() * .8f), false)){
 		//// name ////
 		ImGui::TextEx("Name"); ImGui::SameLine(); ImGui::SetNextItemWidth(-FLT_MIN);
-		ImGui::InputText("##mat_name_input", selected->name, DESHI_NAME_SIZE, ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_AutoSelectAll);
+		ImGui::InputText("##mat_name_input", selected->name, 64, ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_AutoSelectAll);
 		
 		ImGui::Separator();
 		//// stats and scale ////
@@ -1569,7 +1544,7 @@ void TexturesTab(){
 void MaterialsTab(){
 	persist u32  sel_mat_idx = -1;
 	persist bool rename_mat = false;
-	persist char rename_buffer[DESHI_NAME_SIZE] = {};
+	persist char rename_buffer[64] = {};
 	Material* selected = nullptr;
 	if(sel_mat_idx < Storage::MaterialCount()) selected = Storage::MaterialAt(sel_mat_idx);
 	
@@ -1577,12 +1552,12 @@ void MaterialsTab(){
 	//start renaming material
 	if(selected && DeshInput->KeyPressed(Key::F2)){
 		rename_mat = true;
-		cpystr(rename_buffer, selected->name, DESHI_NAME_SIZE);
+		cpystr(rename_buffer, selected->name, 64);
 	}
 	//submit renaming material
 	if(selected && rename_mat && DeshInput->KeyPressed(Key::ENTER)){
 		rename_mat = false;
-		cpystr(selected->name, rename_buffer, DESHI_NAME_SIZE);
+		cpystr(selected->name, rename_buffer, 64);
 	}
 	//stop renaming material
 	if(rename_mat && DeshInput->KeyPressed(Key::ESCAPE)){
@@ -1620,7 +1595,7 @@ void MaterialsTab(){
 				ImGui::TableSetColumnIndex(1);
 				if(rename_mat && sel_mat_idx == mat_idx){
 					ImGui::PushStyleColor(ImGuiCol_FrameBg, ImColor(0xff203c56).Value);
-					ImGui::InputText("##mat_rename_input", rename_buffer, DESHI_NAME_SIZE, ImGuiInputTextFlags_AutoSelectAll | ImGuiInputTextFlags_EnterReturnsTrue);
+					ImGui::InputText("##mat_rename_input", rename_buffer, 64, ImGuiInputTextFlags_AutoSelectAll | ImGuiInputTextFlags_EnterReturnsTrue);
 					ImGui::PopStyleColor();
 				}
 				else{
@@ -1663,7 +1638,7 @@ void MaterialsTab(){
 	if(ImGui::BeginChild("##mat_inspector", ImVec2(ImGui::GetWindowWidth() * .95f, ImGui::GetWindowHeight() * .8f), false)){
 		//// name ////
 		ImGui::TextEx("Name   "); ImGui::SameLine(); ImGui::SetNextItemWidth(-FLT_MIN);
-		ImGui::InputText("##mat_name_input", selected->name, DESHI_NAME_SIZE, ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_AutoSelectAll);
+		ImGui::InputText("##mat_name_input", selected->name, 64, ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_AutoSelectAll);
 		
 		//// shader selection ////
 		ImGui::TextEx("Shader "); ImGui::SameLine(); ImGui::SetNextItemWidth(-1);
@@ -1722,7 +1697,7 @@ void ModelsTab(){
 	persist u32  sel_model_idx = -1;
 	persist u32  sel_batch_idx = -1;
 	persist bool rename_model = false;
-	persist char rename_buffer[DESHI_NAME_SIZE] = {};
+	persist char rename_buffer[64] = {};
 	Model* selected = nullptr;
 	if(sel_model_idx < Storage::ModelCount()) selected = Storage::ModelAt(sel_model_idx);
 	
@@ -1730,12 +1705,12 @@ void ModelsTab(){
 	//start renaming model
 	if(selected && DeshInput->KeyPressed(Key::F2)){
 		rename_model = true;
-		cpystr(rename_buffer, selected->name, DESHI_NAME_SIZE);
+		cpystr(rename_buffer, selected->name, 64);
 	}
 	//submit renaming model
 	if(selected && rename_model && DeshInput->KeyPressed(Key::ENTER)){
 		rename_model = false;
-		cpystr(selected->name, rename_buffer, DESHI_NAME_SIZE);
+		cpystr(selected->name, rename_buffer, 64);
 	}
 	//stop renaming model
 	if(rename_model && DeshInput->KeyPressed(Key::ESCAPE)){
@@ -1773,7 +1748,7 @@ void ModelsTab(){
 				ImGui::TableSetColumnIndex(1);
 				if(rename_model && sel_model_idx == model_idx){
 					ImGui::PushStyleColor(ImGuiCol_FrameBg, ImColor(0xff203c56).Value);
-					ImGui::InputText("##model_rename_input", rename_buffer, DESHI_NAME_SIZE, ImGuiInputTextFlags_AutoSelectAll | ImGuiInputTextFlags_EnterReturnsTrue);
+					ImGui::InputText("##model_rename_input", rename_buffer, 64, ImGuiInputTextFlags_AutoSelectAll | ImGuiInputTextFlags_EnterReturnsTrue);
 					ImGui::PopStyleColor();
 				}
 				else{
@@ -1818,7 +1793,7 @@ void ModelsTab(){
 	if(ImGui::BeginChild("##model_inspector", ImVec2(ImGui::GetWindowWidth() * .95f, ImGui::GetWindowHeight() * .8f), false)){
 		//// name ////
 		ImGui::TextEx("Name  "); ImGui::SameLine(); ImGui::SetNextItemWidth(-FLT_MIN);
-		ImGui::InputText("##model_name_input", selected->name, DESHI_NAME_SIZE, ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_AutoSelectAll);
+		ImGui::InputText("##model_name_input", selected->name, 64, ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_AutoSelectAll);
 		
 		//// mesh selection ////
 		ImGui::TextEx("Mesh  "); ImGui::SameLine(); ImGui::SetNextItemWidth(-1);

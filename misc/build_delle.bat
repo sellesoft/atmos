@@ -10,8 +10,8 @@ REM                                       Includes/Sources/Libs
 REM _____________________________________________________________________________________________________
 
 @set INCLUDES=/I"..\src" /I"..\deshi\src" /I"..\deshi\src\external" /I"C:\src\glfw-3.3.2.bin.WIN64\include" /I"%VULKAN_SDK%\include"
-@set SOURCES=..\deshi\src\deshi.cpp attributes\*.cpp atmos.cpp admin.cpp camerainstance.cpp controller.cpp editor.cpp physicssystem.cpp
-@set LIBS=/libpath:C:\src\glfw-3.3.2.bin.WIN64\lib-vc2019 /libpath:%VULKAN_SDK%\lib glfw3.lib opengl32.lib gdi32.lib shell32.lib vulkan-1.lib shaderc_combined.lib
+@set SOURCES=..\deshi\src\deshi.cpp atmos.cpp
+@set LIBS=/libpath:C:\src\glfw-3.3.2.bin.WIN64\lib-vc2019 /libpath:%VULKAN_SDK%\lib glfw3.lib opengl32.lib gdi32.lib vulkan-1.lib shaderc_combined.lib
 
 REM _____________________________________________________________________________________________________
 REM                                      Compiler and Linker Flags
@@ -26,18 +26,18 @@ REM ____________________________________________________________________________
 REM                                            Defines
 REM _____________________________________________________________________________________________________
 
+REM  BUILD_SLOW:      slow code allowed (Assert, etc)
+REM  BUILD_INTERNAL:  build for developer only (Renderer debug, etc)
+REM  BUILD_RELEASE:   build for final release
 REM  DESHI_WINDOWS:   build for 64-bit windows
 REM  DESHI_MAC:       build for Mac OS X
 REM  DESHI_LINUX:     build for Linux
-REM  DESHI_SLOW:      slow code allowed (Assert, etc)
-REM  DESHI_INTERNAL:  build for developer only (Renderer debug, etc)
 REM  DESHI_VULKAN:    build for Vulkan
 REM  DESHI_OPENGL:    build for OpenGL
 REM  DESHI_DIRECTX12: build for DirectX12
-REM  ATMOS_RELEASE:   build for final release (no imgui and no editor)
 
-@set DEFINES_DEBUG=/D"DESHI_INTERNAL=1" /D"DESHI_SLOW=1" 
-@set DEFINES_RELEASE=/D"ATMOS_RELEASE=1"
+@set DEFINES_DEBUG=/D"BUILD_INTERNAL=1" /D"BUILD_SLOW=1" 
+@set DEFINES_RELEASE=/D"BUILD_RELEASE=1"
 @set DEFINES_OS=/D"DESHI_WINDOWS=1" /D"DESHI_MAC=0" /D"DESHI_LINUX=0"
 @set DEFINES_RENDERER=/D"DESHI_VULKAN=1" /D"DESHI_OPENGL=0" /D"DESHI_DIRECTX12=0"
 

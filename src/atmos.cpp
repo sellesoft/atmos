@@ -82,7 +82,11 @@ Bug Board       //NOTE mark these with a last-known active date (M/D/Y)
 
 */
 
-#include "defines.h"
+//// kigu includes ////
+#include "kigu/common.h"
+#include "kigu/common.h"
+
+//// deshi includes ////
 #include "core/memory.h"
 #include "core/assets.h"
 #include "core/commands.h"
@@ -90,16 +94,42 @@ Bug Board       //NOTE mark these with a last-known active date (M/D/Y)
 #include "core/logger.h"
 #include "core/imgui.h"
 #include "core/input.h"
+#include "core/io.h"
 #include "core/renderer.h"
 #include "core/storage.h"
 #include "core/time.h"
 #include "core/ui.h"
 #include "core/window.h"
+#include "math/geometry.h"
 
-#define ATMOS_IMPLEMENTATION
-#include "Admin.h"
+//// atmos files ////
+#define ATMOS_IMPLEMENTATION 1
+#include "admin.h"
+#include "attribute.h"
+#include "camerainstance.h"
+#include "collider.h"
+#include "controller.h"
+#include "entity.h"
+#include "editor.h"
+#include "interptransform.h"
 #include "menu.h"
+#include "modelinstance.h"
+#include "movement.h"
+#include "physics.h"
+#include "player.h"
+#include "physicssystem.h"
+#include "transform.h"
+
+#include "admin.cpp"
 #include "atmos_commands.cpp"
+#include "camerainstance.cpp"
+#include "collider.cpp"
+#include "controller.cpp"
+#include "editor.cpp"
+#include "modelinstance.cpp"
+#include "movement.cpp"
+#include "physics.cpp"
+#include "physicssystem.cpp"
 
 local Admin admin; Admin* g_admin = &admin;
 

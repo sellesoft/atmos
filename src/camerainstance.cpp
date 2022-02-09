@@ -1,12 +1,3 @@
-#include "camerainstance.h"
-#include "core/window.h"
-#include "core/renderer.h"
-#include "core/console.h"
-#include "math/Math.h"
-#include "utils/debug.h"
-
-//#include <cstring>
-
 CameraInstance::CameraInstance(float fov, float nearZ, float farZ, bool freeCam) {
 	this->nearZ = nearZ;
 	this->farZ = farZ;

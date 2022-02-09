@@ -1,9 +1,3 @@
-#include "controller.h"
-#include "Admin.h"
-#include "camerainstance.h"
-#include "entities/PlayerEntity.h"
-#include "core/window.h"
-
 local f32 MOUSE_SENS_FRACTION = .03f; //TODO(delle) calculate this to be the same as Source
 
 void Controller::Init(){

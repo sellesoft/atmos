@@ -2,8 +2,6 @@
 #ifndef ATMOS_EDITOR_H
 #define ATMOS_EDITOR_H
 
-#include "defines.h"
-
 struct EditorSettings{
 	
 };

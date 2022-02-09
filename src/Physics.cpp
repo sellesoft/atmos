@@ -1,9 +1,3 @@
-#include "Physics.h"
-#include "../admin.h"
-#include "../entities/entity.h"
-#include "utils/string_utils.h"
-#include "core/storage.h"
-
 Physics::Physics(vec3 position, vec3 rotation, vec3 velocity, vec3 acceleration, vec3 rotVeloctiy,
 				 vec3 rotAcceleration, float elasticity, float mass, bool staticPosition) {
 	this->position = position;

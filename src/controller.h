@@ -2,9 +2,9 @@
 #ifndef ATMOS_CONTROLLER_H
 #define ATMOS_CONTROLLER_H
 
-#include "defines.h"
 #include "core/input.h"
 #include "core/assets.h"
+#include "kigu/common.h"
 
 struct CameraInstance;
 struct Controller{

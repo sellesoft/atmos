@@ -1,9 +1,3 @@
-#include "ModelInstance.h"
-#include "../entities/Entity.h"
-#include "core/renderer.h"
-#include "core/storage.h"
-#include "utils/string_utils.h"
-
 ModelInstance::ModelInstance(){
 	model    = Storage::NullModel();
 	mesh     = model->mesh;
