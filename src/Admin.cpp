@@ -7,12 +7,14 @@ void Admin::Init(){
 	state = GameState_Editor;
 	simulateInEditor = false;
 	levelName = "";
+	
+	InitEditor();
 #endif //BUILD_RELEASE
 	
 	camera = CameraInstance(90);
 	InitMenu();
 	controller.Init();
-	editor.Init();
+	//editor.Init();
 	physics.Init(300);
 	
 	//NOTE temp reserves before we arena them so their pointers dont change
@@ -46,8 +48,9 @@ void Admin::Update(){
 		}break;
 		
 		case GameState_Editor:{
+			UpdateEditor();
 			controller.Update();
-			editor.Update();
+			//editor.Update();
 			if(simulateInEditor){
 				forE(interpTransformArr) it->Update();
 				physics.Update();
@@ -73,7 +76,7 @@ void Admin::PostRenderUpdate(){
 }
 
 void Admin::Reset(){
-	editor.Reset();
+	//editor.Reset();
 	
 	for(Entity* e : entities){ delete e; }
 	entities.clear();
@@ -85,6 +88,7 @@ void Admin::Reset(){
 }
 
 void Admin::Cleanup(){
+	CleanupEditor();
 	//TODO save game
 }
 

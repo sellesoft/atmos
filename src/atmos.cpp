@@ -111,6 +111,7 @@ Bug Board       //NOTE mark these with a last-known active date (M/D/Y)
 #include "controller.h"
 #include "entity.h"
 #include "editor.h"
+#include "editor2.h"
 #include "interptransform.h"
 #include "menu.h"
 #include "modelinstance.h"
