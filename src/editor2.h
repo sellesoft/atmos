@@ -215,8 +215,27 @@ UpdateEditor(){
 	}
 	
 	//// @grid ////
-	{
-		//TODO world grid
+	if(editor_config.draw_grid){
+		int lines = 100;
+		f32 xp = floor(AtmoAdmin->camera.position.x) + lines;
+		f32 xn = floor(AtmoAdmin->camera.position.x) - lines;
+		f32 zp = floor(AtmoAdmin->camera.position.z) + lines;
+		f32 zn = floor(AtmoAdmin->camera.position.z) - lines;
+		
+		color color(50, 50, 50);
+		for(int i = 0; i < lines * 2 + 1; i++){
+			vec3 v1 = vec3(xn + i, 0, zn);
+			vec3 v2 = vec3(xn + i, 0, zp);
+			vec3 v3 = vec3(xn, 0, zn + i);
+			vec3 v4 = vec3(xp, 0, zn + i);
+			
+			if(xn + i != 0) Render::DrawLine(v1, v2, color);
+			if(zn + i != 0) Render::DrawLine(v3, v4, color);
+		}
+		
+		Render::DrawLine(vec3{-1000,0,0}, vec3{1000,0,0}, Color_Red);
+		Render::DrawLine(vec3{0,-1000,0}, vec3{0,1000,0}, Color_Green);
+		Render::DrawLine(vec3{0,0,-1000}, vec3{0,0,1000}, Color_Blue);
 	}
 	
 	//// @ui_minimized ////
