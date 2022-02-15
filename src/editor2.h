@@ -9,7 +9,7 @@
 @scene_ui     entity list and properties
 @undos_ui     undos/redos list
 @config_ui    editor config
-@saveas_ui
+@leveldir_ui popup for saving/loading a level
 @ui_other     other window drawing (metrics, storage)
 */
 
@@ -28,6 +28,7 @@ struct EditorConfig{      //defaults
 	Font* font;             //gohufont-11.bdf
 	f32   font_height;      //11
 	b32   editor_minimized; //false
+	b32   editor_pinned;    //false
 	vec2  editor_pos;       //{0, 0}
 	vec2  editor_size;      //{window width / 5, window height}
 	b32   draw_grid;        //true
@@ -67,8 +68,10 @@ enum EditorMenuBarTab{
 
 Type editor_transform_type = TransformType_NONE;
 Type editor_menu_bar_tab = EditorMenuBarTab_NONE;
-b32  editor_show_saveas = false;
-char editor_level_saveas_buffer[256] = {};
+b32  editor_show_leveldir = false;
+b32  editor_leveldir_saving = false;
+char editor_leveldir_dir_buffer[256] = {};
+char editor_leveldir_file_buffer[256] = {};
 
 EditorConfig editor_config;
 array<Entity*> editor_selected_entities;
@@ -79,16 +82,19 @@ array<Entity*> editor_selected_entities;
 ///////////////
 void
 InitEditor(){
+	cstring levels_dir = absolute_path("data/levels/");
+	CopyMemory(editor_leveldir_dir_buffer, levels_dir.str, levels_dir.count);
+	
 	editor_config.font        = Storage::CreateFontFromFileBDF("gohufont-11.bdf").second;
 	editor_config.font_height = editor_config.font->max_height;
 	editor_config.editor_minimized = false;
+	editor_config.editor_pinned    = false;
 	editor_config.editor_pos       = vec2::ZERO;
 	editor_config.editor_size      = vec2{f32(DeshWindow->width)/5.f, f32(DeshWindow->height)};
 	editor_config.draw_grid    = true;
 	editor_config.draw_metrics = false;
 	editor_config.draw_storage = false;
 	editor_config.draw_ui_demo = false;
-	
 	//TODO load editor config file
 	
 	editor_selected_entities = array<Entity*>(deshi_allocator);
@@ -107,8 +113,21 @@ CleanupEditor(){
 /////////////////
 //// @update ////
 /////////////////
+void StartDisabled(){
+	UI::PushColor(UIStyleCol_ButtonBg,        Color_Black);
+	UI::PushColor(UIStyleCol_ButtonBgActive,  Color_Black);
+	UI::PushColor(UIStyleCol_ButtonBgHovered, Color_Black);
+	UI::PushColor(UIStyleCol_Text,            Color_DarkGrey);
+}
+
+void StopDisabled(){
+	UI::PopColor(4);
+}
+
 void
 UpdateEditor(){
+	if(DeshWindow->minimized) return; //NOTE nothing here needs to happen if minimized
+	
 	//// @input ////
 	{
 		//// @gizmo_input ////
@@ -180,7 +199,8 @@ UpdateEditor(){
 			if(AtmoAdmin->levelName){
 				AtmoAdmin->SaveLevel(cstring{AtmoAdmin->levelName.str,(u64)AtmoAdmin->levelName.count});
 			}else{
-				editor_show_saveas = true;
+				editor_show_leveldir = true;
+				editor_leveldir_saving = true;
 			}
 		}
 		
@@ -200,21 +220,22 @@ UpdateEditor(){
 	}
 	
 	//// @ui_minimized ////
-	if(editor_config.editor_minimized && !DeshWindow->minimized){
-		//TODO minimized editor
+	if(editor_config.editor_minimized){
+		//TODO minimized editor (use header)
 	}
 	
 	//// @ui_expanded ////
-	if(!editor_config.editor_minimized && !DeshWindow->minimized){
+	if(!editor_config.editor_minimized){
 		UI::PushFont(editor_config.font);
 		UI::PushVar(UIStyleVar_FontHeight, editor_config.font_height);
-		UI::Begin("atmos_editor", editor_config.editor_pos, editor_config.editor_size, UIWindowFlags_NoBorder | UIWindowFlags_NoScroll);
+		Flags extra_flags = (editor_config.editor_pinned) ? UIWindowFlags_NoMove | UIWindowFlags_NoResize : 0;
+		UI::Begin("atmos_editor", editor_config.editor_pos, editor_config.editor_size, UIWindowFlags_NoBorder | UIWindowFlags_NoScroll | extra_flags);
 		UIStyle&  style  = UI::GetStyle();
 		UIWindow* window = UI::GetWindow();
 		
 		f32 header_height = style.fontHeight * style.buttonHeightRelToFont;
 		vec2 window_padding = style.windowPadding;
-		UI::PushVar(UIStyleVar_WindowPadding, vec2::ZERO);
+		UI::PushVar(UIStyleVar_WindowMargins, vec2::ZERO);
 		UI::BeginChild("atmos_editor_header", vec2{window->width, header_height}, UIWindowFlags_Invisible | UIWindowFlags_NoBorder | UIWindowFlags_NoScroll | UIWindowFlags_FitAllElements);
 		
 		//// header ////
@@ -230,7 +251,7 @@ UpdateEditor(){
 			vec2 line_start{0,0}, end_offset{0, header_height};
 			
 			if(UI::Button("Level")   || UI::IsLastItemHovered()) editor_menu_bar_tab = EditorMenuBarTab_Level;
-			if(editor_menu_bar_tab == EditorMenuBarTab_Level)   menu_item = UI::GetLastItem();
+			if(editor_menu_bar_tab == EditorMenuBarTab_Level) menu_item = UI::GetLastItem();
 			line_start = UI::GetLastItemPos() + UI::GetLastItemSize().xComp();
 			UI::Line(line_start, line_start + end_offset, 1, separator_color);
 			
@@ -240,7 +261,7 @@ UpdateEditor(){
 			UI::Line(line_start, line_start + end_offset, 1, separator_color);
 			
 			if(UI::Button("State")   || UI::IsLastItemHovered()) editor_menu_bar_tab = EditorMenuBarTab_State;
-			if(editor_menu_bar_tab == EditorMenuBarTab_State)   menu_item = UI::GetLastItem();
+			if(editor_menu_bar_tab == EditorMenuBarTab_State) menu_item = UI::GetLastItem();
 			line_start = UI::GetLastItemPos() + UI::GetLastItemSize().xComp();
 			UI::Line(line_start, line_start + end_offset, 1, separator_color);
 		}UI::EndRow();
@@ -252,53 +273,42 @@ UpdateEditor(){
 			b32 popout_hovered = true;
 			vec2 popout_pos = (menu_item->position + vec2{-1, menu_item->size.y}).floor();
 			UI::PushVar(UIStyleVar_ItemSpacing,      vec2::ONE);
-			UI::PushVar(UIStyleVar_WindowPadding,    vec2::ZERO);
+			UI::PushVar(UIStyleVar_WindowMargins,    vec2::ZERO);
 			UI::PushVar(UIStyleVar_WindowBorderSize, 1.f);
 			UI::PushVar(UIStyleVar_ButtonBorderSize, 0);
 			UI::PushColor(UIStyleCol_Border,   separator_color);
 			UI::PushColor(UIStyleCol_WindowBg, separator_color);
+			//NOTE a different popout for each tab until buttons work with fitallelements
+			UI::BeginPopOut("atmos_editor_menubar_menus", popout_pos, menu_item->size.ceil() + vec2{1,0}, UIWindowFlags_NoMove | UIWindowFlags_NoScroll | UIWindowFlags_FitAllElements);
 			if(editor_menu_bar_tab == EditorMenuBarTab_Level){
-				UI::BeginPopOut("atmos_editor_menubar_level", popout_pos, menu_item->size, UIWindowFlags_NoMove | UIWindowFlags_NoScroll | UIWindowFlags_FitAllElements);
-				
 				if(UI::Button("New")){
 					AtmoAdmin->Reset();
 				}
 				if(UI::Button("Save")){
 					if(AtmoAdmin->levelName == ""){
-						editor_show_saveas = true;
-					}else{;
+						editor_show_leveldir = true;
+						editor_leveldir_saving = true;
+					}else{
 						AtmoAdmin->SaveLevel(cstring{AtmoAdmin->levelName.str,upt(AtmoAdmin->levelName.count)});
 					}
 				}
-				
-				//NOTE temporary disabled colors until save as and load are implemented
-				UI::PushColor(UIStyleCol_ButtonBg,        Color_Black);
-				UI::PushColor(UIStyleCol_ButtonBgActive,  Color_Black);
-				UI::PushColor(UIStyleCol_ButtonBgHovered, Color_Black);
-				UI::PushColor(UIStyleCol_Text,            Color_DarkGrey);
 				if(UI::Button("Save As")){
-					editor_show_saveas = true;
+					editor_show_leveldir = true;
+					editor_leveldir_saving = true;
 				}
-				
 				if(UI::Button("Load")){
-					
+					editor_show_leveldir = true;
+					editor_leveldir_saving = false;
 				}
-				UI::PopColor(4);
-				
-				if(!UI::IsWinHovered()) popout_hovered = false;
-				UI::EndPopOut();
 			}else if(editor_menu_bar_tab == EditorMenuBarTab_View){
-				UI::BeginPopOut("atmos_editor_menubar_view", popout_pos, menu_item->size, UIWindowFlags_NoMove | UIWindowFlags_NoScroll | UIWindowFlags_FitAllElements);
-				
 				if(UI::Button("Metrics")) ToggleBool(editor_config.draw_metrics);
 				if(UI::Button("Storage")) ToggleBool(editor_config.draw_storage);
 				if(UI::Button("UI Demo")) ToggleBool(editor_config.draw_ui_demo);
-				
-				if(!UI::IsWinHovered()) popout_hovered = false;
-				UI::EndPopOut();
 			}else if(editor_menu_bar_tab == EditorMenuBarTab_State){
 				
 			}
+			if(!UI::IsWinHovered()) popout_hovered = false;
+			UI::EndPopOut();
 			UI::PopColor(2); UI::PopVar(4);
 			
 			//if neither the popout is hovered nor the menu bar tab is hovered, stop drawing the menu popouts next frame
@@ -311,7 +321,7 @@ UpdateEditor(){
 		
 		UI::EndChild();
 		UI::BeginChild("atmos_editor_body", vec2{window->width, window->height - (2*header_height) - 2}, UIWindowFlags_Invisible | UIWindowFlags_NoBorder | UIWindowFlags_NoScroll);
-		UI::PushVar(UIStyleVar_WindowPadding, window_padding);
+		UI::PushVar(UIStyleVar_WindowMargins, window_padding);
 		
 		//// tabs ////
 		enum EditorTabs{
@@ -351,12 +361,112 @@ UpdateEditor(){
 		UI::PopFont();
 	}
 	
-	//// @saveas_ui ////
-	if(false && editor_show_saveas){
-		UIWindow* popout = 0;
-		//TODO lighten everything except this window
-		UI::Begin("atmos_editor_saveas", vec2::ZERO, vec2{MAX_F32,MAX_F32}, UIWindowFlags_NoScroll | UIWindowFlags_FitAllElements);
-		//TODO saveas
+	//// @leveldir_ui ////
+	if(editor_show_leveldir){
+		UIStyle& style = UI::GetStyle();
+		
+		vec2 window_size = vec2{DeshWindow->width/5.f,DeshWindow->width/5.f}.floor();
+		UI::Begin("atmos_editor_leveldir", vec2(DeshWindow->centerX,DeshWindow->centerY) - window_size/2.f, window_size, UIWindowFlags_NoScroll);
+		vec2 input_size = vec2{UI::GetMarginedArea().second.x+1, style.fontHeight * style.inputTextHeightRelToFont};
+		
+		UI::SetNextItemSize(input_size);
+		UI::InputText("atmos_editor_leveldir_path", editor_leveldir_dir_buffer,  sizeof(editor_leveldir_dir_buffer),  editor_leveldir_dir_buffer);
+		UI::SetNextItemSize(input_size);
+		UI::InputText("atmos_editor_leveldir_file", editor_leveldir_file_buffer, sizeof(editor_leveldir_file_buffer), "example.level");
+		string full_path(editor_leveldir_dir_buffer,  deshi_temp_allocator);
+		string file_name(editor_leveldir_file_buffer, deshi_temp_allocator);
+		if(full_path[full_path.count-1] != '/' || full_path[full_path.count-1] != '\\') full_path += "/";
+		full_path += file_name;
+		
+		vec2 button_size = vec2{UI::GetMarginedArea().second.x/2.f, style.fontHeight * style.buttonHeightRelToFont};
+		b32 try_operation = false;
+		b32 file_already_exists = file_exists(full_path.str) && file_name.count;
+		UI::SetNextItemSize(button_size);
+		if(editor_leveldir_saving){
+			if(UI::Button((file_already_exists) ? "Overwrite" : "Save")) try_operation = true;
+		}else{
+			if(file_already_exists){
+				if(UI::Button("Load")) try_operation = true;
+			}else{
+				StartDisabled();
+				UI::Button("Load");
+				StopDisabled();
+			}
+		}
+		UI::SameLine();
+		UI::SetNextItemSize(button_size);
+		if(UI::Button("Cancel")){
+			editor_show_leveldir = false;
+			editor_leveldir_saving = false;
+		}
+		
+		UI::SetWinCursorY(UI::GetWinCursor().y + style.fontHeight * style.buttonHeightRelToFont);
+		vec2 list_dims = (UI::GetMarginedArea().second - UI::GetWinCursor().yComp()).floor();
+		UI::SetNextWindowSize(list_dims);
+		UI::BeginChild("atmos_editor_leveldir_list", list_dims, UIWindowFlags_NoResize | UIWindowFlags_NoMove | UIWindowFlags_NoScrollX);{
+			UI::PushVar(UIStyleVar_WindowMargins,    vec2::ZERO);
+			UI::PushVar(UIStyleVar_WindowBorderSize, 0.f);
+			UI::PushVar(UIStyleVar_ButtonBorderSize, 1.f);
+			UI::PushVar(UIStyleVar_ButtonTextAlign,  vec2{0, .5f});
+			
+			button_size = vec2{UI::GetClientArea().second.x - 1, style.fontHeight * style.buttonHeightRelToFont}.floor();
+			if(file_exists(editor_leveldir_dir_buffer)){
+				File* directory = file_info(editor_leveldir_dir_buffer);
+				if(directory && directory->is_directory){
+					UI::SetNextItemSize(button_size);
+					if(UI::Button("..")){
+						u32 slash_idx = 0;
+						if(directory->path[directory->path_length-1] == '/' || directory->path[directory->path_length-1] == '\\'){
+							slash_idx = find_last_char(directory->path, '/', 1);
+							if(slash_idx == -1) slash_idx = find_last_char(directory->path, '\\', 1);
+						}else{
+							slash_idx = find_last_char(directory->path, '/');
+							if(slash_idx == -1) slash_idx = find_last_char(directory->path, '\\');
+						}
+						Assert(slash_idx != -1);
+						editor_leveldir_dir_buffer[slash_idx] = '\0';
+					}
+					
+					//TODO reuse list_file_name var
+					array<File> files = get_directory_files(directory);
+					forE(files){ //directories first
+						if(it->is_directory){
+							string list_file_name(get_file_name(*it), deshi_temp_allocator);
+							UI::SetNextItemSize(button_size);
+							if(UI::Button(list_file_name.str)){
+								CopyMemory(editor_leveldir_dir_buffer, it->path, it->path_length+1);
+								ZeroMemory(editor_leveldir_file_buffer, sizeof(editor_leveldir_file_buffer));
+							}
+						}
+					}
+					forE(files){ //files after
+						if(!it->is_directory){
+							string list_file_name(get_file_name(*it), deshi_temp_allocator);
+							UI::SetNextItemSize(button_size);
+							if(UI::Button(list_file_name.str)){
+								CopyMemory(editor_leveldir_file_buffer, list_file_name.str, list_file_name.count+1);
+							}
+						}
+					}
+				}else{
+					UI::Text("Invalid directory");
+				}
+			}
+			
+			UI::PopVar(4);
+		}UI::EndChild();
+		
+		if(try_operation){ //NOTE this only happens if the filepath has already been verified as valid
+			u32 dot_idx = find_last_char(file_name, '.');
+			if(editor_leveldir_saving){
+				AtmoAdmin->SaveLevel(cstring{file_name.str, dot_idx});
+			}else{
+				AtmoAdmin->LoadLevel(cstring{file_name.str, dot_idx});
+			}
+			editor_show_leveldir = false;
+			editor_leveldir_saving = false;
+		}
+		
 		UI::End();
 	}
 	

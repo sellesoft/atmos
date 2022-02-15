@@ -62,7 +62,7 @@ void UpdateMenu(){
 	
 	//// draw menu ////
 	UI::PushColor(UIStyleCol_WindowBg, PackColorU32(128,128,255,64));
-	UI::Begin("atmos_menu", vec2::ZERO, DeshWindow->dimensions, UIWindowFlags_NoMove|UIWindowFlags_NoTitleBar|UIWindowFlags_NoResize);
+	UI::Begin("atmos_menu", vec2::ZERO, DeshWindow->dimensions, UIWindowFlags_NoMove | UIWindowFlags_NoResize);
 	
 	f32 center_x = (f32)DeshWindow->centerX;
 	cstring text;
