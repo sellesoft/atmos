@@ -24,17 +24,19 @@ void CleanupEditor();
 #endif //ATMOS_EDITOR2_H
 #ifdef ATMOS_IMPLEMENTATION
 
-struct EditorConfig{      //defaults
-	Font* font;             //gohufont-11.bdf
-	f32   font_height;      //11
-	b32   editor_minimized; //false
-	b32   editor_pinned;    //false
-	vec2  editor_pos;       //{0, 0}
-	vec2  editor_size;      //{window width / 5, window height}
-	b32   draw_grid;        //true
-	b32   draw_metrics;     //false
-	b32   draw_storage;     //false
-	b32   draw_ui_demo;     //false
+struct EditorConfig{    //defaults
+	cstring font_name;    //gohufont-11.bdf
+	f32 font_height;      //11
+	
+	b32 editor_minimized; //false
+	b32 editor_pinned;    //false
+	vec2 editor_pos;      //{0, 0}
+	vec2 editor_size;     //{window width / 5, window height}
+	
+	b32 draw_grid;        //true
+	b32 draw_metrics;     //false
+	b32 draw_storage;     //false
+	b32 draw_ui_demo;     //false
 };
 
 enum TransformType{
@@ -66,27 +68,24 @@ enum EditorMenuBarTab{
 	EditorMenuBarTab_State,
 };
 
-Type editor_transform_type = TransformType_NONE;
-Type editor_menu_bar_tab = EditorMenuBarTab_NONE;
-b32  editor_show_leveldir = false;
-b32  editor_leveldir_saving = false;
-char editor_leveldir_dir_buffer[256] = {};
-char editor_leveldir_file_buffer[256] = {};
+Font* editor_font = 0;
+Type  editor_transform_type = TransformType_NONE;
+Type  editor_menu_bar_tab = EditorMenuBarTab_NONE;
+b32   editor_show_leveldir = false;
+b32   editor_leveldir_saving = false;
+char  editor_leveldir_dir_buffer[256] = {};
+char  editor_leveldir_file_buffer[256] = {};
 
 EditorConfig editor_config;
 array<Entity*> editor_selected_entities;
-
 
 ///////////////
 //// @init ////
 ///////////////
 void
 InitEditor(){
-	cstring levels_dir = absolute_path("data/levels/");
-	CopyMemory(editor_leveldir_dir_buffer, levels_dir.str, levels_dir.count);
-	
-	editor_config.font        = Storage::CreateFontFromFileBDF("gohufont-11.bdf").second;
-	editor_config.font_height = editor_config.font->max_height;
+	editor_config.font_name   = cstr_lit("gohufont-11.bdf");
+	editor_config.font_height = 11;
 	editor_config.editor_minimized = false;
 	editor_config.editor_pinned    = false;
 	editor_config.editor_pos       = vec2::ZERO;
@@ -97,6 +96,9 @@ InitEditor(){
 	editor_config.draw_ui_demo = false;
 	//TODO load editor config file
 	
+	editor_font = Storage::CreateFontFromFile(editor_config.font_name, editor_config.font_height).second;
+	cstring levels_dir = absolute_path("data/levels/");
+	CopyMemory(editor_leveldir_dir_buffer, levels_dir.str, levels_dir.count);
 	editor_selected_entities = array<Entity*>(deshi_allocator);
 }
 
@@ -113,15 +115,40 @@ CleanupEditor(){
 /////////////////
 //// @update ////
 /////////////////
-void StartDisabled(){
-	UI::PushColor(UIStyleCol_ButtonBg,        Color_Black);
-	UI::PushColor(UIStyleCol_ButtonBgActive,  Color_Black);
-	UI::PushColor(UIStyleCol_ButtonBgHovered, Color_Black);
-	UI::PushColor(UIStyleCol_Text,            Color_DarkGrey);
+#define number_inputtext_flags UIInputTextFlags_Numerical | UIInputTextFlags_EnterReturnsTrue
+
+#define StartDisabled() \
+UI::PushColor(UIStyleCol_ButtonBg,        Color_Black); \
+UI::PushColor(UIStyleCol_ButtonBgActive,  Color_Black); \
+UI::PushColor(UIStyleCol_ButtonBgHovered, Color_Black); \
+UI::PushColor(UIStyleCol_Text,            Color_DarkGrey); \
+
+#define StopDisabled() \
+UI::PopColor(4);
+
+#define BoolButton(var) \
+if(UI::Button((var) ? "True" : "False")) ToggleBool(var)
+
+b32 InputFloat(const char* label, f32* value, const char* fmt = "%g", f32 width = MAX_F32){
+	char buffer[32]; snprintf(buffer, ArrayCount(buffer), fmt, *value);
+	UI::SetNextItemSize(width, UI::GetStyle().fontHeight * UI::GetStyle().inputTextHeightRelToFont);
+	if(UI::InputText(label, buffer, ArrayCount(buffer), 0, number_inputtext_flags)){
+		*value = stod(buffer);
+		return true;
+	}
+	return false;
 }
 
-void StopDisabled(){
-	UI::PopColor(4);
+b32 InputVec3(const char* label, vec3* value, const char* fmt = "%g", f32 width = MAX_F32){
+	width = (width == MAX_F32) ? (UI::GetMarginedRight() - UI::GetWinCursor().x - UI::GetRightIndent()) / 3.f : width / 3.f;
+	b32 value_changed = false;
+	UI::BeginRow(label, 3, UI::GetStyle().fontHeight * UI::GetStyle().inputTextHeightRelToFont);{ //TODO auto divide size when possible
+		UI::RowSetupRelativeColumnWidths({1,1,1});
+		value_changed |= InputFloat(label+1, &value->x, fmt, width); //HACK label+x is for unique labels since UI has no way to do that
+		value_changed |= InputFloat(label+2, &value->y, fmt, width);
+		value_changed |= InputFloat(label+3, &value->z, fmt, width);
+	}UI::EndRow();
+	return value_changed;
 }
 
 void
@@ -245,7 +272,7 @@ UpdateEditor(){
 	
 	//// @ui_expanded ////
 	if(!editor_config.editor_minimized){
-		UI::PushFont(editor_config.font);
+		UI::PushFont(editor_font);
 		UI::PushVar(UIStyleVar_FontHeight, editor_config.font_height);
 		Flags extra_flags = (editor_config.editor_pinned) ? UIWindowFlags_NoMove | UIWindowFlags_NoResize : 0;
 		UI::Begin("atmos_editor", editor_config.editor_pos, editor_config.editor_size, UIWindowFlags_NoBorder | UIWindowFlags_NoScroll | extra_flags);
@@ -364,7 +391,40 @@ UpdateEditor(){
 		//TODO multiple undo/redo
 		
 		//// @config_ui ////
-		//TODO config list
+		if(editor_tab == EditorTab_Config){
+			if(UI::BeginHeader("Physics")){
+				UI::Text("Simulate in Editor "); UI::SameLine(); BoolButton(AtmoAdmin->simulateInEditor);
+				UI::Text("Simulation Paused  "); UI::SameLine(); BoolButton(AtmoAdmin->physics.paused);
+				UI::Text("Integration        "); UI::SameLine(); BoolButton(AtmoAdmin->physics.integrating);
+				UI::Text("Manifold Solving   "); UI::SameLine(); BoolButton(AtmoAdmin->physics.solving);
+				UI::SetNextItemSize(MAX_F32, style.fontHeight*style.buttonHeightRelToFont);
+				if(UI::Button("Step Once")){ AtmoAdmin->physics.solving = true; }
+				UI::Text("Gravity              "); UI::SameLine(); InputFloat("editor_phys_gravity",   &AtmoAdmin->physics.gravity);
+				UI::Text("Min Linear Velocity  "); UI::SameLine(); InputFloat("editor_phys_minlinvel", &AtmoAdmin->physics.minVelocity);
+				UI::Text("Max Linear Velocity  "); UI::SameLine(); InputFloat("editor_phys_maxlinvel", &AtmoAdmin->physics.maxVelocity);
+				UI::Text("Min Angular Velocity "); UI::SameLine(); InputFloat("editor_phys_minangvel", &AtmoAdmin->physics.minRotVelocity);
+				UI::Text("Max Angular Velocity "); UI::SameLine(); InputFloat("editor_phys_maxangvel", &AtmoAdmin->physics.maxRotVelocity);
+				UI::EndHeader();
+			}
+			
+			if(UI::BeginHeader("Camera")){
+				UI::BeginRow("atmos_editor_cam_buttons", 2, style.fontHeight*style.buttonHeightRelToFont);{
+					UI::RowSetupRelativeColumnWidths({1,1});
+					if(UI::Button("Zero")) { AtmoAdmin->camera.position = vec3::ZERO; AtmoAdmin->camera.rotation = vec3::ZERO; }
+					if(UI::Button("Reset")){ AtmoAdmin->camera.position = { 4.f,3.f,-4.f }; AtmoAdmin->camera.rotation = { 28.f,-45.f,0.f }; }
+				}UI::EndRow();
+				UI::Text("Position  "); UI::SameLine(); InputVec3("editor_cam_pos", &AtmoAdmin->camera.position);
+				UI::Text("Rotation  "); UI::SameLine(); InputVec3("editor_cam_rot", &AtmoAdmin->camera.rotation);
+				UI::Text("Near Clip "); UI::SameLine(); if(InputFloat("editor_cam_nearz", &AtmoAdmin->camera.nearZ)) AtmoAdmin->camera.UpdateProjectionMatrix();
+				UI::Text("Far Clip  "); UI::SameLine(); if(InputFloat("editor_cam_farz", &AtmoAdmin->camera.farZ)) AtmoAdmin->camera.UpdateProjectionMatrix();
+				UI::Text("hFOV      "); UI::SameLine(); if(InputFloat("editor_cam_fov", &AtmoAdmin->camera.fov)) AtmoAdmin->camera.UpdateProjectionMatrix();
+				UI::EndHeader();
+			}
+			
+			//if(UI::BeginHeader("Rendering")){
+			//UI::EndHeader();
+			//}
+		}
 		
 		UI::PopVar();
 		UI::EndChild();
@@ -389,7 +449,7 @@ UpdateEditor(){
 		vec2 input_size = vec2{UI::GetMarginedArea().second.x+1, style.fontHeight * style.inputTextHeightRelToFont};
 		
 		UI::SetNextItemSize(input_size);
-		UI::InputText("atmos_editor_leveldir_path", editor_leveldir_dir_buffer,  sizeof(editor_leveldir_dir_buffer),  editor_leveldir_dir_buffer);
+		UI::InputText("atmos_editor_leveldir_path", editor_leveldir_dir_buffer,  sizeof(editor_leveldir_dir_buffer));
 		UI::SetNextItemSize(input_size);
 		UI::InputText("atmos_editor_leveldir_file", editor_leveldir_file_buffer, sizeof(editor_leveldir_file_buffer), "example.level");
 		string full_path(editor_leveldir_dir_buffer,  deshi_temp_allocator);
@@ -495,4 +555,5 @@ UpdateEditor(){
 	if(editor_config.draw_ui_demo) UI::DemoWindow();
 }
 
+#undef BoolButton
 #endif //ATMOS_IMPLEMENTATION

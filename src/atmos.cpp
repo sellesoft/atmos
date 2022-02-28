@@ -6,6 +6,7 @@ reimplement system timers
 save gravity with levels
 change entity and admin LoadTEXT to be character based rather than std::string based
 pool/arena components and entities for better performance
+move admin to atmos.cpp
 
 Attribute TODOs
 ---------------
@@ -18,6 +19,7 @@ Entity TODOs
 rework and simplify entity creation so there is a distinction between development and gameplay creation
 add special transform inverse matrix calculation since it can be alot faster than generalized
 ____https://lxjk.github.io/2017/09/03/Fast-4x4-Matrix-Inverse-with-SSE-SIMD-Explained.html
+rework events
 
 Controller TODOs
 ----------------
