@@ -131,7 +131,7 @@ if(UI::Button((var) ? "True" : "False")) ToggleBool(var)
 
 b32 InputFloat(const char* label, f32* value, const char* fmt = "%g", f32 width = MAX_F32){
 	char buffer[32]; snprintf(buffer, ArrayCount(buffer), fmt, *value);
-	UI::SetNextItemSize(width, UI::GetStyle().fontHeight * UI::GetStyle().inputTextHeightRelToFont);
+	UI::SetNextItemWidth(width);
 	if(UI::InputText(label, buffer, ArrayCount(buffer), 0, number_inputtext_flags)){
 		*value = stod(buffer);
 		return true;
@@ -149,6 +149,13 @@ b32 InputVec3(const char* label, vec3* value, const char* fmt = "%g", f32 width 
 		value_changed |= InputFloat(label+3, &value->z, fmt, width);
 	}UI::EndRow();
 	return value_changed;
+}
+
+void TextCentered(const char* text){
+	UI::BeginRow(text, 1, UI::GetStyle().fontHeight);
+	UI::RowSetupColumnAlignments({vec2{.5f,.5f}});
+	UI::Text(text);
+	UI::EndRow();
 }
 
 void
@@ -393,11 +400,11 @@ UpdateEditor(){
 		//// @config_ui ////
 		if(editor_tab == EditorTab_Config){
 			if(UI::BeginHeader("Physics")){
-				UI::Text("Simulate in Editor "); UI::SameLine(); BoolButton(AtmoAdmin->simulateInEditor);
-				UI::Text("Simulation Paused  "); UI::SameLine(); BoolButton(AtmoAdmin->physics.paused);
-				UI::Text("Integration        "); UI::SameLine(); BoolButton(AtmoAdmin->physics.integrating);
-				UI::Text("Manifold Solving   "); UI::SameLine(); BoolButton(AtmoAdmin->physics.solving);
-				UI::SetNextItemSize(MAX_F32, style.fontHeight*style.buttonHeightRelToFont);
+				UI::Text("Simulate in Editor "); UI::SameLine(); UI::SetNextItemWidth(MAX_F32); BoolButton(AtmoAdmin->simulateInEditor);
+				UI::Text("Simulation Paused  "); UI::SameLine(); UI::SetNextItemWidth(MAX_F32); BoolButton(AtmoAdmin->physics.paused);
+				UI::Text("Integration        "); UI::SameLine(); UI::SetNextItemWidth(MAX_F32); BoolButton(AtmoAdmin->physics.integrating);
+				UI::Text("Manifold Solving   "); UI::SameLine(); UI::SetNextItemWidth(MAX_F32); BoolButton(AtmoAdmin->physics.solving);
+				UI::SetNextItemWidth(MAX_F32);
 				if(UI::Button("Step Once")){ AtmoAdmin->physics.solving = true; }
 				UI::Text("Gravity              "); UI::SameLine(); InputFloat("editor_phys_gravity",   &AtmoAdmin->physics.gravity);
 				UI::Text("Min Linear Velocity  "); UI::SameLine(); InputFloat("editor_phys_minlinvel", &AtmoAdmin->physics.minVelocity);
@@ -421,9 +428,63 @@ UpdateEditor(){
 				UI::EndHeader();
 			}
 			
-			//if(UI::BeginHeader("Rendering")){
-			//UI::EndHeader();
-			//}
+			if(UI::BeginHeader("Rendering")){
+				persist RenderSettings* settings = Render::GetSettings();
+				persist const char* resolution_strings[] = { "128", "256", "512", "1024", "2048", "4096" };
+				persist u32 resolution_values[] = { 128, 256, 512, 1024, 2048, 4096 };
+				persist u32 shadow_resolution_index = 4;
+				persist const char* msaa_strings[] = { "1", "2", "4", "8", "16", "32", "64" };
+				persist vec3 clear_color = settings->clearColor;
+				persist vec4 selected_color = settings->selectedColor;
+				persist vec4 collider_color = settings->colliderColor;
+				
+				UI::Text("Debugging            "); UI::SameLine(); UI::SetNextItemWidth(MAX_F32); BoolButton(settings->debugging);
+				UI::Text("Shader Printf        "); UI::SameLine(); UI::SetNextItemWidth(MAX_F32); BoolButton(settings->printf);
+				UI::Text("Recompile Shaders    "); UI::SameLine(); UI::SetNextItemWidth(MAX_F32); BoolButton(settings->recompileAllShaders);
+				UI::Text("MSAA Samples         "); UI::SameLine(); UI::SetNextItemWidth(MAX_F32);
+				if(UI::BeginCombo("atmos_editor_msaa_combo", msaa_strings[settings->msaaSamples])){
+					forI(ArrayCount(msaa_strings)){
+						if(UI::Selectable(msaa_strings[i], settings->msaaSamples == i)){
+							settings->msaaSamples = i;
+						}
+					}
+					UI::EndCombo(); //atmos_editor_msaa_combo
+				}
+				UI::Text("Texture Filtering    "); UI::SameLine(); UI::SetNextItemWidth(MAX_F32); BoolButton(settings->textureFiltering);
+				UI::Text("Anistropic Filtering "); UI::SameLine(); UI::SetNextItemWidth(MAX_F32); BoolButton(settings->anistropicFiltering);
+				TextCentered("^ above settings require restart ^"); //TODO fix TextCentered
+				UI::Text("Logging Level        "); UI::SameLine(); UI::Text("TODO InputInt"); //UI::SetNextItemWidth(MAX_F32);
+				UI::Text("Crash On Error       "); UI::SameLine(); UI::SetNextItemWidth(MAX_F32); BoolButton(settings->crashOnError);
+				UI::Text("Shader Optimization  "); UI::SameLine(); UI::SetNextItemWidth(MAX_F32); BoolButton(settings->optimizeShaders); //TODO note on update
+				UI::Text("Shadow PCF           "); UI::SameLine(); UI::SetNextItemWidth(MAX_F32); BoolButton(settings->shadowPCF);
+				UI::Text("Shadowmap Resolution "); UI::SameLine(); UI::SetNextItemWidth(MAX_F32);
+				if(UI::BeginCombo("atmos_editor_sahdowres_combo", resolution_strings[shadow_resolution_index])){
+					forI(ArrayCount(resolution_strings)){
+						if(UI::Selectable(resolution_strings[i], shadow_resolution_index == i)){
+							settings->shadowResolution = resolution_values[i];
+							shadow_resolution_index = i;
+							Render::remakeOffscreen();
+						}
+					}
+					UI::EndCombo(); //atmos_editor_msaa_combo
+				}
+				UI::Text("Shadow near clip     "); UI::SameLine(); InputFloat("editor_shadow_near", &settings->shadowNearZ);
+				UI::Text("Shadow far  clip     "); UI::SameLine(); InputFloat("editor_shadow_far", &settings->shadowFarZ);
+				UI::Text("Shadow depth bias constant "); UI::SameLine(); InputFloat("editor_shadow_contant", &settings->depthBiasConstant);
+				UI::Text("Shadow depth bias slope "); UI::SameLine(); InputFloat("editor_shadow_slope", &settings->depthBiasSlope);
+				UI::Text("Show shadowmap texture "); UI::SameLine(); UI::SetNextItemWidth(MAX_F32); BoolButton(settings->showShadowMap);
+				UI::Text("Background Color     "); UI::SameLine(); UI::Text("TODO InputColor");
+				UI::Text("Selected   Color     "); UI::SameLine(); UI::Text("TODO InputColor");
+				UI::Text("Collider   Color     "); UI::SameLine(); UI::Text("TODO InputColor");
+				UI::Text("Only show wireframe  "); UI::SameLine(); UI::SetNextItemWidth(MAX_F32); BoolButton(settings->wireframeOnly);
+				UI::Text("Draw mesh wireframes "); UI::SameLine(); UI::SetNextItemWidth(MAX_F32); BoolButton(settings->meshWireframes);
+				UI::Text("Draw mesh normals    "); UI::SameLine(); UI::SetNextItemWidth(MAX_F32); BoolButton(settings->meshNormals);
+				UI::Text("Draw light frustrums "); UI::SameLine(); UI::SetNextItemWidth(MAX_F32); BoolButton(settings->lightFrustrums);
+				UI::Text("Draw temp meshes on top "); UI::SameLine(); UI::SetNextItemWidth(MAX_F32); BoolButton(settings->tempMeshOnTop);
+				UI::SetNextItemWidth(MAX_F32);
+				if(UI::Button("Clear Debug Meshes")){ Render::ClearDebug(); }
+				UI::EndHeader();
+			}
 		}
 		
 		UI::PopVar();
